@@ -233,12 +233,13 @@ export function DashboardScreen({ navigation }: any) {
           </View>
         </View>
 
-        <View style={z.discoverRow}>
+        <View style={[z.discoverRow, isMobile && { gap: 10 }]}>
           {FEATURE_DETAILS.map((f, i) => {
             const icons = [Truck, Gift, BookOpen, Recycle, Zap, Shield];
             const Icon = icons[i] || Package;
+            const cardW = isMobile ? Math.floor((width - 2 * pad - 10) / 2) : undefined;
             return (
-              <TouchableOpacity key={f.id} style={[z.discoverCard, isMobile && { width: '48%' }]} activeOpacity={0.85} onPress={() => setSelectedFeature(f)}>
+              <TouchableOpacity key={f.id} style={[z.discoverCard, cardW ? { width: cardW } : undefined]} activeOpacity={0.85} onPress={() => setSelectedFeature(f)}>
                 <LinearGradient colors={f.gradient} style={z.discoverCardInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                   <View style={z.discoverCardDecor} />
                   <View style={z.discoverIconBg}>
