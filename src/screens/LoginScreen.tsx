@@ -96,6 +96,7 @@ export function LoginScreen({ navigation }: any) {
   const [isLoading, setIsLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [signupErrors, setSignupErrors] = useState<{ name?: string; phone?: string; password?: string; general?: string }>({});
 
   // Demographics State
   const [age, setAge] = useState('');
@@ -179,19 +180,13 @@ export function LoginScreen({ navigation }: any) {
   };
 
   const handleSignupSubmit = async () => {
+    const errs: { name?: string; phone?: string; password?: string; general?: string } = {};
     if (!name.trim() || !email.trim() || !phone.trim() || !password) return;
-    if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-      Alert.alert('Invalid name', 'Full name should contain only letters.');
-      return;
-    }
-    if (!/^\d{10}$/.test(phone.trim())) {
-      Alert.alert('Invalid phone', 'Please enter a valid 10-digit phone number.');
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert('Weak password', 'Password must be at least 6 characters.');
-      return;
-    }
+    if (!/^[a-zA-Z\s]+$/.test(name.trim())) errs.name = 'Full name should contain only letters.';
+    if (!/^\d{10}$/.test(phone.trim())) errs.phone = 'Please enter a valid 10-digit phone number.';
+    if (password.length < 6) errs.password = 'Password must be at least 6 characters.';
+    if (Object.keys(errs).length > 0) { setSignupErrors(errs); return; }
+    setSignupErrors({});
 
     setIsLoading(true);
     try {
@@ -200,12 +195,11 @@ export function LoginScreen({ navigation }: any) {
       setStep('verify_signup_otp');
     } catch (error: any) {
       const isNetworkError = !error?.response;
-      Alert.alert(
-        isNetworkError ? 'No internet connection' : 'Could not send OTP',
-        isNetworkError
-          ? 'Please check your network and try again.'
-          : (error?.response?.data?.message || 'Failed to send OTP. Please try again.')
-      );
+      setSignupErrors({
+        general: isNetworkError
+          ? 'No internet connection. Please check your network and try again.'
+          : (error?.response?.data?.message || 'Could not send OTP. Please try again.'),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -575,25 +569,29 @@ export function LoginScreen({ navigation }: any) {
             <InputField
               placeholder="Full name"
               value={name}
-              onChange={(v: string) => setName(v.replace(/[^a-zA-Z\s]/g, ''))}
+              onChange={(v: string) => { setName(v.replace(/[^a-zA-Z\s]/g, '')); setSignupErrors(e => ({ ...e, name: undefined })); }}
               icon={<User size={18} color="#94a3b8" />}
             />
+            {signupErrors.name ? <Text style={styles.fieldError}>{signupErrors.name}</Text> : null}
             <InputField
               placeholder="Phone number (10 digits)"
               value={phone}
-              onChange={(v: string) => setPhone(v.replace(/[^0-9]/g, ''))}
+              onChange={(v: string) => { setPhone(v.replace(/[^0-9]/g, '')); setSignupErrors(e => ({ ...e, phone: undefined })); }}
               keyboardType="number-pad"
               maxLength={10}
               icon={<User size={18} color="#94a3b8" />}
             />
+            {signupErrors.phone ? <Text style={styles.fieldError}>{signupErrors.phone}</Text> : null}
             <InputField
               placeholder="Create password"
               value={password}
-              onChange={setPassword}
+              onChange={(v: string) => { setPassword(v); setSignupErrors(e => ({ ...e, password: undefined })); }}
               secureTextEntry
               showToggle
               icon={<Lock size={18} color="#94a3b8" />}
             />
+            {signupErrors.password ? <Text style={styles.fieldError}>{signupErrors.password}</Text> : null}
+            {signupErrors.general ? <Text style={styles.fieldError}>{signupErrors.general}</Text> : null}
             <PrimaryButton onPress={handleSignupSubmit} disabled={!password || !name || !email || !phone || isLoading} loading={isLoading}>
               <Text style={styles.buttonText}>Sign up</Text>
               <ArrowRight size={18} color="#fff" />
@@ -774,6 +772,7 @@ const styles = StyleSheet.create({
   rootContainer: { flex: 1, backgroundColor: '#064e3b' },
   offlineBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 8 },
   offlineBannerText: { color: '#dc2626', fontSize: 13, fontWeight: '700', textAlign: 'center' },
+  fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: -10, marginBottom: 4, paddingLeft: 4 },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, backgroundColor: '#064e3b' },
   container: { flex: 1, backgroundColor: '#ffffff', maxWidth: 900, width: '100%', alignSelf: 'center' },
   header: {
