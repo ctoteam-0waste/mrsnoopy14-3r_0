@@ -88,7 +88,7 @@ export function DashboardScreen({ navigation }: any) {
         profileService.getProfile().catch(() => ({})),
         bookingService.getMyBookings().catch(() => []),
       ]);
-      if (prof.name) setUserName(prof.name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' '));
+      if (prof.name) { const first = prof.name.trim().split(/\s+/)[0]; setUserName(first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()); }
       setBalance(prof.karmaCoins || prof.coins || 0);
       setStreak(prof.streak || prof.activeStreak || 0);
       if (Array.isArray(orders)) {
