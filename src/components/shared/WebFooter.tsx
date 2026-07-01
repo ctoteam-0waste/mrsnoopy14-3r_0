@@ -42,11 +42,11 @@ export function WebFooter() {
                 </View>
                 <View style={s.contactRow}>
                   <Phone size={13} color="#94a3b8" />
-                  <Text style={s.contactText}>+91 98765 43210</Text>
+                  <Text style={s.contactText}>070931 98828</Text>
                 </View>
                 <View style={s.contactRow}>
                   <MapPin size={13} color="#94a3b8" />
-                  <Text style={s.contactText}>Patna, Bihar, India</Text>
+                  <Text style={s.contactText}>PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503</Text>
                 </View>
               </View>
             </View>
@@ -66,11 +66,11 @@ export function WebFooter() {
                 </View>
                 <View style={s.contactRow}>
                   <Phone size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>+91 98765 43210</Text>
+                  <Text style={s.contactText}>070931 98828</Text>
                 </View>
                 <View style={s.contactRow}>
                   <MapPin size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>Patna, Bihar, India</Text>
+                  <Text style={s.contactText}>PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503</Text>
                 </View>
               </View>
             </>
