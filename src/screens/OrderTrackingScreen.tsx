@@ -110,6 +110,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   );
   const [isPool, setIsPool] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   // Initialize from actual booking status so already-cancelled bookings show correctly
   const [isCancelled, setIsCancelled] = useState(passedBooking?.status === 'CANCELLED');
   // Don't auto-show rating modal if opening a historical completed booking
@@ -119,35 +120,25 @@ export function OrderTrackingScreen({ route, navigation }: any) {
 
   // Cancel allowed only when real booking exists and before agent reaches
   const hasRealBooking = !!(passedBooking?._id || passedBooking?.id);
-  const canCancel = hasRealBooking && ['ORDER_PLACED', 'AGENT_ASSIGNED'].includes(currentStatus) && !isCancelled;
+  const CANCELLABLE_STATUSES = ['ORDER_PLACED', 'AGENT_ASSIGNED', 'PENDING', 'SCHEDULED'];
+  const canCancel = hasRealBooking && CANCELLABLE_STATUSES.includes(currentStatus) && !isCancelled;
 
   const handleCancelBooking = () => {
-    Alert.alert(
-      'Cancel booking?',
-      'Are you sure you want to cancel this pickup request?',
-      [
-        { text: 'No, keep it', style: 'cancel' },
-        {
-          text: 'Yes, cancel',
-          style: 'destructive',
-          onPress: async () => {
-            setIsCancelling(true);
-            try {
-              await bookingService.cancelBooking(rawBookingId);
-              setIsCancelled(true);
-            } catch (error: any) {
-              const msg = error?.response?.data?.message;
-              Alert.alert(
-                'Cannot cancel',
-                msg || 'Could not cancel booking. Please try again.'
-              );
-            } finally {
-              setIsCancelling(false);
-            }
-          }
-        }
-      ]
-    );
+    setShowCancelConfirm(true);
+  };
+
+  const confirmCancel = async () => {
+    setShowCancelConfirm(false);
+    setIsCancelling(true);
+    try {
+      await bookingService.cancelBooking(rawBookingId);
+      setIsCancelled(true);
+    } catch (error: any) {
+      const msg = error?.response?.data?.message;
+      Alert.alert('Cannot cancel', msg || 'Could not cancel booking. Please try again.');
+    } finally {
+      setIsCancelling(false);
+    }
   };
 
   const { latestUpdate, clearLatestUpdate } = useUserSocket();
@@ -475,7 +466,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         </TouchableOpacity>
 
         {/* Cancel Button — only before agent reaches */}
-        {canCancel && (
+        {canCancel && !showCancelConfirm && (
           <TouchableOpacity
             style={styles.cancelBtn}
             onPress={handleCancelBooking}
@@ -487,10 +478,25 @@ export function OrderTrackingScreen({ route, navigation }: any) {
             ) : (
               <>
                 <XCircle size={16} color="#ef4444" />
-                <Text style={styles.cancelBtnText}>Cancel Booking</Text>
+                <Text style={styles.cancelBtnText}>Cancel booking</Text>
               </>
             )}
           </TouchableOpacity>
+        )}
+
+        {/* Inline cancel confirmation — replaces Alert.alert (works on web) */}
+        {canCancel && showCancelConfirm && (
+          <View style={styles.cancelConfirmBox}>
+            <Text style={styles.cancelConfirmText}>Cancel this pickup request?</Text>
+            <View style={styles.cancelConfirmRow}>
+              <TouchableOpacity style={styles.cancelConfirmNo} onPress={() => setShowCancelConfirm(false)}>
+                <Text style={styles.cancelConfirmNoText}>Keep it</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelConfirmYes} onPress={confirmCancel} disabled={isCancelling}>
+                {isCancelling ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.cancelConfirmYesText}>Yes, cancel</Text>}
+              </TouchableOpacity>
+            </View>
+          </View>
         )}
 
         <View style={{ height: 32 }} />
@@ -603,4 +609,11 @@ const styles = StyleSheet.create({
   secondaryBtnText: { color: '#475569', fontSize: 15, fontWeight: '700' },
   cancelBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#fef2f2', borderRadius: 16, paddingVertical: 14, borderWidth: 1.5, borderColor: '#fecaca', marginTop: 8 },
   cancelBtnText: { color: '#ef4444', fontSize: 15, fontWeight: '700' },
+  cancelConfirmBox: { backgroundColor: '#fef2f2', borderRadius: 16, padding: 16, marginTop: 8, borderWidth: 1.5, borderColor: '#fecaca' },
+  cancelConfirmText: { fontSize: 14, fontWeight: '700', color: '#0f172a', textAlign: 'center', marginBottom: 12 },
+  cancelConfirmRow: { flexDirection: 'row', gap: 10 },
+  cancelConfirmNo: { flex: 1, backgroundColor: 'white', borderRadius: 12, paddingVertical: 12, alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' },
+  cancelConfirmNoText: { color: '#475569', fontSize: 14, fontWeight: '700' },
+  cancelConfirmYes: { flex: 1, backgroundColor: '#ef4444', borderRadius: 12, paddingVertical: 12, alignItems: 'center' },
+  cancelConfirmYesText: { color: 'white', fontSize: 14, fontWeight: '700' },
 });
