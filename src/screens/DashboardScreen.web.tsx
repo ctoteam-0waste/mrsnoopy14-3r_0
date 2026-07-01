@@ -135,45 +135,65 @@ export function DashboardScreen({ navigation }: any) {
           {/* Hero content */}
           <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20 }]}>
             {/* Left: Greeting + Balance */}
-            <View style={z.heroLeft}>
-              <Text style={z.heroGreet}>Welcome back,</Text>
-              <Text style={[z.heroName, isMobile && { fontSize: 18 }]}>{userName || '...'}</Text>
-              <View style={z.heroBalance}>
+            <View style={[z.heroLeft, isMobile && { alignItems: 'center' }]}>
+              <Text style={[z.heroGreet, isMobile && { textAlign: 'center' }]}>Welcome back,</Text>
+              <Text style={[z.heroName, isMobile && { fontSize: 22, textAlign: 'center' }]}>{userName || '...'}</Text>
+              <View style={[z.heroBalance, isMobile && { justifyContent: 'center' }]}>
                 <View style={z.heroCoinGlow}>
-                  <KarmaCoin size={isMobile ? 48 : 64} glow animated />
+                  <KarmaCoin size={isMobile ? 52 : 64} glow animated />
                 </View>
                 <View>
-                  <Text style={[z.heroBalNum, isMobile && { fontSize: 28 }]}>{balance.toLocaleString()}</Text>
+                  <Text style={[z.heroBalNum, isMobile && { fontSize: 32 }]}>{balance.toLocaleString()}</Text>
                   <Text style={z.heroBalLabel}>Karma Coins</Text>
                 </View>
               </View>
-              <View style={z.heroProgressWrap}>
+              <View style={[z.heroProgressWrap, isMobile && { width: '100%' }]}>
                 <View style={z.heroProgressTrack}>
                   <LinearGradient colors={['#4ade80', '#22d3ee']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[z.heroProgressFill, { width: `${progress}%` as any }]} />
                 </View>
-                <Text style={z.heroProgressText}>{progress}% to next reward</Text>
+                <Text style={[z.heroProgressText, isMobile && { textAlign: 'center' }]}>{progress}% to next reward</Text>
               </View>
             </View>
 
             {/* Stats grid */}
-            <View style={[z.heroRight, isMobile && { flexWrap: 'wrap' }]}>
-              {[
+            {(() => {
+              const stats = [
                 { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
                 { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
                 { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
                 { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
-              ].map((st, i) => (
-                <View key={i} style={[z.statCard, isMobile && { width: '48%' }]}>
-                  <View style={z.statTop}>
-                    <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
-                      <st.icon size={18} color={st.color} />
+              ];
+              const statW = Math.floor((width - 2 * pad - 8) / 2);
+              return isMobile ? (
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                  {stats.map((st, i) => (
+                    <View key={i} style={[z.statCard, { width: statW, flex: 0 }]}>
+                      <View style={z.statTop}>
+                        <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
+                          <st.icon size={16} color={st.color} />
+                        </View>
+                        <Text style={[z.statLabel, { fontSize: 9 }]}>{st.label}</Text>
+                      </View>
+                      <Text style={[z.statVal, { color: st.color, fontSize: 18 }]}>{st.val}</Text>
                     </View>
-                    <Text style={z.statLabel}>{st.label}</Text>
-                  </View>
-                  <Text style={[z.statVal, { color: st.color }]}>{st.val}</Text>
+                  ))}
                 </View>
-              ))}
-            </View>
+              ) : (
+                <View style={z.heroRight}>
+                  {stats.map((st, i) => (
+                    <View key={i} style={z.statCard}>
+                      <View style={z.statTop}>
+                        <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
+                          <st.icon size={18} color={st.color} />
+                        </View>
+                        <Text style={z.statLabel}>{st.label}</Text>
+                      </View>
+                      <Text style={[z.statVal, { color: st.color }]}>{st.val}</Text>
+                    </View>
+                  ))}
+                </View>
+              );
+            })()}
           </View>
         </View>
       </LinearGradient>
