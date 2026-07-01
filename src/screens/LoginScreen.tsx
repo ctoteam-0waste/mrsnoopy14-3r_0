@@ -20,7 +20,7 @@ try {
 type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'demographics' | 'reset_password';
 
 // Reusable Components
-function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false }: any) {
+function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType }: any) {
   const [hidden, setHidden] = useState(secureTextEntry);
   return (
     <View style={styles.inputContainer}>
@@ -35,6 +35,8 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
         autoFocus={autoFocus}
         keyboardType={keyboardType}
         maxLength={maxLength}
+        onSubmitEditing={onSubmitEditing}
+        returnKeyType={returnKeyType}
       />
       {showToggle && (
         <TouchableOpacity style={{ position: 'absolute', right: 16, zIndex: 1 }} onPress={() => setHidden((h: boolean) => !h)} activeOpacity={0.7}>
@@ -338,8 +340,10 @@ export function LoginScreen({ navigation }: any) {
             keyboardType="email-address"
             maxLength={254}
             autoFocus
+            returnKeyType="go"
+            onSubmitEditing={handleContinue}
           />
-          {!!emailError && <Text style={{ color: '#ef4444', fontSize: 13, fontWeight: '600', marginTop: -8, marginBottom: 8, marginLeft: 4 }}>{emailError}</Text>}
+          {!!emailError && <Text style={styles.fieldError}>{emailError}</Text>}
           <PrimaryButton onPress={handleContinue} disabled={!identifier} loading={isLoading}>
             <Text style={styles.buttonText}>Continue</Text>
             <ArrowRight size={18} color="#fff" />
@@ -772,7 +776,7 @@ const styles = StyleSheet.create({
   rootContainer: { flex: 1, backgroundColor: '#064e3b' },
   offlineBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 8 },
   offlineBannerText: { color: '#dc2626', fontSize: 13, fontWeight: '700', textAlign: 'center' },
-  fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: -10, marginBottom: 4, paddingLeft: 4 },
+  fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, backgroundColor: '#064e3b' },
   container: { flex: 1, backgroundColor: '#ffffff', maxWidth: 900, width: '100%', alignSelf: 'center' },
   header: {
