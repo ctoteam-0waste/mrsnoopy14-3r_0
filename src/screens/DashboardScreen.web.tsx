@@ -135,10 +135,10 @@ export function DashboardScreen({ navigation }: any) {
           {/* Hero content */}
           <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20 }]}>
             {/* Left: Greeting + Balance */}
-            <View style={[z.heroLeft, isMobile && { alignItems: 'center' }]}>
-              <Text style={[z.heroGreet, isMobile && { textAlign: 'center' }]}>Welcome back,</Text>
-              <Text style={[z.heroName, isMobile && { fontSize: 22, textAlign: 'center' }]}>{userName || '...'}</Text>
-              <View style={[z.heroBalance, isMobile && { justifyContent: 'center' }]}>
+            <View style={z.heroLeft}>
+              <Text style={z.heroGreet}>Welcome back,</Text>
+              <Text style={[z.heroName, isMobile && { fontSize: 20 }]}>{userName || '...'}</Text>
+              <View style={z.heroBalance}>
                 <View style={z.heroCoinGlow}>
                   <KarmaCoin size={isMobile ? 52 : 64} glow animated />
                 </View>
@@ -147,53 +147,54 @@ export function DashboardScreen({ navigation }: any) {
                   <Text style={z.heroBalLabel}>Karma Coins</Text>
                 </View>
               </View>
-              <View style={[z.heroProgressWrap, isMobile && { width: '100%' }]}>
+              <View style={[z.heroProgressWrap, isMobile && { maxWidth: '100%' }]}>
                 <View style={z.heroProgressTrack}>
                   <LinearGradient colors={['#4ade80', '#22d3ee']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[z.heroProgressFill, { width: `${progress}%` as any }]} />
                 </View>
-                <Text style={[z.heroProgressText, isMobile && { textAlign: 'center' }]}>{progress}% to next reward</Text>
+                <Text style={z.heroProgressText}>{progress}% to next reward</Text>
               </View>
             </View>
 
             {/* Stats grid */}
-            {(() => {
-              const stats = [
-                { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
-                { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
-                { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
-                { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
-              ];
-              const statW = Math.floor((width - 2 * pad - 8) / 2);
-              return isMobile ? (
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
-                  {stats.map((st, i) => (
-                    <View key={i} style={[z.statCard, { width: statW, flex: 0 }]}>
-                      <View style={z.statTop}>
-                        <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
-                          <st.icon size={16} color={st.color} />
-                        </View>
-                        <Text style={[z.statLabel, { fontSize: 9 }]}>{st.label}</Text>
+            {isMobile ? (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                {[
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
+                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
+                ].map((st, i) => (
+                  <View key={i} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                      <View style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: st.color + '20', alignItems: 'center', justifyContent: 'center' }}>
+                        <st.icon size={14} color={st.color} />
                       </View>
-                      <Text style={[z.statVal, { color: st.color, fontSize: 18 }]}>{st.val}</Text>
+                      <Text style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', fontWeight: '600' }}>{st.label}</Text>
                     </View>
-                  ))}
-                </View>
-              ) : (
-                <View style={z.heroRight}>
-                  {stats.map((st, i) => (
-                    <View key={i} style={z.statCard}>
-                      <View style={z.statTop}>
-                        <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
-                          <st.icon size={18} color={st.color} />
-                        </View>
-                        <Text style={z.statLabel}>{st.label}</Text>
+                    <Text style={{ fontSize: 20, fontWeight: '900', color: st.color }}>{st.val}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <View style={z.heroRight}>
+                {[
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total coins' },
+                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
+                  { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Quiz streak' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Pickups done' },
+                ].map((st, i) => (
+                  <View key={i} style={z.statCard}>
+                    <View style={z.statTop}>
+                      <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
+                        <st.icon size={18} color={st.color} />
                       </View>
-                      <Text style={[z.statVal, { color: st.color }]}>{st.val}</Text>
+                      <Text style={z.statLabel}>{st.label}</Text>
                     </View>
-                  ))}
-                </View>
-              );
-            })()}
+                    <Text style={[z.statVal, { color: st.color }]}>{st.val}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
           </View>
         </View>
       </LinearGradient>
