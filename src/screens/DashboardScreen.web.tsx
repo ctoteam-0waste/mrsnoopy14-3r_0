@@ -133,7 +133,7 @@ export function DashboardScreen({ navigation }: any) {
         <View style={[z.container, { paddingHorizontal: pad }]}>
 
           {/* Hero content */}
-          <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20 }]}>
+          <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20, alignItems: 'stretch' }]}>
             {/* Left: Greeting + Balance */}
             <View style={z.heroLeft}>
               <Text style={z.heroGreet}>Welcome back,</Text>
