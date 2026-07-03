@@ -462,9 +462,17 @@ export function LoginScreen({ navigation }: any) {
               <Lock size={16} color="#64748b" />
               <Text style={styles.readonlyEmailText} numberOfLines={1}>{identifier}</Text>
             </View>
-            <PrimaryButton onPress={() => {
-              // TODO: call authService.sendOtp(identifier) when backend is ready
-              setResetSubStep('verify_otp');
+            <PrimaryButton onPress={async () => {
+              setIsLoading(true);
+              try {
+                await authService.sendForgotPasswordOtp(identifier.trim());
+                setResetSubStep('verify_otp');
+              } catch (error: any) {
+                const msg = error?.response?.data?.message;
+                Alert.alert('Could not send OTP', msg || 'Please try again.');
+              } finally {
+                setIsLoading(false);
+              }
             }} loading={isLoading}>
               <Text style={styles.buttonText}>Send OTP</Text>
               <ArrowRight size={18} color="#fff" />
@@ -493,13 +501,21 @@ export function LoginScreen({ navigation }: any) {
               icon={<CheckCircle2 size={18} color="#94a3b8" />}
               autoFocus
             />
-            <PrimaryButton onPress={() => {
+            <PrimaryButton onPress={async () => {
               if (otpValue.length < 6) {
                 Alert.alert('Invalid OTP', 'Please enter the 6-digit OTP sent to your email.');
                 return;
               }
-              // TODO: call authService.verifyOtp(identifier, otpValue) when backend is ready
-              setResetSubStep('new_password');
+              setIsLoading(true);
+              try {
+                await authService.verifyForgotPasswordOtp(identifier.trim(), otpValue);
+                setResetSubStep('new_password');
+              } catch (error: any) {
+                const msg = error?.response?.data?.message;
+                Alert.alert('Verification failed', msg || 'Invalid or expired OTP. Please try again.');
+              } finally {
+                setIsLoading(false);
+              }
             }} disabled={otpValue.length < 6} loading={isLoading}>
               <Text style={styles.buttonText}>Verify OTP</Text>
               <ArrowRight size={18} color="#fff" />

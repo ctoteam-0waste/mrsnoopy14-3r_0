@@ -85,6 +85,18 @@ export const authService = {
     }
   },
 
+  // Send OTP for forgot password
+  sendForgotPasswordOtp: async (email: string) => {
+    const response = await api.post('/api/v1/auth/forgot-password', { email });
+    return response.data;
+  },
+
+  // Verify OTP for forgot password
+  verifyForgotPasswordOtp: async (email: string, otp: string) => {
+    const response = await api.post('/api/v1/auth/verify-otp', { email, otp });
+    return response.data;
+  },
+
   // Send OTP for signup verification
   sendSignupOtp: async (email: string) => {
     const response = await api.post('/api/v1/auth/send-otp', { email });
