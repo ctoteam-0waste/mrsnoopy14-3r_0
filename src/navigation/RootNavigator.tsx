@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addNotificationResponseListener, getLastNotificationResponse } from '../utils/notifications';
 import { SplashScreen } from '../screens/SplashScreen';
@@ -17,7 +17,7 @@ import { BookingDetailsScreen } from '../screens/BookingDetailsScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 function AuthLoadingScreen() {
   return (
