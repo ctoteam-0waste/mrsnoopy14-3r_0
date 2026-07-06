@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { addNotificationResponseListener, getLastNotificationResponse } from '../utils/notifications';
 import { SplashScreen } from '../screens/SplashScreen';
@@ -17,7 +17,7 @@ import { BookingDetailsScreen } from '../screens/BookingDetailsScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 function AuthLoadingScreen() {
   return (
@@ -66,11 +66,7 @@ export function RootNavigator() {
   return (
     <NavigationContainer ref={navRef}>
       <Stack.Navigator
-        screenOptions={{
-          headerShown: false,
-          cardStyle: { flex: 1 },
-          animationEnabled: Platform.OS !== 'web',
-        }}
+        screenOptions={{ headerShown: false }}
         initialRouteName={isLoggedIn ? 'App' : 'Splash'}
       >
         <Stack.Screen name="Splash" component={SplashScreen} />

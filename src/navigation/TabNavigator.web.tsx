@@ -9,6 +9,7 @@ import { DashboardScreen } from '../screens/DashboardScreen';
 import { WalletScreen } from '../screens/WalletScreen';
 import { OrdersScreen } from '../screens/OrdersScreen';
 import { StoreScreen } from '../screens/StoreScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 import { navigationRef } from './navRef';
 
 const Tab = createBottomTabNavigator();
@@ -131,6 +132,7 @@ export function TabNavigator() {
         <Tab.Screen name="Orders" component={OrdersScreen} />
         <Tab.Screen name="Wallet" component={WalletScreen} />
         <Tab.Screen name="Store" component={StoreScreen} />
+        <Tab.Screen name="Profile" component={ProfileScreen} />
       </Tab.Navigator>
     </View>
   );

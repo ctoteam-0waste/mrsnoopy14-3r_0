@@ -1,6 +1,4 @@
-import 'react-native-gesture-handler';
 import React, { useEffect } from 'react';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { UserSocketProvider } from './src/context/UserSocketContext';
@@ -42,14 +40,12 @@ export default function App() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <NotificationProvider>
-          <UserSocketProvider>
-            <RootNavigator />
-          </UserSocketProvider>
-        </NotificationProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <NotificationProvider>
+        <UserSocketProvider>
+          <RootNavigator />
+        </UserSocketProvider>
+      </NotificationProvider>
+    </SafeAreaProvider>
   );
 }
