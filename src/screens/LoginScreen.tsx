@@ -20,11 +20,11 @@ try {
 type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'demographics' | 'reset_password';
 
 // Reusable Components
-function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType, inputRef }: any) {
+function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType, inputRef, textContentType, autoComplete }: any) {
   const [hidden, setHidden] = useState(secureTextEntry);
   return (
     <View style={styles.inputContainer}>
-      {icon && <View style={styles.iconWrapper}>{icon}</View>}
+      {icon && <View style={styles.iconWrapper} pointerEvents="none">{icon}</View>}
       <TextInput
         ref={inputRef}
         style={[styles.input, icon ? { paddingLeft: 48 } : {}, showToggle ? { paddingRight: 48 } : {}]}
@@ -38,6 +38,10 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
         maxLength={maxLength}
         onSubmitEditing={onSubmitEditing}
         returnKeyType={returnKeyType}
+        textContentType={textContentType}
+        autoComplete={autoComplete}
+        autoCorrect={false}
+        autoCapitalize="none"
       />
       {showToggle && (
         <TouchableOpacity style={{ position: 'absolute', right: 16, zIndex: 1 }} onPress={() => setHidden((h: boolean) => !h)} activeOpacity={0.7}>
@@ -631,6 +635,8 @@ export function LoginScreen({ navigation }: any) {
               icon={<Lock size={18} color="#94a3b8" />}
               returnKeyType="next"
               onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+              textContentType="newPassword"
+              autoComplete="password-new"
             />
             <InputField
               inputRef={confirmPasswordRef}
@@ -642,6 +648,8 @@ export function LoginScreen({ navigation }: any) {
               icon={<Lock size={18} color="#94a3b8" />}
               returnKeyType="done"
               onSubmitEditing={handleResetPassword}
+              textContentType="newPassword"
+              autoComplete="password-new"
             />
             <PrimaryButton onPress={handleResetPassword} disabled={!newPassword || !confirmPassword || isLoading} loading={isLoading}>
               <Text style={styles.buttonText}>Reset password</Text>
