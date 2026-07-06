@@ -206,15 +206,17 @@ export function LoginScreen({ navigation }: any) {
     setIsLoading(true);
     try {
       const res = await authService.sendOtp(phone.trim(), 'registration');
-      setResendTimer(res?.data?.retryAfter || 60);
+      setResendTimer(res?.data?.retryAfter || res?.retryAfter || 60);
       setSignupOtp(['', '', '', '', '', '']);
       setStep('verify_signup_otp');
     } catch (error: any) {
       const isNetworkError = !error?.response;
+      const d = error?.response?.data;
+      const serverMsg = d?.message || d?.error || d?.msg || (typeof d === 'string' ? d : null);
       setSignupErrors({
         general: isNetworkError
           ? 'No internet connection. Please check your network and try again.'
-          : (error?.response?.data?.message || 'Could not send OTP. Please try again.'),
+          : (serverMsg || 'Could not send OTP. Please try again.'),
       });
     } finally {
       setIsLoading(false);
@@ -504,11 +506,12 @@ export function LoginScreen({ navigation }: any) {
               setIsLoading(true);
               try {
                 const res = await authService.sendOtp(forgotPhone.trim(), 'forgot-password');
-                setResendTimer(res?.data?.retryAfter || 60);
+                setResendTimer(res?.data?.retryAfter || res?.retryAfter || 60);
                 setOtpValue('');
                 setResetSubStep('verify_otp');
               } catch (error: any) {
-                const msg = error?.response?.data?.message;
+                const d = error?.response?.data;
+                const msg = d?.message || d?.error || d?.msg || (typeof d === 'string' ? d : null);
                 Alert.alert('Could not send OTP', msg || 'Please try again.');
               } finally {
                 setIsLoading(false);
