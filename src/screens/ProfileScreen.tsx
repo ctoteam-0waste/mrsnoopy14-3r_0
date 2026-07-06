@@ -145,6 +145,17 @@ export function ProfileScreen({ navigation }: any) {
     'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Siliguri', 'Asansol'],
   };
   const ALL_STATES = Object.keys(INDIAN_STATES);
+
+  // Address Modal State — declared BEFORE filteredStates/filteredCities to avoid TDZ crash
+  const [addressModalVisible, setAddressModalVisible] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    flatNo: '', street: '', city: '', state: '', pincode: ''
+  });
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [addressErrors, setAddressErrors] = useState({ flatNo: '', street: '', city: '', state: '', pincode: '' });
+  const [addressTouched, setAddressTouched] = useState({ flatNo: false, street: false, city: false, state: false, pincode: false });
+  const addressSlideAnim = useRef(new Animated.Value(0)).current;
+
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
 
@@ -156,16 +167,6 @@ export function ProfileScreen({ navigation }: any) {
   const filteredCities = addressForm.city
     ? citiesForState.filter(c => c.toLowerCase().includes(addressForm.city.toLowerCase()))
     : citiesForState;
-
-  // Address Modal State â€” structured fields
-  const [addressModalVisible, setAddressModalVisible] = useState(false);
-  const [addressForm, setAddressForm] = useState({
-    flatNo: '', street: '', city: '', state: '', pincode: ''
-  });
-  const [isSavingAddress, setIsSavingAddress] = useState(false);
-  const [addressErrors, setAddressErrors] = useState({ flatNo: '', street: '', city: '', state: '', pincode: '' });
-  const [addressTouched, setAddressTouched] = useState({ flatNo: false, street: false, city: false, state: false, pincode: false });
-  const addressSlideAnim = useRef(new Animated.Value(0)).current;
 
   const validateAddressField = (field: string, value: string): string => {
     if (!value.trim()) {
