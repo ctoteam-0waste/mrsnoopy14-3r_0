@@ -53,7 +53,7 @@ export function StoreScreen({ navigation }: any) {
 const styles = StyleSheet.create({
   rootContainer: { flex: 1, backgroundColor: '#064e3b' },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
-  container: { flex: 1 },
+  container: { flex: 1, backgroundColor: '#f0fdf6' },
   header: {
     paddingTop: 10,
     paddingHorizontal: 20,
