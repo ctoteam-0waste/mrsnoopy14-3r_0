@@ -20,12 +20,13 @@ try {
 type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'demographics' | 'reset_password';
 
 // Reusable Components
-function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType }: any) {
+function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType, inputRef }: any) {
   const [hidden, setHidden] = useState(secureTextEntry);
   return (
     <View style={styles.inputContainer}>
       {icon && <View style={styles.iconWrapper}>{icon}</View>}
       <TextInput
+        ref={inputRef}
         style={[styles.input, icon ? { paddingLeft: 48 } : {}, showToggle ? { paddingRight: 48 } : {}]}
         placeholder={placeholder}
         placeholderTextColor="#94a3b8"
@@ -91,6 +92,8 @@ export function LoginScreen({ navigation }: any) {
   const [otpValue, setOtpValue] = useState('');
   const [signupOtp, setSignupOtp] = useState(['', '', '', '', '', '']);
   const otpRefs = useRef<Array<any>>([]);
+  const newPasswordRef = useRef<any>(null);
+  const confirmPasswordRef = useRef<any>(null);
   const [resetSubStep, setResetSubStep] = useState<'send_otp' | 'verify_otp' | 'new_password'>('send_otp');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -611,6 +614,7 @@ export function LoginScreen({ navigation }: any) {
               <Text style={styles.subtitle}>Set a new password for {identifier}</Text>
             </View>
             <InputField
+              inputRef={newPasswordRef}
               placeholder="New password (min 6 chars)"
               value={newPassword}
               onChange={setNewPassword}
@@ -618,14 +622,19 @@ export function LoginScreen({ navigation }: any) {
               showToggle
               icon={<Lock size={18} color="#94a3b8" />}
               autoFocus
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             />
             <InputField
+              inputRef={confirmPasswordRef}
               placeholder="Confirm new password"
               value={confirmPassword}
               onChange={setConfirmPassword}
               secureTextEntry
               showToggle
               icon={<Lock size={18} color="#94a3b8" />}
+              returnKeyType="done"
+              onSubmitEditing={handleResetPassword}
             />
             <PrimaryButton onPress={handleResetPassword} disabled={!newPassword || !confirmPassword || isLoading} loading={isLoading}>
               <Text style={styles.buttonText}>Reset password</Text>
