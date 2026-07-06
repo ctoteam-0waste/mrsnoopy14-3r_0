@@ -133,6 +133,14 @@ export function LoginScreen({ navigation }: any) {
     return () => clearTimeout(t);
   }, [resendTimer]);
 
+  // Focus new password field via ref when substep opens (avoids autoFocus + secureTextEntry iOS bug)
+  React.useEffect(() => {
+    if (resetSubStep === 'new_password') {
+      const t = setTimeout(() => newPasswordRef.current?.focus(), 150);
+      return () => clearTimeout(t);
+    }
+  }, [resetSubStep]);
+
   const handleGoogleSignIn = async () => {
     if (!GoogleSignin) {
       Alert.alert('Not available', 'Google Sign-In requires a native build. Use APK to test.');
@@ -621,7 +629,6 @@ export function LoginScreen({ navigation }: any) {
               secureTextEntry
               showToggle
               icon={<Lock size={18} color="#94a3b8" />}
-              autoFocus
               returnKeyType="next"
               onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             />
