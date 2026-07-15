@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>%WEB_TITLE%</title>
+
+    <!-- Google Search Console ownership verification -->
+    <meta name="google-site-verification" content="hjZP0SOm9CiCTAiAiNG_4-GoW_5mUQR9h-N4wdxMJng" />
+
+    <!-- Google tag (gtag.js) — send_page_view is off; RootNavigator.tsx fires page_view
+         events itself on every screen change so in-app navigation is tracked too, not
+         just the initial load. -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-EV8X3FVWZ2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-EV8X3FVWZ2', { send_page_view: false });
+    </script>
+
+    <!-- Canonical + robots -->
+    <link rel="canonical" href="https://karmaverse.earth/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="keywords" content="recycling app, waste management India, doorstep recycling pickup, circular economy, KarmaCoins, e-waste recycling, 3R Zero Waste, recycle for rewards, Gurugram recycling, Haryana recycling" />
+    <meta name="author" content="3R Zero Waste" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="KarmaVerse" />
+    <meta property="og:title" content="KarmaVerse — Recycle & Earn Rewards in India" />
+    <meta property="og:description" content="India's first circular economy rewards platform. Schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle." />
+    <meta property="og:url" content="https://karmaverse.earth/" />
+    <meta property="og:image" content="https://karmaverse.earth/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_IN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="KarmaVerse — Recycle & Earn Rewards in India" />
+    <meta name="twitter:description" content="India's first circular economy rewards platform. Schedule free doorstep pickups and earn KarmaCoins XP for every kg you recycle." />
+    <meta name="twitter:image" content="https://karmaverse.earth/og-image.png" />
+
+    <!-- Icons + manifest -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Structured data: the organization behind KarmaVerse -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "3R Zero Waste",
+        "url": "https://0waste.co.in/",
+        "logo": "https://karmaverse.earth/apple-touch-icon.png",
+        "email": "cto.team@0waste.co.in",
+        "telephone": "+91-70931-98828",
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Plot 62, Sector 8 Rd, IMT Manesar",
+          "addressLocality": "Gurugram",
+          "addressRegion": "Haryana",
+          "postalCode": "122503",
+          "addressCountry": "IN"
+        }
+      }
+    </script>
+
+    <!-- Structured data: the KarmaVerse product itself -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "KarmaVerse",
+        "url": "https://karmaverse.earth/",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "Android, iOS, Web",
+        "description": "India's first circular economy rewards platform. Schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "3R Zero Waste",
+          "url": "https://0waste.co.in/"
+        }
+      }
+    </script>
+
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      /* These styles make the body full-height */
+      html,
+      body {
+        height: 100%;
+      }
+      /* These styles disable body scrolling if you are using <ScrollView> */
+      body {
+        overflow: hidden;
+      }
+      /* These styles make the root element full-height */
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- LLM/crawler-visible fallback: this app is a client-rendered SPA, so bots that -->
+    <!-- don't execute JavaScript only ever see this block plus the meta tags above. -->
+    <noscript>
+      <h1>KarmaVerse — Recycle & Earn Rewards in India</h1>
+      <p>
+        India's first circular economy rewards platform, built by 3R Zero Waste.
+        Schedule free doorstep pickups for plastic, paper, metal, e-waste, textile and more.
+        Every pickup is verified and weighed by an agent, and KarmaCoins XP are credited
+        instantly — redeemable for eco-friendly products, tree planting, or charitable donations.
+      </p>
+      <p>You need to enable JavaScript to run this app.</p>
+    </noscript>
+    <!-- The root element for your Expo app. -->
+    <div id="root"></div>
+  </body>
+</html>

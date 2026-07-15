@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNotifications } from './NotificationContext';
 
-const SOCKET_URL = 'https://karmacoin-backend-8.onrender.com';
+const SOCKET_URL = 'https://api.karmaverse.earth';
 
 export type BookingStatusEvent =
   | 'BOOKING_ACCEPTED'
@@ -14,13 +14,13 @@ export type BookingStatusEvent =
   | 'BOOKING_IN_POOL';
 
 export interface BookingUpdate {
-  event: BookingStatusEvent | 'AGENT_LOCATION_UPDATE';
+  event: BookingStatusEvent | 'AGENT_LOCATION';
   bookingId: string;
   message: string;
   totalKarmaCoins?: number;
   agentId?: string;
   agent?: { name: string; rating?: number; phone?: string };
-  agentLocation?: { latitude: number; longitude: number };
+  agentLocation?: { lat: number; lng: number };
 }
 
 interface UserSocketContextType {
@@ -28,6 +28,7 @@ interface UserSocketContextType {
   latestUpdate: BookingUpdate | null;
   clearLatestUpdate: () => void;
   reconnect: () => void;
+  agentLocation: { lat: number; lng: number } | null;
 }
 
 const UserSocketContext = createContext<UserSocketContextType>({
@@ -35,12 +36,14 @@ const UserSocketContext = createContext<UserSocketContextType>({
   latestUpdate: null,
   clearLatestUpdate: () => {},
   reconnect: () => {},
+  agentLocation: null,
 });
 
 export function UserSocketProvider({ children }: { children: React.ReactNode }) {
   const socketRef = useRef<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [latestUpdate, setLatestUpdate] = useState<BookingUpdate | null>(null);
+  const [agentLocation, setAgentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { addNotification } = useNotifications();
 
   const connectSocket = useCallback(async () => {
@@ -98,7 +101,7 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
       const coins = data.totalKarmaCoins || 0;
       const msg = data.message || `${coins} KarmaCoins credited to your wallet!`;
       setLatestUpdate({ event: 'BOOKING_PICKED_UP', bookingId: data.bookingId, message: msg, totalKarmaCoins: coins });
-      addNotification({ type: 'BOOKING_PICKED_UP', title: `+${coins} Karma Coins`, message: msg, bookingId: data.bookingId });
+      addNotification({ type: 'BOOKING_PICKED_UP', title: `+${coins} KarmaCoins XP`, message: msg, bookingId: data.bookingId });
     });
 
     socket.on('BOOKING_COMPLETED', (data: any) => {
@@ -119,12 +122,17 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
       addNotification({ type: 'BOOKING_IN_POOL', title: 'Added to priority queue', message: msg, bookingId: data.bookingId });
     });
 
-    socket.on('AGENT_LOCATION_UPDATE', (data: any) => {
+    // Backend emits 'agent:location' with flat payload: { bookingId, lat, lng, timestamp }
+    socket.on('agent:location', (data: any) => {
+      const { lat, lng } = data;
+      if (lat != null && lng != null) {
+        setAgentLocation({ lat, lng });
+      }
       setLatestUpdate({
-        event: 'AGENT_LOCATION_UPDATE',
+        event: 'AGENT_LOCATION',
         bookingId: data.bookingId,
         message: 'Agent location updated',
-        agentLocation: data.location || data.agentLocation,
+        agentLocation: { lat, lng },
       });
     });
   }, []);
@@ -142,7 +150,7 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
   const clearLatestUpdate = useCallback(() => setLatestUpdate(null), []);
 
   return (
-    <UserSocketContext.Provider value={{ isConnected, latestUpdate, clearLatestUpdate, reconnect: connectSocket }}>
+    <UserSocketContext.Provider value={{ isConnected, latestUpdate, clearLatestUpdate, reconnect: connectSocket, agentLocation }}>
       {children}
     </UserSocketContext.Provider>
   );

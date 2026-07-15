@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
+import { showAlert } from '../utils/alert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Package, Truck, CheckCircle2, ChevronRight, Clock, Star } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -48,7 +48,7 @@ export function OrdersScreen({ navigation }: any) {
         setRatedOrders(prev => new Set(prev).add(orderId));
         setRatingTarget(null);
       } else {
-        Alert.alert('Could not submit rating', msg || 'Please try again.');
+        showAlert('Could not submit rating', msg || 'Please try again.');
       }
     }
   };
@@ -102,11 +102,9 @@ export function OrdersScreen({ navigation }: any) {
   return (
     <View style={styles.rootContainer}>
       <StatusBar barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
 
-        {/* Deep Green Header */}
-        <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.headerSubtitle}>Track your impact</Text>
             <Text style={styles.headerTitle}>My pickups</Text>
@@ -130,6 +128,7 @@ export function OrdersScreen({ navigation }: any) {
         </LinearGradient>
 
         <View style={styles.scrollContent}>
+
           {isLoading ? (
              <View style={{ marginTop: 40, alignItems: 'center' }}>
                <ActivityIndicator size="large" color="#16a34a" />
@@ -225,8 +224,7 @@ export function OrdersScreen({ navigation }: any) {
             })
           )}
         </View>
-        </ScrollView>
-      </SafeAreaView>
+      </ScrollView>
 
       {/* Rating Modal — triggered from History tab "Rate agent" button */}
       {ratingTarget && (
@@ -244,21 +242,14 @@ export function OrdersScreen({ navigation }: any) {
 }
 
 const styles = StyleSheet.create({
-  rootContainer: { flex: 1, backgroundColor: '#064e3b' },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
+  rootContainer: { flex: 1, backgroundColor: '#f0fdf6' },
   container: { flex: 1, backgroundColor: '#f0fdf6' },
   header: {
-    paddingTop: 20,
+    paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 24,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    zIndex: 10,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   headerTop: { marginBottom: 20 },
   headerSubtitle: { color: '#86efac', fontSize: 12, fontWeight: '800', letterSpacing: 1.5, marginBottom: 4 },

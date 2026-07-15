@@ -1,0 +1,37 @@
+# KarmaVerse
+
+> India's first circular economy rewards platform — schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle. Built by 3R Zero Waste.
+
+KarmaVerse is a mobile and web app that lets households across India request free doorstep
+recycling pickups (plastic, paper, metal, e-waste, textile, cardboard, and more). A verified
+agent collects, weighs, and confirms the items on the spot, and KarmaCoins XP are credited to
+the user's wallet immediately. Coins are redeemable for eco-friendly products, tree planting,
+or charitable donations. It is operated by 3R Zero Waste, a waste-management company based in
+Gurugram, Haryana, India.
+
+## Key facts
+
+- Doorstep pickup is 100% free — no cost to the user, ever
+- 8 waste categories accepted: plastic, paper, metal, e-waste, textile, cardboard, and more
+- 1.85 Lakh+ (185,000+) citizens reached with recycling awareness so far
+- Rewards: KarmaCoins XP earned per kg recycled, redeemable for products, tree planting, or donations
+- Referral program: both the referrer and the new user each earn 1,000 KarmaCoins XP
+- Also includes a daily eco-quiz for additional KarmaCoins XP
+- Operator: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503, India
+
+## Pages
+
+- [Home](https://karmaverse.earth/): product overview, how it works, features, and sign-up.
+- [Log in or sign up](https://karmaverse.earth/login)
+- [Privacy policy](https://karmaverse.earth/legal/privacy)
+- [Terms & conditions](https://karmaverse.earth/legal/terms)
+
+## Related
+
+- [3R Zero Waste](https://0waste.co.in/): the parent company operating KarmaVerse.
+
+## Contact
+
+- Support: support@karmacoins.in
+- CTO team: cto.team@0waste.co.in
+- Phone: +91 70931 98828

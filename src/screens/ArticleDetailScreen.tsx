@@ -45,7 +45,7 @@ export function ArticleDetailScreen({ route, navigation }: any) {
 
           <Text style={styles.subHeading}>E-Waste: The Hidden Danger</Text>
           <Text style={styles.paragraph}>
-            Old laptops, phone chargers, and batteries contain hazardous chemicals like lead and mercury. When dumped in regular landfills, these leach into groundwater. KarmaCoins XP partners with R2 certified recyclers to ensure your tech is broken down safely.
+            Old laptops, phone chargers, and batteries contain hazardous chemicals like lead and mercury. When dumped in regular landfills, these leach into groundwater. KarmaVer$e partners with R2 certified recyclers to ensure your tech is broken down safely.
           </Text>
 
           {/* Engagement Footer */}
@@ -65,12 +65,12 @@ export function ArticleDetailScreen({ route, navigation }: any) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
   safeArea: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16, maxWidth: 800, width: '100%', alignSelf: 'center' },
   backBtn: { padding: 8, backgroundColor: 'white', borderRadius: 12, elevation: 1 },
   headerActions: { flexDirection: 'row', gap: 12 },
   actionBtn: { padding: 8, backgroundColor: 'white', borderRadius: 12, elevation: 1 },
-  
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 60, paddingTop: 10 },
+
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 60, paddingTop: 10, maxWidth: 800, width: '100%', alignSelf: 'center' },
   categoryTag: { color: '#0284c7', fontSize: 12, fontWeight: '800', letterSpacing: 1, marginBottom: 12 },
   title: { fontSize: 28, fontWeight: '800', color: '#0f172a', lineHeight: 36, marginBottom: 16 },
   meta: { fontSize: 13, color: '#64748b', fontWeight: '600', marginBottom: 24 },

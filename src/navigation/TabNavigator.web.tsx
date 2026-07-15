@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { Home, PackageCheck, Wallet, ShoppingBag, Bell, Leaf, User } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
+import { Home, PackageCheck, Wallet, ShoppingBag, Bell, User } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 
@@ -78,8 +78,7 @@ function TopNavbar({ state, navigation }: any) {
     <View style={s.navOuter}>
       <View style={s.nav}>
         <View style={s.navLeft}>
-          <View style={s.navLogo}><Leaf size={18} color="white" /></View>
-          <Text style={s.navBrand}>KarmaCoins XP</Text>
+          <Image source={require('../../assets/logo.png')} style={{ height: 48, width: 76, resizeMode: 'contain' }} />
         </View>
 
         <View style={s.navTabs}>

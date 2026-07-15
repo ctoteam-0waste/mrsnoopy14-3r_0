@@ -1,12 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions, Image, Linking
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
-  Leaf, Truck, Gamepad2, Gift, Star, Shield, ChevronRight,
+  Truck, Gamepad2, Gift, Star, Shield, ChevronRight,
   Recycle, Users, Coins, ArrowRight, Smartphone, CheckCircle2,
-  Package, Clock, BookOpen, Zap
+  Package, Clock, BookOpen, Zap, Mail, Phone, MapPin
 } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 
@@ -14,9 +14,15 @@ const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
 const MAX = 1100;
 
-export function SplashScreen({ navigation }: any) {
+export function SplashScreen({ navigation, route }: any) {
   const fadeIn = useRef(new Animated.Value(0)).current;
   const slideUp = useRef(new Animated.Value(40)).current;
+  const scrollRef = useRef<ScrollView>(null);
+  const sectionY = useRef({ howItWorks: 0, features: 0, rewards: 0 });
+
+  const scrollToSection = (key: 'howItWorks' | 'features' | 'rewards') => {
+    scrollRef.current?.scrollTo({ y: sectionY.current[key], animated: true });
+  };
 
   useEffect(() => {
     Animated.parallel([
@@ -25,22 +31,67 @@ export function SplashScreen({ navigation }: any) {
     ]).start();
   }, []);
 
+  // Arriving from a Quick Links entry point (e.g. WebFooter) with a target section —
+  // wait a tick for onLayout to populate sectionY before scrolling to it.
+  useEffect(() => {
+    const target = route?.params?.scrollTo as 'howItWorks' | 'features' | 'rewards' | undefined;
+    if (!target) return;
+    const t = setTimeout(() => scrollToSection(target), 300);
+    return () => clearTimeout(t);
+  }, [route?.params?.scrollTo]);
+
   return (
     <View style={s.root}>
-      <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
-
-        {/* ── NAVBAR ── */}
-        <View style={s.navOuter}>
-          <View style={[s.nav, isMobile && { paddingHorizontal: 16 }]}>
-            <View style={s.navLeft}>
-              <View style={s.navLogo}><Leaf size={18} color="#052e16" /></View>
-              <Text style={s.navTitle}>KarmaCoins XP</Text>
+      {/* ── NAV BAR ── */}
+      <View style={s.navBar}>
+        <View style={[s.navInner, isMobile && { paddingHorizontal: 20 }]}>
+          <TouchableOpacity
+            onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
+            activeOpacity={0.8}
+            style={s.navLogoRow}
+          >
+            {/* Icon and wordmark are separate crops of the same source logo, laid
+                out the same way as the original artwork (icon left, wordmark on
+                top, tagline underneath) — the tagline is real text here instead
+                of the tiny raster copy, so it stays crisp at navbar scale. */}
+            <Image source={require('../../assets/logo-icon.png')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 40, height: 42 }]} />
+            <View>
+              <Image source={require('../../assets/logo-wordmark.png')} resizeMode="contain" style={[s.navWordmarkImg, isMobile && { width: 108, height: 20 }]} />
+              {!isMobile && (
+                <Text style={s.navTagline}>
+                  <Text style={{ color: '#86efac' }}>EARN</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.35)' }}>  •  </Text>
+                  <Text style={{ color: '#86efac' }}>IMPACT</Text>
+                  <Text style={{ color: 'rgba(255,255,255,0.35)' }}>  •  </Text>
+                  <Text style={{ color: '#fbbf24' }}>ELEVATE</Text>
+                </Text>
+              )}
             </View>
-            <TouchableOpacity style={s.navLoginBtn} onPress={() => navigation.navigate('Login')}>
-              <Text style={s.navLoginText}>Login</Text>
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
+
+          {!isMobile && (
+            <View style={s.navTabs}>
+              <TouchableOpacity onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}>
+                <Text style={s.navTabText}>Home</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => scrollToSection('howItWorks')}>
+                <Text style={s.navTabText}>How it works</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => scrollToSection('features')}>
+                <Text style={s.navTabText}>Features</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => scrollToSection('rewards')}>
+                <Text style={s.navTabText}>Rewards</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}>
+                <Text style={s.navTabText}>Contact</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
+      </View>
+
+      <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
 
         {/* ── HERO ── */}
         <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={s.hero}>
@@ -56,10 +107,10 @@ export function SplashScreen({ navigation }: any) {
             </View>
 
             <Text style={[s.heroTitle, isMobile && { fontSize: 36 }]}>
-              Recycle your waste.{'\n'}Earn real rewards.
+              Turn your waste{'\n'}into KarmaCoins XP.
             </Text>
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
-              Schedule free waste pickups from your doorstep, earn Karma Coins for every kg recycled, and redeem exciting eco-rewards.
+              India's first circular economy rewards platform — schedule free doorstep pickups for plastic, paper, metal, e-waste & more. Earn real rewards for every kg you recycle.
             </Text>
 
             {/* CTA */}
@@ -68,9 +119,10 @@ export function SplashScreen({ navigation }: any) {
                 <Text style={s.ctaPrimaryText}>Get started free</Text>
                 <ArrowRight size={18} color="#052e16" />
               </TouchableOpacity>
-              <TouchableOpacity style={s.ctaSecondary}>
+              <TouchableOpacity style={s.ctaSecondary} activeOpacity={1}>
                 <Smartphone size={16} color="#4ade80" />
                 <Text style={s.ctaSecondaryText}>Download app</Text>
+                <Text style={s.ctaSecondaryBadge}>Coming soon</Text>
               </TouchableOpacity>
             </View>
 
@@ -78,31 +130,31 @@ export function SplashScreen({ navigation }: any) {
             <View style={[s.trustRow, isMobile && { flexDirection: 'column', gap: 12 }]}>
               <View style={s.trustItem}>
                 <Users size={16} color="#4ade80" />
-                <Text style={s.trustText}>10,000+ users</Text>
+                <Text style={s.trustText}>1.85 Lakh+ citizens reached</Text>
               </View>
               <View style={s.trustItem}>
                 <Package size={16} color="#4ade80" />
-                <Text style={s.trustText}>50,000+ pickups</Text>
+                <Text style={s.trustText}>100% free pickup service</Text>
               </View>
               <View style={s.trustItem}>
-                <Star size={16} color="#fbbf24" />
-                <Text style={s.trustText}>4.8 rating</Text>
+                <Coins size={16} color="#4ade80" />
+                <Text style={s.trustText}>Earn KarmaCoins XP on every pickup</Text>
               </View>
             </View>
           </Animated.View>
         </LinearGradient>
 
         {/* ── HOW IT WORKS ── */}
-        <View style={s.section}>
+        <View style={s.section} onLayout={(e) => { sectionY.current.howItWorks = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>HOW IT WORKS</Text>
             <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Start recycling in 3 simple steps</Text>
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
               {[
-                { num: '1', icon: Truck, color: '#16a34a', bg: '#f0fdf4', title: 'Schedule pickup', desc: 'Choose your waste type, pick a date & time slot. Our app does the rest.' },
-                { num: '2', icon: Shield, color: '#0891b2', bg: '#ecfeff', title: 'Agent collects', desc: 'A verified agent arrives at your door, weighs items & collects safely.' },
-                { num: '3', icon: Coins, color: '#d97706', bg: '#fffbeb', title: 'Earn Karma Coins', desc: 'Get instant coins for every kg. Redeem for rewards or donate.' },
+                { num: '1', icon: Truck, color: '#16a34a', bg: '#f0fdf4', title: 'Schedule a free pickup', desc: 'Choose your waste type, pick a date & time slot. Our verified agent comes to your door.' },
+                { num: '2', icon: Shield, color: '#0891b2', bg: '#ecfeff', title: 'Agent collects & verifies', desc: 'Agent weighs items on the spot, verifies waste type, and completes the collection safely.' },
+                { num: '3', icon: Coins, color: '#d97706', bg: '#fffbeb', title: 'Earn KarmaCoins XP instantly', desc: 'Coins are credited to your wallet immediately after verification. Redeem anytime.' },
               ].map((step, i) => (
                 <View key={i} style={s.stepCard}>
                   <View style={[s.stepIconBg, { backgroundColor: step.bg }]}>
@@ -118,7 +170,7 @@ export function SplashScreen({ navigation }: any) {
         </View>
 
         {/* ── FEATURES ── */}
-        <View style={[s.section, { backgroundColor: '#f8fafc' }]}>
+        <View style={[s.section, { backgroundColor: '#f8fafc' }]} onLayout={(e) => { sectionY.current.features = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>FEATURES</Text>
             <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Everything you need to go green</Text>
@@ -126,10 +178,10 @@ export function SplashScreen({ navigation }: any) {
             <View style={[s.featGrid, isMobile && { flexDirection: 'column' }]}>
               {[
                 { icon: Truck, color: '#16a34a', title: 'Free doorstep pickup', desc: 'Schedule anytime, our agents come to you' },
-                { icon: Gamepad2, color: '#7c3aed', title: 'Daily eco-quiz', desc: 'Play daily quizzes and earn bonus coins' },
+                { icon: Gamepad2, color: '#7c3aed', title: 'Daily eco-quiz', desc: 'Test your green IQ. Earn KarmaCoins XP daily.' },
                 { icon: Recycle, color: '#0891b2', title: '8 waste categories', desc: 'Plastic, paper, metal, e-waste, textile & more' },
                 { icon: Gift, color: '#e11d48', title: 'Real rewards', desc: 'Redeem coins for products or donate to causes' },
-                { icon: Users, color: '#ea580c', title: 'Refer & earn', desc: 'Invite friends and earn bonus Karma Coins' },
+                { icon: Users, color: '#ea580c', title: 'Refer & earn', desc: 'Both you and your friend get 1,000 KarmaCoins XP instantly' },
                 { icon: Zap, color: '#d97706', title: 'Instant credit', desc: 'Coins credited immediately after verification' },
               ].map((feat, i) => (
                 <View key={i} style={[s.featCard, isMobile && { width: '100%' }]}>
@@ -145,11 +197,11 @@ export function SplashScreen({ navigation }: any) {
         </View>
 
         {/* ── COIN BANNER ── */}
-        <LinearGradient colors={['#052e16', '#15803d']} style={s.coinBanner}>
+        <LinearGradient colors={['#052e16', '#15803d']} style={s.coinBanner} onLayout={(e) => { sectionY.current.rewards = e.nativeEvent.layout.y; }}>
           <View style={[s.container, s.coinContent, isMobile && { flexDirection: 'column', paddingHorizontal: 20 }]}>
             <View style={{ flex: 1 }}>
-              <Text style={[s.coinTitle, isMobile && { fontSize: 28 }]}>Start earning Karma Coins today</Text>
-              <Text style={s.coinSub}>Join thousands of eco-warriors making a real difference. Every pickup counts.</Text>
+              <Text style={[s.coinTitle, isMobile && { fontSize: 28 }]}>Be part of India's circular economy</Text>
+              <Text style={s.coinSub}>Turn your household waste into KarmaCoins XP — schedule a free pickup and start making a real difference today.</Text>
               <TouchableOpacity style={s.coinBtn} onPress={() => navigation.navigate('Login')}>
                 <Text style={s.coinBtnText}>Create free account</Text>
                 <ArrowRight size={18} color="#052e16" />
@@ -163,35 +215,65 @@ export function SplashScreen({ navigation }: any) {
 
         {/* ── FOOTER ── */}
         <View style={s.footer}>
-          <View style={[s.container, s.footerContent, isMobile && { flexDirection: 'column', gap: 20, paddingHorizontal: 20 }]}>
-            <View>
+          <View style={[s.container, s.footerContent, isMobile && { flexDirection: 'column', gap: 28, paddingHorizontal: 20 }]}>
+            <View style={[s.footerBrand, isMobile && { width: '100%' }]}>
               <View style={s.footerLogoRow}>
-                <View style={s.navLogo}><Leaf size={16} color="#052e16" /></View>
-                <Text style={[s.navTitle, { fontSize: 16 }]}>KarmaCoins XP</Text>
+                <Image source={require('../../assets/logo.png')} resizeMode="contain" style={s.footerLogoImg} />
               </View>
-              <Text style={s.footerDesc}>Turning waste into rewards,{'\n'}one pickup at a time.</Text>
+              <Text style={s.footerDesc}>
+                3R Zero Waste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its doorstep recycling rewards app.
+              </Text>
+              <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/')}>
+                <Text style={[s.footerLink, { marginTop: 10, color: '#4ade80', fontWeight: '700' }]}>0waste.co.in ↗</Text>
+              </TouchableOpacity>
             </View>
-            <View style={s.footerLinks}>
-              <Text style={s.footerLinkTitle}>Product</Text>
-              <Text style={s.footerLink}>How it works</Text>
-              <Text style={s.footerLink}>Features</Text>
-              <Text style={s.footerLink}>Pricing</Text>
-            </View>
-            <View style={s.footerLinks}>
-              <Text style={s.footerLinkTitle}>Company</Text>
-              <Text style={s.footerLink}>About us</Text>
-              <Text style={s.footerLink}>Careers</Text>
-              <Text style={s.footerLink}>Contact</Text>
-            </View>
-            <View style={s.footerLinks}>
-              <Text style={s.footerLinkTitle}>Legal</Text>
-              <Text style={s.footerLink}>Privacy policy</Text>
-              <Text style={s.footerLink}>Terms of service</Text>
-              <Text style={s.footerLink}>Refund policy</Text>
+
+            <View style={[s.footerLinksRow, isMobile && { flexDirection: 'column', gap: 24 }]}>
+              <View style={s.footerLinks}>
+                <Text style={s.footerLinkTitle}>Product</Text>
+                <TouchableOpacity onPress={() => scrollToSection('howItWorks')}>
+                  <Text style={s.footerLink}>How it works</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => scrollToSection('features')}>
+                  <Text style={s.footerLink}>Features</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => scrollToSection('rewards')}>
+                  <Text style={s.footerLink}>Rewards</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={s.footerLinks}>
+                <Text style={s.footerLinkTitle}>Company</Text>
+                <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/about-us/')}>
+                  <Text style={s.footerLink}>About us</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>
+                  <Text style={s.footerLink}>Privacy policy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms' })}>
+                  <Text style={s.footerLink}>Terms of service</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={s.footerLinks}>
+                <Text style={s.footerLinkTitle}>Contact us</Text>
+                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('mailto:cto.team@0waste.co.in')}>
+                  <Mail size={14} color="#4ade80" />
+                  <Text style={s.footerLink}>cto.team@0waste.co.in</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('tel:+917093198828')}>
+                  <Phone size={14} color="#4ade80" />
+                  <Text style={s.footerLink}>+91 70931 98828</Text>
+                </TouchableOpacity>
+                <View style={s.footerContactRow}>
+                  <MapPin size={14} color="#4ade80" style={{ marginTop: 2 }} />
+                  <Text style={[s.footerLink, { flex: 1 }]}>Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503</Text>
+                </View>
+              </View>
             </View>
           </View>
           <View style={[s.container, s.footerBottom, isMobile && { paddingHorizontal: 20 }]}>
-            <Text style={s.footerCopy}>© 2026 KarmaCoins XP by 3R Zero Waste. All rights reserved.</Text>
+            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.</Text>
           </View>
         </View>
 
@@ -203,14 +285,19 @@ export function SplashScreen({ navigation }: any) {
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#ffffff' },
 
-  // Nav
-  navOuter: { backgroundColor: '#052e16', paddingTop: 8 },
-  nav: { maxWidth: MAX, width: '100%', alignSelf: 'center', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 32, paddingVertical: 14 },
-  navLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  navLogo: { width: 32, height: 32, borderRadius: 8, backgroundColor: '#4ade80', alignItems: 'center', justifyContent: 'center' },
-  navTitle: { color: 'white', fontSize: 18, fontWeight: '900', letterSpacing: -0.5 },
-  navLoginBtn: { backgroundColor: 'rgba(255,255,255,0.1)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)', borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
-  navLoginText: { color: 'white', fontWeight: '700', fontSize: 14 },
+  // Nav bar — dark background matches the logo lockup, which is a white/light
+  // wordmark on a transparent background and disappears on light surfaces.
+  navBar: {
+    backgroundColor: '#052e16', borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.08)', zIndex: 10,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 4,
+  },
+  navInner: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  navLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  navIconImg: { width: 62, height: 65 },
+  navWordmarkImg: { width: 92, height: 17 },
+  navTagline: { fontSize: 8.5, fontWeight: '800', letterSpacing: 0.8, marginTop: 2 },
+  navTabs: { flexDirection: 'row', alignItems: 'center', gap: 28 },
+  navTabText: { color: 'rgba(255,255,255,0.75)', fontSize: 14, fontWeight: '700' },
 
   // Hero
   hero: { paddingBottom: 60, minHeight: 500 },
@@ -226,6 +313,7 @@ const s = StyleSheet.create({
   ctaPrimaryText: { color: '#052e16', fontWeight: '900', fontSize: 16 },
   ctaSecondary: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: 'rgba(255,255,255,0.2)', borderRadius: 14, paddingHorizontal: 24, paddingVertical: 16 },
   ctaSecondaryText: { color: '#4ade80', fontWeight: '700', fontSize: 15 },
+  ctaSecondaryBadge: { color: 'rgba(255,255,255,0.5)', fontWeight: '600', fontSize: 11 },
   trustRow: { flexDirection: 'row', gap: 28 },
   trustItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   trustText: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '600' },
@@ -263,12 +351,16 @@ const s = StyleSheet.create({
 
   // Footer
   footer: { backgroundColor: '#0f172a', paddingTop: 50 },
-  footerContent: { flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 40 },
+  footerContent: { flexDirection: 'row', gap: 32, paddingBottom: 40 },
+  footerBrand: { flex: 1.2 },
   footerLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  footerDesc: { color: '#94a3b8', fontSize: 14, fontWeight: '500', lineHeight: 22 },
-  footerLinks: { gap: 10 },
+  footerLogoImg: { width: 150, height: 100 },
+  footerDesc: { color: '#94a3b8', fontSize: 14, fontWeight: '500', lineHeight: 22, maxWidth: 320 },
+  footerLinksRow: { flex: 2, flexDirection: 'row', justifyContent: 'space-between' },
+  footerLinks: { gap: 12, flex: 1 },
   footerLinkTitle: { color: 'white', fontSize: 14, fontWeight: '800', marginBottom: 4 },
   footerLink: { color: '#94a3b8', fontSize: 13, fontWeight: '500' },
+  footerContactRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8 },
   footerBottom: { borderTopWidth: 1, borderTopColor: '#1e293b', paddingVertical: 20 },
   footerCopy: { color: '#64748b', fontSize: 12, fontWeight: '500' },
 });

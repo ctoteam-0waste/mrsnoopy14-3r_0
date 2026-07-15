@@ -42,10 +42,12 @@ export const authService = {
     }
   },
 
-  // Signup / Register — otpToken from verifyOtp required
-  register: async (data: { name: string, email: string, phone: string, password: string, otpToken: string }) => {
+  // Signup / Register — otpToken from verifyOtp required; referralCode optional (omit if blank)
+  register: async (data: { name: string, email: string, phone: string, password: string, otpToken: string, referralCode?: string }) => {
     try {
-      const response = await api.post('/api/v1/auth/register', data);
+      const payload: any = { ...data };
+      if (!payload.referralCode) delete payload.referralCode;
+      const response = await api.post('/api/v1/auth/register', payload);
       return response.data;
     } catch (error: any) {
       console.error('Register Error:', error?.response?.data || error);
@@ -67,7 +69,7 @@ export const authService = {
   // Google Sign-In — send idToken to backend, receive our JWT
   googleLogin: async (idToken: string) => {
     try {
-      const response = await api.post('/api/v1/auth/google', { idToken });
+      const response = await api.post('/api/v1/auth/google-login', { idToken });
       const token = response.data?.data?.token || response.data?.token;
       if (!token) throw new Error('No token received');
       await AsyncStorage.setItem('userToken', token);

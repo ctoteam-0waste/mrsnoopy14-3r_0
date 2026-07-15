@@ -1,11 +1,16 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { showAlert } from '../utils/alert';
+import { showRedeemInfoOnce } from '../utils/redeemInfo';
+import { getStableUserSuffix } from '../utils/userId';
+import { AddressSearch } from '../components/shared/AddressSearch';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, TriangleAlert, FileText, Magnet, Droplets, Wine, Smartphone, Shirt, Leaf } from 'lucide-react-native';
+import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, FileText, Magnet, Droplets, Wine, Smartphone } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, StickyNote, Database, Cog, Utensils, Activity, Sparkles, Laptop, Cable, Tv, Scissors, Apple, Trees, Battery, PaintBucket, Trash2 } from 'lucide-react-native';
+import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
 import { profileService } from '../services/profile';
 import * as Location from 'expo-location';
@@ -15,53 +20,110 @@ const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
 const CARD_WIDTH = (Math.min(width, 900) - 40 - (CARD_MARGIN * 2 * COLS)) / COLS;
 
-// Re-using the premium catalog from old StoreScreen
+// Waste catalogue — 9 categories. category/subCategory strings are sent to the
+// backend exactly as written here (Title Case, matched by exact string).
 const CATEGORIES = [
-  { id: '1', title: 'Plastic waste', color: '#0ea5e9', icon: Droplets },
-  { id: '2', title: 'Paper waste', color: '#84cc16', icon: FileText },
-  { id: '3', title: 'Metal waste', color: '#64748b', icon: Magnet },
-  { id: '4', title: 'Glass waste', color: '#10b981', icon: Wine },
-  { id: '5', title: 'E-waste', color: '#14b8a6', icon: Smartphone },
-  { id: '6', title: 'Textile waste', color: '#6366f1', icon: Shirt },
-  { id: '7', title: 'Organic', color: '#eab308', icon: Leaf },
-  { id: '8', title: 'Hazardous', color: '#ef4444', icon: TriangleAlert },
+  { id: '1', name: 'Phones & Computers', color: '#0ea5e9', icon: Smartphone },
+  { id: '2', name: 'Mixed e-waste', color: '#14b8a6', icon: Cable },
+  { id: '3', name: 'Glass', color: '#10b981', icon: Wine },
+  { id: '4', name: 'Paper', color: '#84cc16', icon: FileText },
+  { id: '5', name: 'Appliances & TV', color: '#8b5cf6', icon: Tv },
+  { id: '6', name: 'Batteries', color: '#ef4444', icon: Battery },
+  { id: '7', name: 'Shoes', color: '#f59e0b', icon: ShoppingBag },
+  { id: '8', name: 'Metal', color: '#64748b', icon: Magnet },
+  { id: '9', name: 'Plastic', color: '#3b82f6', icon: Droplets },
 ];
 
-const ALL_ITEMS = [
-  { id: 'p1', catId: '1', name: 'PET Bottle', unit: 'per kg', coins: 12, itemIcon: CupSoda },
-  { id: 'p2', catId: '1', name: 'Milk Packets', unit: 'per kg', coins: 8, itemIcon: PackageOpen },
-  { id: 'p3', catId: '1', name: 'Containers', unit: 'per kg', coins: 10, itemIcon: Archive },
-  { id: 'p4', catId: '1', name: 'Carry Bags', unit: 'per kg', coins: 5, itemIcon: ShoppingBag },
-  
-  { id: 'pa1', catId: '2', name: 'Newspaper', unit: 'per kg', coins: 15, itemIcon: NewsIcon },
-  { id: 'pa2', catId: '2', name: 'Books', unit: 'per kg', coins: 12, itemIcon: BookOpen },
-  { id: 'pa3', catId: '2', name: 'Cardboard', unit: 'per kg', coins: 10, itemIcon: PackageOpen },
-  { id: 'pa4', catId: '2', name: 'Office Paper', unit: 'per kg', coins: 14, itemIcon: StickyNote },
-  
-  { id: 'm1', catId: '3', name: 'Aluminium Can', unit: 'per kg', coins: 35, itemIcon: Database },
-  { id: 'm2', catId: '3', name: 'Iron Scrap', unit: 'per kg', coins: 25, itemIcon: Cog },
-  { id: 'm3', catId: '3', name: 'Steel Utensils', unit: 'per kg', coins: 30, itemIcon: Utensils },
-  { id: 'm4', catId: '3', name: 'Copper Wire', unit: 'per kg', coins: 80, itemIcon: Activity },
-  
-  { id: 'g1', catId: '4', name: 'Glass Bottle', unit: 'per kg', coins: 5, itemIcon: Wine },
-  { id: 'g2', catId: '4', name: 'Broken Glass', unit: 'per kg', coins: 3, itemIcon: Sparkles },
-  
-  { id: 'e1', catId: '5', name: 'Mobile Phone', unit: 'per piece', coins: 50, itemIcon: Smartphone },
-  { id: 'e2', catId: '5', name: 'Laptop', unit: 'per piece', coins: 200, itemIcon: Laptop },
-  { id: 'e3', catId: '5', name: 'Charger & Cables', unit: 'per kg', coins: 40, itemIcon: Cable },
-  { id: 'e4', catId: '5', name: 'Small Appliances', unit: 'per item', coins: 60, itemIcon: Tv },
-  
-  { id: 't1', catId: '6', name: 'Old Clothes', unit: 'per kg', coins: 10, itemIcon: Shirt },
-  { id: 't2', catId: '6', name: 'Fabric Waste', unit: 'per kg', coins: 8, itemIcon: Scissors },
-  
-  { id: 'o1', catId: '7', name: 'Food Waste', unit: 'per kg', coins: 2, itemIcon: Apple },
-  { id: 'o2', catId: '7', name: 'Vegetable Peels', unit: 'per kg', coins: 2, itemIcon: Leaf },
-  { id: 'o3', catId: '7', name: 'Garden Waste', unit: 'per kg', coins: 3, itemIcon: Trees },
-  
-  { id: 'h1', catId: '8', name: 'Batteries', unit: 'per piece', coins: 20, itemIcon: Battery },
-  { id: 'h2', catId: '8', name: 'Paint Containers', unit: 'per item', coins: 10, itemIcon: PaintBucket },
-  { id: 'h3', catId: '8', name: 'Sanitary Waste', unit: 'per kg', coins: 0, itemIcon: Trash2 },
+const CONDITIONS = ['Working', 'Not Working'] as const;
+type Condition = typeof CONDITIONS[number];
+
+type CatalogueItem = {
+  id: string;
+  catId: string;
+  subCategory: string;             // exact backend name
+  unit: 'kg' | 'piece' | 'pickup';
+  coins?: number;                  // items without a condition dropdown
+  coinsWorking?: number;           // condition items
+  coinsNotWorking?: number;        // condition items
+  hasCondition?: boolean;
+  minQty?: number;                 // e.g. Battery pickup = 10
+  itemIcon: any;
+  // Real product photo. Accepts a local require(...) or a { uri } remote image.
+  // When absent, the card falls back to itemIcon.
+  image?: any;
+};
+
+// Items with a Working / Not Working dropdown carry coinsWorking + coinsNotWorking.
+// Everything else carries a single coins value. Broken glass is not accepted, so
+// it is intentionally left out of the catalogue.
+// `image` (optional) shows a real product photo; when absent the card uses itemIcon.
+const ALL_ITEMS: CatalogueItem[] = [
+  // 1. Phones & Computers (piece, condition)
+  { id: 'pc1', catId: '1', subCategory: 'Laptop', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 300, itemIcon: Laptop, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lenovo_G500s_laptop-2905.jpg/500px-Lenovo_G500s_laptop-2905.jpg' } },
+  { id: 'pc2', catId: '1', subCategory: 'Desktop', unit: 'piece', hasCondition: true, coinsWorking: 200, coinsNotWorking: 100, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/HP_ProDesk_600_G1_Tower_PC-001.jpg/500px-HP_ProDesk_600_G1_Tower_PC-001.jpg' } },
+  { id: 'pc3', catId: '1', subCategory: 'Monitor (LCD/LED)', unit: 'piece', hasCondition: true, coinsWorking: 400, coinsNotWorking: 100, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Dell_Professional_P2212H-9899_%28cropped%29.jpg/500px-Dell_Professional_P2212H-9899_%28cropped%29.jpg' } },
+  { id: 'pc4', catId: '1', subCategory: 'Printer', unit: 'piece', hasCondition: true, coinsWorking: 600, coinsNotWorking: 100, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/HP_Deskjet_All_in_One_Printer.jpg/500px-HP_Deskjet_All_in_One_Printer.jpg' } },
+  { id: 'pc5', catId: '1', subCategory: 'Tablet', unit: 'piece', hasCondition: true, coinsWorking: 200, coinsNotWorking: 100, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Samsung_Galaxy_Tab_A9%2B_tablet.jpg/500px-Samsung_Galaxy_Tab_A9%2B_tablet.jpg' } },
+  { id: 'pc6', catId: '1', subCategory: 'Smartphone-branded', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 100, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/IPhone_7_-_A1778_Rose_Gold_-_Back_%28retouch%29_%28white_BG_no_shadow%29.jpg/500px-IPhone_7_-_A1778_Rose_Gold_-_Back_%28retouch%29_%28white_BG_no_shadow%29.jpg' } },
+  { id: 'pc7', catId: '1', subCategory: 'Smartphone-non-branded', unit: 'piece', hasCondition: true, coinsWorking: 500, coinsNotWorking: 100, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Blackview_A60_Smartphone_Android_mobile_phone_front_face_logged_in_screen.jpg/500px-Blackview_A60_Smartphone_Android_mobile_phone_front_face_logged_in_screen.jpg' } },
+  { id: 'pc8', catId: '1', subCategory: 'Keyboard', unit: 'piece', hasCondition: true, coinsWorking: 10, coinsNotWorking: 8, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Wireless_Computer_Keyboard.jpg/500px-Wireless_Computer_Keyboard.jpg' } },
+  { id: 'pc9', catId: '1', subCategory: 'Mouse', unit: 'piece', hasCondition: true, coinsWorking: 10, coinsNotWorking: 8, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wired_Mouse_with_white_background.jpg/500px-Wired_Mouse_with_white_background.jpg' } },
+  { id: 'pc10', catId: '1', subCategory: 'Touchpad phone', unit: 'piece', hasCondition: true, coinsWorking: 20, coinsNotWorking: 10, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/5_different_Smartphones.jpg/500px-5_different_Smartphones.jpg' } },
+
+  // 2. Mixed e-waste (kg)
+  { id: 'me1', catId: '2', subCategory: 'Router, camera, HDD, etc', unit: 'kg', coins: 20, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
+
+  // 3. Glass (kg) — Broken glass is not accepted, so it is omitted
+  { id: 'gl1', catId: '3', subCategory: 'Beer bottle', unit: 'kg', coins: 2, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Beer_bottles_2018_G1.jpg/500px-Beer_bottles_2018_G1.jpg' } },
+  { id: 'gl2', catId: '3', subCategory: 'Soft drink bottle', unit: 'kg', coins: 2, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg/500px-Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg' } },
+  { id: 'gl3', catId: '3', subCategory: 'Wine bottle', unit: 'kg', coins: 2, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Collection_Sparkling_wine_white_Lion_Gri.jpg' } },
+  { id: 'gl4', catId: '3', subCategory: 'Glass jar', unit: 'kg', coins: 2, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png/500px-A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png' } },
+  { id: 'gl5', catId: '3', subCategory: 'Other', unit: 'kg', coins: 1, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Amber_Glass_Flask.JPG/500px-Amber_Glass_Flask.JPG' } },
+
+  // 4. Paper (kg)
+  { id: 'pa1', catId: '4', subCategory: 'Newspaper', unit: 'kg', coins: 10, itemIcon: NewsIcon, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/A_stack_of_newspapers.jpg/500px-A_stack_of_newspapers.jpg' } },
+  { id: 'pa2', catId: '4', subCategory: 'Cardboard', unit: 'kg', coins: 10, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cardboard_box.png/500px-Cardboard_box.png' } },
+  { id: 'pa3', catId: '4', subCategory: 'Magazines', unit: 'kg', coins: 8, itemIcon: BookOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gfp-stack-of-magazines-and-books.jpg/500px-Gfp-stack-of-magazines-and-books.jpg' } },
+  { id: 'pa4', catId: '4', subCategory: 'Other', unit: 'kg', coins: 4, itemIcon: FileText, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/10000_papers_from_ESO_data_%289740706856%29.jpg/500px-10000_papers_from_ESO_data_%289740706856%29.jpg' } },
+
+  // 5. Appliances & TV (piece, condition)
+  { id: 'ap1', catId: '5', subCategory: 'Television-below 40"', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 200, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/9/91/1990s_Television_Set.jpg' } },
+  { id: 'ap2', catId: '5', subCategory: 'Television-above 40"', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 250, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Interactive_LED_Flat_Panel_Display.png/500px-Interactive_LED_Flat_Panel_Display.png' } },
+  { id: 'ap3', catId: '5', subCategory: 'Fridge', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 500, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg/500px-Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg' } },
+  { id: 'ap4', catId: '5', subCategory: 'Large Appliance', unit: 'piece', hasCondition: true, coinsWorking: 1500, coinsNotWorking: 250, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/A_collection_of_washing_machines_in_a_laundry_shop.jpg/500px-A_collection_of_washing_machines_in_a_laundry_shop.jpg' } },
+
+  // 6. Batteries (pickup) — minimum 10 batteries
+  { id: 'ba1', catId: '6', subCategory: 'Battery pickup', unit: 'pickup', coins: 2, minQty: 10, itemIcon: Battery, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Three_AA_batteries_on_a_white_background.JPG/500px-Three_AA_batteries_on_a_white_background.JPG' } },
+
+  // 7. Shoes (piece)
+  { id: 'sh1', catId: '7', subCategory: 'Branded', unit: 'piece', coins: 200, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg/500px-NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg' } },
+  { id: 'sh2', catId: '7', subCategory: 'Non-branded', unit: 'piece', coins: 150, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Leather_shoes_4_man.JPG/500px-Leather_shoes_4_man.JPG' } },
+
+  // 8. Metal (kg)
+  { id: 'mt1', catId: '8', subCategory: 'Aluminium', unit: 'kg', coins: 20, itemIcon: Database, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Beverage_cans.jpg/500px-Beverage_cans.jpg' } },
+  { id: 'mt2', catId: '8', subCategory: 'Copper wire', unit: 'kg', coins: 30, itemIcon: Activity, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg/500px-Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg' } },
+  { id: 'mt3', catId: '8', subCategory: 'Iron', unit: 'kg', coins: 10, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png/500px-Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png' } },
+  { id: 'mt4', catId: '8', subCategory: 'Utensils', unit: 'kg', coins: 10, itemIcon: Utensils, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Stainless_Steel_Utensils_Store_%283907497472%29.jpg/500px-Stainless_Steel_Utensils_Store_%283907497472%29.jpg' } },
+  { id: 'mt5', catId: '8', subCategory: 'Other', unit: 'kg', coins: 10, itemIcon: Magnet, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/157series_scrapped.jpg/500px-157series_scrapped.jpg' } },
+
+  // 9. Plastic (kg)
+  { id: 'pl1', catId: '9', subCategory: 'PET Bottles', unit: 'kg', coins: 10, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg/500px-1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg' } },
+  { id: 'pl2', catId: '9', subCategory: 'Hard (HDPE, LDPE, PP)', unit: 'kg', coins: 15, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Purple_plastic_bucket.jpg' } },
+  { id: 'pl3', catId: '9', subCategory: 'Thermocol', unit: 'kg', coins: 10, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Expanded_polystyrene_foam_dunnage.jpg/500px-Expanded_polystyrene_foam_dunnage.jpg' } },
+  { id: 'pl4', catId: '9', subCategory: 'Other', unit: 'kg', coins: 1, itemIcon: Droplets, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Evian_Bottle.jpg/500px-Evian_Bottle.jpg' } },
 ];
+
+const unitLabel = (unit: string) => (unit === 'kg' ? 'per kg' : unit === 'piece' ? 'per piece' : 'per pickup');
+
+// A condition item stores each variant separately in the cart via a suffixed key.
+const condSuffix = (c: Condition) => (c === 'Working' ? 'W' : 'N');
+const makeCartKey = (item: CatalogueItem, cond: Condition) => (item.hasCondition ? `${item.id}__${condSuffix(cond)}` : item.id);
+const parseCartKey = (key: string): { id: string; condition?: Condition } => {
+  const [id, suf] = key.split('__');
+  return { id, condition: suf === 'W' ? 'Working' : suf === 'N' ? 'Not Working' : undefined };
+};
+const rateFor = (item: CatalogueItem, condition?: Condition) =>
+  item.hasCondition ? (condition === 'Not Working' ? item.coinsNotWorking || 0 : item.coinsWorking || 0) : item.coins || 0;
 
 const generateDates = () => {
   const dates = [];
@@ -92,14 +154,25 @@ const TIMES = [
   '06:00 PM - 09:00 PM'
 ];
 
+// Shows the product photo; if it fails to load, falls back to the category icon.
+function ItemImage({ image, Icon, color }: { image?: any; Icon: any; color: string }) {
+  const [failed, setFailed] = useState(false);
+  if (image && !failed) {
+    return <Image source={image} style={styles.cardImage} resizeMode="contain" onError={() => setFailed(true)} />;
+  }
+  return <Icon size={46} color={color} strokeWidth={1.5} opacity={0.8} />;
+}
+
 export function SchedulePickupScreen({ navigation }: any) {
   // Step Management
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  // Cart State { itemId: quantity }
+  // Cart State { cartKey: quantity } — cartKey encodes condition for dropdown items
   const [cart, setCart] = useState<Record<string, number>>({});
-  
+  // Selected Working / Not Working per condition item
+  const [itemCondition, setItemCondition] = useState<Record<string, Condition>>({});
+
   // UI States
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].id);
   const [selectedDate, setSelectedDate] = useState(DATES[0].fullDate);
@@ -109,7 +182,6 @@ export function SchedulePickupScreen({ navigation }: any) {
   const [userAddress, setUserAddress] = useState('');
   const [userCoordinates, setUserCoordinates] = useState<[number, number] | null>(null);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
-  const [editedAddress, setEditedAddress] = useState('');
 
   // Priority 1: Get real GPS coordinates from device
   useEffect(() => {
@@ -162,11 +234,12 @@ export function SchedulePickupScreen({ navigation }: any) {
     let totalItems = 0;
     let totalCoins = 0;
     
-    Object.entries(cart).forEach(([id, qty]) => {
+    Object.entries(cart).forEach(([key, qty]) => {
+      const { id, condition } = parseCartKey(key);
       const item = ALL_ITEMS.find(i => i.id === id);
       if (item) {
         totalItems += qty;
-        totalCoins += (item.coins * qty);
+        totalCoins += rateFor(item, condition) * qty;
       }
     });
 
@@ -177,40 +250,27 @@ export function SchedulePickupScreen({ navigation }: any) {
   const displayedItems = useMemo(() => ALL_ITEMS.filter(item => item.catId === activeCategory), [activeCategory]);
   const activeCatData = CATEGORIES.find(c => c.id === activeCategory);
 
-  const getBackendCategoryName = (catTitle: string) => {
-    const lower = catTitle.toLowerCase();
-    if (lower.includes('plastic')) return 'plastic';
-    if (lower.includes('metal')) return 'metal';
-    if (lower.includes('e-waste') || lower.includes('e-waste')) return 'e-waste';
-    if (lower.includes('paper')) return 'paper';
-    if (lower.includes('glass')) return 'glass';
-    if (lower.includes('textile')) return 'textile';
-    if (lower.includes('organic')) return 'organic';
-    if (lower.includes('hazardous')) return 'hazardous';
-    return 'other';
-  };
-
   const handleConfirmPickup = async () => {
     console.log('[Confirm Pickup] Pressed! Cart:', cart);
     console.log('[Confirm Pickup] userAddress State:', userAddress);
 
     if (Object.keys(cart).length === 0) {
-      Alert.alert("Empty cart", "Please add items to your cart first.");
+      showAlert("Empty cart", "Please add items to your cart first.");
       return;
     }
 
     if (!selectedTime) {
-      Alert.alert("Time slot required", "Please select a pickup time slot.");
+      showAlert("Time slot required", "Please select a pickup time slot.");
       return;
     }
 
-    if (!userCoordinates) {
-      Alert.alert("Location required", "Please allow location access so we can find an agent near you.", [{ text: "OK" }]);
+    if (!userCoordinates || typeof userCoordinates[0] !== 'number' || typeof userCoordinates[1] !== 'number' || Number.isNaN(userCoordinates[0]) || Number.isNaN(userCoordinates[1])) {
+      showAlert("Location required", "Please allow location access so we can find an agent near you.", [{ text: "OK" }]);
       return;
     }
 
     if (!userAddress || userAddress.trim().length === 0) {
-      Alert.alert(
+      showAlert(
         "Pickup address required",
         "Please save your home or office address in the Profile section before scheduling a pickup.",
         [
@@ -223,23 +283,18 @@ export function SchedulePickupScreen({ navigation }: any) {
 
     setIsLoading(true);
     try {
-      // Structure the categories array
+      // Structure the categories array — send category/subCategory exactly as in the
+      // catalogue, and condition only for Working/Not Working items (never null).
       const payloadCategories: any[] = [];
-      Object.entries(cart).forEach(([itemId]) => {
-        const item = ALL_ITEMS.find(i => i.id === itemId);
-        if (item) {
-          const categoryObj = CATEGORIES.find(c => c.id === item.catId);
-          if (categoryObj) {
-             // Add an entry for each quantity? Or just one entry per subCategory?
-             // Based on the mock, it seems it expects flat items. If user adds 2 laptops, 
-             // maybe we just push 2 entries, or backend handles it via order weight later. 
-             // We'll push one entry per distinct item type for now as the schema doesn't ask for quantity.
-             payloadCategories.push({
-               category: getBackendCategoryName(categoryObj.title),
-               subCategory: item.name
-             });
-          }
-        }
+      Object.keys(cart).forEach((key) => {
+        const { id, condition } = parseCartKey(key);
+        const item = ALL_ITEMS.find(i => i.id === id);
+        if (!item) return;
+        const categoryObj = CATEGORIES.find(c => c.id === item.catId);
+        if (!categoryObj) return;
+        const entry: any = { category: categoryObj.name, subCategory: item.subCategory };
+        if (item.hasCondition && condition) entry.condition = condition;
+        payloadCategories.push(entry);
       });
 
       const payload: any = {
@@ -261,11 +316,13 @@ export function SchedulePickupScreen({ navigation }: any) {
       const res = await bookingService.createBooking(payload);
       const createdBooking = res?.data || res;
       console.log('[Confirm Pickup] Created booking:', createdBooking);
-      
+
       setIsSubmitted(true);
+      const token = await AsyncStorage.getItem('userToken');
+      showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
       setTimeout(() => navigation.replace('OrderTracking', { booking: createdBooking }), 2500);
     } catch (error: any) {
-      Alert.alert(
+      showAlert(
         "Scheduling failed",
         error?.response?.data?.message || "Failed to schedule pickup. Please try again."
       );
@@ -297,14 +354,14 @@ export function SchedulePickupScreen({ navigation }: any) {
               return (
                 <LinearGradient key={cat.id} colors={[cat.color, cat.color + 'dd']} style={styles.filterChipActive} start={{ x:0, y:0 }} end={{ x:1, y:1 }}>
                   <Icon size={16} color="white" style={{ marginRight: 6 }} />
-                  <Text style={styles.filterTextActive}>{cat.title}</Text>
+                  <Text style={styles.filterTextActive}>{cat.name}</Text>
                 </LinearGradient>
               );
             }
             return (
               <TouchableOpacity key={cat.id} style={styles.filterChip} onPress={() => setActiveCategory(cat.id)}>
                 <Icon size={16} color="#64748b" style={{ marginRight: 6 }} />
-                <Text style={styles.filterText}>{cat.title}</Text>
+                <Text style={styles.filterText}>{cat.name}</Text>
               </TouchableOpacity>
             );
           })}
@@ -314,32 +371,59 @@ export function SchedulePickupScreen({ navigation }: any) {
       <ScrollView contentContainerStyle={styles.gridContent}>
         <View style={styles.gridContainer}>
           {displayedItems.map((item) => {
-            const qty = cart[item.id] || 0;
+            const hasCond = !!item.hasCondition;
+            const activeCond: Condition = itemCondition[item.id] || 'Working';
+            const key = makeCartKey(item, activeCond);
+            const qty = cart[key] || 0;
+            const addedAny = hasCond
+              ? ((cart[makeCartKey(item, 'Working')] || 0) + (cart[makeCartKey(item, 'Not Working')] || 0)) > 0
+              : qty > 0;
             const CatIcon = item.itemIcon || activeCatData?.icon || PackageOpen;
             const catColor = activeCatData?.color || '#16a34a';
 
             return (
-              <View key={item.id} style={[styles.cardContainer, qty > 0 && styles.cardContainerActive]}>
+              <View key={item.id} style={[styles.cardContainer, addedAny && styles.cardContainerActive]}>
                 <View style={[styles.cardImageArea, { backgroundColor: catColor + '15' }]}>
-                  <CatIcon size={46} color={catColor} strokeWidth={1.5} opacity={0.8} />
+                  <ItemImage image={item.image} Icon={CatIcon} color={catColor} />
                 </View>
 
                 <View style={styles.cardInfo}>
-                  <Text style={styles.itemName} numberOfLines={1}>{item.name}</Text>
-                  <Text style={styles.itemUnit}>{item.unit}</Text>
-                  
+                  <Text style={styles.itemName} numberOfLines={2}>{item.subCategory}</Text>
+                  <Text style={styles.itemUnit}>{unitLabel(item.unit)}</Text>
+
+                  {item.minQty ? (
+                    <Text style={styles.minHint}>Minimum {item.minQty} batteries</Text>
+                  ) : null}
+
+                  {hasCond && (
+                    <View style={styles.conditionRow}>
+                      {CONDITIONS.map((c) => {
+                        const on = activeCond === c;
+                        return (
+                          <TouchableOpacity
+                            key={c}
+                            style={[styles.condPill, on && styles.condPillActive]}
+                            onPress={() => setItemCondition(prev => ({ ...prev, [item.id]: c }))}
+                          >
+                            <Text style={[styles.condText, on && styles.condTextActive]}>{c}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  )}
+
                   <View style={styles.coinPill}>
                     <KarmaCoin size={12} />
-                    <Text style={styles.coinValue}>+{item.coins}</Text>
+                    <Text style={styles.coinValue}>+{rateFor(item, activeCond)}</Text>
                   </View>
 
                   {qty === 0 ? (
-                    <TouchableOpacity style={styles.addBtn} onPress={() => updateQuantity(item.id, 1)}>
+                    <TouchableOpacity style={styles.addBtn} onPress={() => updateQuantity(key, 1)}>
                       <Plus size={18} color="white" />
                       <Text style={styles.addBtnText}>ADD</Text>
                     </TouchableOpacity>
                   ) : (
-                    <TouchableOpacity style={styles.addedBtn} onPress={() => updateQuantity(item.id, -qty)}>
+                    <TouchableOpacity style={styles.addedBtn} onPress={() => updateQuantity(key, -qty)}>
                       <CheckCircle2 size={16} color="#16a34a" />
                       <Text style={styles.addedBtnText}>ADDED</Text>
                     </TouchableOpacity>
@@ -428,53 +512,26 @@ export function SchedulePickupScreen({ navigation }: any) {
         <View style={styles.addressBody}>
           <View style={styles.addressTopRow}>
             <Text style={styles.homeLabelText}>Pickup address</Text>
-            {!isEditingAddress && (
-              <TouchableOpacity
-                onPress={() => { setEditedAddress(userAddress); setIsEditingAddress(true); }}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.changeText}>Edit</Text>
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity onPress={() => setIsEditingAddress(true)} activeOpacity={0.7}>
+              <Text style={styles.changeText}>Edit</Text>
+            </TouchableOpacity>
           </View>
-          {isEditingAddress ? (
-            <>
-              <TextInput
-                style={styles.addressInput}
-                value={editedAddress}
-                onChangeText={setEditedAddress}
-                placeholder="Enter your full address..."
-                placeholderTextColor="#9ca3af"
-                multiline
-                autoFocus
-              />
-              <View style={{ flexDirection: 'row', gap: 8, marginTop: 10 }}>
-                <TouchableOpacity
-                  style={styles.cancelEditBtn}
-                  onPress={() => { setIsEditingAddress(false); setEditedAddress(userAddress); }}
-                >
-                  <Text style={styles.cancelEditText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.saveEditBtn}
-                  onPress={() => {
-                    if (editedAddress.trim().length >= 5) {
-                      setUserAddress(editedAddress.trim());
-                      setIsEditingAddress(false);
-                    } else {
-                      Alert.alert('Too short', 'Please enter a valid address.');
-                    }
-                  }}
-                >
-                  <Text style={styles.saveEditText}>Save</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          ) : (
-            <Text style={styles.addressValue}>
-              {userAddress || 'No address saved. Tap Edit to add one.'}
-            </Text>
-          )}
+          <Text style={styles.addressValue}>
+            {userAddress || 'No address saved. Tap Edit to add one.'}
+          </Text>
+          <AddressSearch
+            visible={isEditingAddress}
+            userCoords={userCoordinates}
+            onSelect={(address, coords) => {
+              setUserAddress(address);
+              setUserCoordinates(coords);
+              setIsEditingAddress(false);
+              // Persist to the profile too, so it shows up under Saved Addresses —
+              // best-effort: booking itself doesn't depend on this succeeding.
+              profileService.updateAddress({ fullAddress: address, longitude: coords[0], latitude: coords[1] }).catch(() => {});
+            }}
+            onCancel={() => setIsEditingAddress(false)}
+          />
         </View>
       </View>
 
@@ -569,12 +626,19 @@ const styles = StyleSheet.create({
   
   cardContainer: { width: CARD_WIDTH, backgroundColor: 'white', borderRadius: 18, marginBottom: 10, marginHorizontal: CARD_MARGIN, overflow: 'hidden', elevation: 2, borderWidth: 2, borderColor: 'transparent' },
   cardContainerActive: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  cardImageArea: { height: 56, width: '100%', alignItems: 'center', justifyContent: 'center' },
+  cardImageArea: { height: 92, width: '100%', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#f8fafc', padding: 10 },
+  cardImage: { width: '100%', height: '100%' },
   cardInfo: { padding: 10, flex: 1 },
   itemName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
   itemUnit: { fontSize: 12, color: '#71717a', fontWeight: '500', marginBottom: 8 },
   coinPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 4, marginBottom: 16 },
   coinValue: { fontSize: 12, fontWeight: '800', color: '#d97706' },
+  minHint: { fontSize: 11, color: '#dc2626', fontWeight: '700', marginBottom: 8 },
+  conditionRow: { flexDirection: 'row', gap: 6, marginBottom: 10 },
+  condPill: { flex: 1, paddingVertical: 5, borderRadius: 8, borderWidth: 1, borderColor: '#e4e4e7', backgroundColor: 'white', alignItems: 'center' },
+  condPillActive: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
+  condText: { fontSize: 10, fontWeight: '700', color: '#71717a' },
+  condTextActive: { color: '#16a34a' },
   
   addBtn: { backgroundColor: '#1e293b', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 6, borderRadius: 8, gap: 4 },
   addBtnText: { color: 'white', fontSize: 11, fontWeight: '800' },
@@ -616,11 +680,6 @@ const styles = StyleSheet.create({
   homeLabelText: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
   addressValue: { fontSize: 13, color: '#64748b', fontWeight: '500', lineHeight: 20 },
   changeText: { color: '#16a34a', fontSize: 13, fontWeight: '700' },
-  addressInput: { fontSize: 13, color: '#0f172a', fontWeight: '500', lineHeight: 20, borderWidth: 1.5, borderColor: '#16a34a', borderRadius: 10, padding: 10, marginTop: 8, textAlignVertical: 'top', minHeight: 60 },
-  cancelEditBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: '#f1f5f9', alignItems: 'center' },
-  cancelEditText: { fontSize: 13, fontWeight: '700', color: '#64748b' },
-  saveEditBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, backgroundColor: '#16a34a', alignItems: 'center' },
-  saveEditText: { fontSize: 13, fontWeight: '700', color: 'white' },
 
   estimatesBox: { backgroundColor: '#fffbeb', borderRadius: 16, padding: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#fde68a' },
   estimateLabel: { fontSize: 12, color: '#b45309', fontWeight: '700', marginBottom: 8 },

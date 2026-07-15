@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
-import { Leaf, Mail, Phone, MapPin } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
+import { Mail, Phone, MapPin } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const MAX = 1200;
 
@@ -8,6 +9,15 @@ export function WebFooter() {
   const { width } = useWindowDimensions();
   const isMobile = width < 640;
   const pad = isMobile ? 16 : 40;
+  const navigation = useNavigation<any>();
+
+  const QUICK_LINKS = [
+    { label: 'How it works', onPress: () => navigation.navigate('Splash', { scrollTo: 'howItWorks' }) },
+    { label: 'Features', onPress: () => navigation.navigate('Splash', { scrollTo: 'features' }) },
+    { label: 'Daily quiz', onPress: () => navigation.navigate('Quiz') },
+    { label: 'Knowledge hub', onPress: () => navigation.navigate('KnowledgeHub') },
+    { label: 'Referral program', onPress: () => navigation.navigate('Referral') },
+  ];
 
   return (
     <View style={s.footer}>
@@ -17,11 +27,10 @@ export function WebFooter() {
           {/* About */}
           <View style={[s.col, isMobile && { flex: undefined }]}>
             <View style={s.logoRow}>
-              <View style={s.logoIcon}><Leaf size={16} color="#052e16" /></View>
-              <Text style={s.logoText}>KarmaCoins XP</Text>
+              <Image source={require('../../../assets/logo.png')} style={{ height: 48, width: 76, resizeMode: 'contain' }} />
             </View>
             <Text style={s.aboutText}>
-              India's rewarding recycling platform. Turn your waste into Karma Coins — schedule free doorstep pickups and earn rewards for every kg recycled.
+              India's rewarding recycling platform. Turn your waste into KarmaCoins XP — schedule free doorstep pickups and earn rewards for every kg recycled.
             </Text>
           </View>
 
@@ -30,15 +39,17 @@ export function WebFooter() {
             <View style={{ flexDirection: 'row', gap: 24 }}>
               <View style={{ flex: 1 }}>
                 <Text style={s.colTitle}>Quick links</Text>
-                {['How it works', 'Features', 'Daily quiz', 'Knowledge hub', 'Referral program'].map(link => (
-                  <Text key={link} style={s.link}>{link}</Text>
+                {QUICK_LINKS.map(link => (
+                  <TouchableOpacity key={link.label} onPress={link.onPress}>
+                    <Text style={s.link}>{link.label}</Text>
+                  </TouchableOpacity>
                 ))}
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={s.colTitle}>Contact us</Text>
                 <View style={s.contactRow}>
                   <Mail size={13} color="#94a3b8" />
-                  <Text style={[s.contactText, { fontSize: 12 }]}>support@karmacoins.in</Text>
+                  <Text style={[s.contactText, { fontSize: 12 }]}>cto.team@0waste.co.in</Text>
                 </View>
                 <View style={s.contactRow}>
                   <Phone size={13} color="#94a3b8" />
@@ -54,15 +65,17 @@ export function WebFooter() {
             <>
               <View style={s.col}>
                 <Text style={s.colTitle}>Quick links</Text>
-                {['How it works', 'Features', 'Daily quiz', 'Knowledge hub', 'Referral program'].map(link => (
-                  <Text key={link} style={s.link}>{link}</Text>
+                {QUICK_LINKS.map(link => (
+                  <TouchableOpacity key={link.label} onPress={link.onPress}>
+                    <Text style={s.link}>{link.label}</Text>
+                  </TouchableOpacity>
                 ))}
               </View>
               <View style={s.col}>
                 <Text style={s.colTitle}>Contact us</Text>
                 <View style={s.contactRow}>
                   <Mail size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>support@karmacoins.in</Text>
+                  <Text style={s.contactText}>cto.team@0waste.co.in</Text>
                 </View>
                 <View style={s.contactRow}>
                   <Phone size={14} color="#94a3b8" />
@@ -78,25 +91,26 @@ export function WebFooter() {
 
           {/* Download App */}
           <View style={[s.col, isMobile && { flex: undefined }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 }}>
-              <Text style={s.colTitle}>Get the app</Text>
-              <View style={s.comingSoonBadge}>
-                <Text style={s.comingSoonText}>Coming Aug 2026</Text>
-              </View>
-            </View>
+            <Text style={s.colTitle}>Get the app</Text>
             <View style={isMobile ? { flexDirection: 'row', gap: 10 } : {}}>
               <TouchableOpacity style={[s.storeBtn, s.storeBtnDisabled, isMobile && { flex: 1 }]} activeOpacity={1}>
                 <Text style={s.storeBtnIcon}>▶</Text>
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={s.storeBtnSub}>GET IT ON</Text>
-                  <Text style={s.storeBtnText}>Google Play</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={s.storeBtnText}>Google Play</Text>
+                    <Text style={s.comingSoonInline}>Coming soon</Text>
+                  </View>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity style={[s.storeBtn, s.storeBtnDisabled, isMobile && { flex: 1 }]} activeOpacity={1}>
                 <Text style={s.storeBtnIcon}>●</Text>
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={s.storeBtnSub}>DOWNLOAD ON</Text>
-                  <Text style={s.storeBtnText}>App Store</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Text style={s.storeBtnText}>App Store</Text>
+                    <Text style={s.comingSoonInline}>Coming soon</Text>
+                  </View>
                 </View>
               </TouchableOpacity>
             </View>
@@ -107,12 +121,16 @@ export function WebFooter() {
       {/* Bottom bar */}
       <View style={s.bottomBar}>
         <View style={[s.container, { paddingHorizontal: pad }, isMobile ? s.bottomContentMobile : s.bottomContent]}>
-          <Text style={s.copyright}>© 2026 KarmaCoins XP by 3R Zero Waste. All rights reserved.</Text>
+          <Text style={s.copyright}>© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.</Text>
           {!isMobile && (
             <View style={s.legalLinks}>
-              <Text style={s.legalLink}>Privacy policy</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>
+                <Text style={s.legalLink}>Privacy policy</Text>
+              </TouchableOpacity>
               <Text style={s.legalDot}>·</Text>
-              <Text style={s.legalLink}>Terms of service</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'terms' })}>
+                <Text style={s.legalLink}>Terms of service</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -143,8 +161,7 @@ const s = StyleSheet.create({
   storeBtnIcon: { color: 'white', fontSize: 16 },
   storeBtnSub: { color: '#94a3b8', fontSize: 8, fontWeight: '700', letterSpacing: 1 },
   storeBtnText: { color: 'white', fontSize: 13, fontWeight: '700' },
-  comingSoonBadge: { backgroundColor: '#16a34a', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 3 },
-  comingSoonText: { color: 'white', fontSize: 10, fontWeight: '800' },
+  comingSoonInline: { color: '#4ade80', fontSize: 10, fontWeight: '700', opacity: 0.85 },
 
   bottomBar: { borderTopWidth: 1, borderTopColor: '#1e293b' },
   bottomContent: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 18 },

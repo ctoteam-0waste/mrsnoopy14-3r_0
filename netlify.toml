@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build:web"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Real prerendered files (/, /login, /legal/privacy, /legal/terms) are served as-is —
+# Netlify only falls through to this catch-all for routes with no matching static file,
+# which covers every other in-app screen (all client-side routed via React Navigation).
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { UserSocketProvider } from './src/context/UserSocketContext';
@@ -21,8 +22,28 @@ try {
   });
 } catch (_) {}
 
+// Extract referral code from deep link URL
+// Handles: karmacoin://r/KARMA-XXXXXX  and  https://karmacoin.app/r/KARMA-XXXXXX
+function extractReferralCode(url: string): string | null {
+  const match = url.match(/\/r\/(KARMA-[A-Z0-9]+)/i);
+  return match ? match[1].toUpperCase() : null;
+}
+
 export default function App() {
   useEffect(() => {
+    // Deep link — cold start (app was closed)
+    Linking.getInitialURL().then(url => {
+      if (!url) return;
+      const code = extractReferralCode(url);
+      if (code) AsyncStorage.setItem('pendingReferralCode', code);
+    });
+
+    // Deep link — app already open in background
+    const linkSub = Linking.addEventListener('url', ({ url }) => {
+      const code = extractReferralCode(url);
+      if (code) AsyncStorage.setItem('pendingReferralCode', code);
+    });
+
     // Register push token for already-logged-in users on app start
     AsyncStorage.getItem('userToken').then(token => {
       if (!token) return;
@@ -32,11 +53,14 @@ export default function App() {
     });
 
     // Listen for FCM token refresh and re-register
-    const sub = addPushTokenRefreshListener((newToken) => {
+    const pushSub = addPushTokenRefreshListener((newToken) => {
       sendTokenToBackend(newToken);
     });
 
-    return () => sub.remove();
+    return () => {
+      linkSub.remove();
+      pushSub.remove();
+    };
   }, []);
 
   return (

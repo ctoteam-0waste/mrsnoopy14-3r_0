@@ -1,8 +1,9 @@
 {
   "expo": {
-    "name": "KarmaCoins XP",
+    "name": "KarmaVer$e",
     "slug": "KarmaCredits-RN",
     "version": "1.0.0",
+    "scheme": "karmacoin",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -18,8 +19,7 @@
     },
     "android": {
       "package": "com.karmacredits.app",
-      "googleServicesFile": "./google-services.json",
-      "adaptiveIcon": {
+"adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
@@ -27,9 +27,16 @@
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "name": "KarmaVerse — Recycle & Earn Rewards in India",
+      "shortName": "KarmaVerse",
+      "lang": "en",
+      "description": "India's first circular economy rewards platform. Schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle.",
+      "themeColor": "#052e16",
+      "backgroundColor": "#ffffff"
     },
     "plugins": [
+      "./plugins/withMappls",
       [
         "@react-native-google-signin/google-signin",
         {

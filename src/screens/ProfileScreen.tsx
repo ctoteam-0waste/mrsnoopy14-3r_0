@@ -1,13 +1,16 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, User, MapPin, Flame, Settings, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
+import { showAlert } from '../utils/alert';
+import { ChevronLeft, User, MapPin, Flame, Settings, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
+import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
+import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { authService } from '../services/auth';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getStableUserSuffix } from '../utils/userId';
 
 // Reusable Components
 function InputField({ placeholder, value, onChange, keyboardType = 'default', maxLength }: any) {
@@ -54,19 +57,17 @@ export function ProfileScreen({ navigation }: any) {
       try {
         const data = await profileService.getProfile();
         // Read quiz streak from AsyncStorage (same as Dashboard)
-        const token = await AsyncStorage.getItem('userToken') || 'x';
-        const sfx = token.slice(-8);
+        const token = await AsyncStorage.getItem('userToken');
+        const sfx = getStableUserSuffix(token);
         const [storedDate, storedStreak] = await Promise.all([
           AsyncStorage.getItem(`lastQuizDate_${sfx}`),
           AsyncStorage.getItem(`quizStreak_${sfx}`),
         ]);
         let quizStreak = 0;
         if (storedDate) {
-          const now = new Date();
-          const todayUTC = `${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`;
-          const y = new Date(now); y.setUTCDate(y.getUTCDate()-1);
-          const yestUTC = `${y.getUTCFullYear()}-${String(y.getUTCMonth()+1).padStart(2,'0')}-${String(y.getUTCDate()).padStart(2,'0')}`;
-          if (storedDate === todayUTC || storedDate === yestUTC) quizStreak = Number(storedStreak) || 0;
+          const todayStr = getLocalDateStr();
+          const yestStr = getLocalYesterdayStr();
+          if (storedDate === todayStr || storedDate === yestStr) quizStreak = Number(storedStreak) || 0;
         }
         setUserProfile({
           name: data.name || 'User',
@@ -159,6 +160,22 @@ export function ProfileScreen({ navigation }: any) {
   const [showStateSuggestions, setShowStateSuggestions] = useState(false);
   const [showCitySuggestions, setShowCitySuggestions] = useState(false);
 
+  // Unified map-based address editor (shared with Schedule Pickup)
+  const [showAddressSearch, setShowAddressSearch] = useState(false);
+
+  const handleAddressSelected = async (address: string, coords: [number, number], _details?: AddressDetails) => {
+    setShowAddressSearch(false);
+    setIsSavingAddress(true);
+    try {
+      await profileService.updateAddress({ fullAddress: address, longitude: coords[0], latitude: coords[1] });
+      setUserProfile((p: any) => ({ ...p, address }));
+    } catch (e) {
+      showAlert('Could not save address', 'Please try again.');
+    } finally {
+      setIsSavingAddress(false);
+    }
+  };
+
   const filteredStates = addressForm.state
     ? ALL_STATES.filter(s => s.toLowerCase().includes(addressForm.state.toLowerCase()))
     : ALL_STATES;
@@ -236,7 +253,7 @@ export function ProfileScreen({ navigation }: any) {
       setUserProfile({ ...userProfile, address: fullAddress });
       closeAddressModal();
     } catch (e) {
-      Alert.alert('Error', 'Failed to update address. Please try again.');
+      showAlert('Error', 'Failed to update address. Please try again.');
     } finally {
       setIsSavingAddress(false);
     }
@@ -319,16 +336,34 @@ export function ProfileScreen({ navigation }: any) {
     if (emailChanged || phoneChanged) {
       setFlowStep('loading');
       try {
-        await profileService.sendProfileOtp(emailChanged ? editForm.email : editForm.phone);
+        await profileService.sendProfileOtp(
+          emailChanged ? editForm.email : editForm.phone,
+          !!emailChanged,
+          userProfile?.phone,
+          userProfile?.email
+        );
         setProfileOtp(['', '', '', '', '', '']);
         setFlowStep('otp');
       } catch (error: any) {
-        Alert.alert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
+        showAlert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
         setFlowStep('form');
       }
     } else {
       await saveProfileDirect();
     }
+  };
+
+  const refreshProfile = async () => {
+    try {
+      const data = await profileService.getProfile();
+      setUserProfile((prev: any) => ({
+        ...prev,
+        name: data.name || prev?.name,
+        phone: data.phone || prev?.phone,
+        email: data.email || prev?.email,
+        coins: data.karmaCoins || data.coins || prev?.coins,
+      }));
+    } catch (_) {}
   };
 
   const saveProfileDirect = async () => {
@@ -339,11 +374,12 @@ export function ProfileScreen({ navigation }: any) {
         email: editForm.email,
         phone: editForm.phone
       });
-      setUserProfile({ ...userProfile, ...editForm });
+      await refreshProfile();
       setFlowStep('success');
       setTimeout(() => closeModal(), 2000);
-    } catch (error) {
-      Alert.alert('Update failed', 'Failed to update account details');
+    } catch (error: any) {
+      const msg = error?.response?.data?.message || error?.response?.data?.error || 'Failed to update account details';
+      showAlert('Update failed', msg);
       setFlowStep('form');
     }
   };
@@ -351,15 +387,27 @@ export function ProfileScreen({ navigation }: any) {
   const handleProfileOtpVerify = async () => {
     const otp = profileOtp.join('');
     if (otp.length < 6) {
-      Alert.alert('Invalid OTP', 'Please enter the 6-digit OTP.');
+      showAlert('Invalid OTP', 'Please enter the 6-digit OTP.');
       return;
     }
     setFlowStep('loading');
     try {
-      await profileService.verifyProfileOtp(emailChanged ? editForm.email : editForm.phone, otp);
-      await saveProfileDirect();
+      await profileService.verifyProfileOtp(
+        emailChanged ? editForm.email : editForm.phone,
+        otp,
+        !!emailChanged,
+        userProfile?.phone,
+        userProfile?.email
+      );
+      // If name also changed, save it
+      if (editForm.name !== userProfile?.name) {
+        await profileService.updateAccount({ name: editForm.name });
+      }
+      await refreshProfile();
+      setFlowStep('success');
+      setTimeout(() => closeModal(), 2000);
     } catch (error: any) {
-      Alert.alert('Verification failed', error?.response?.data?.message || 'Invalid or expired OTP.');
+      showAlert('Verification failed', error?.response?.data?.message || 'Invalid or expired OTP.');
       setFlowStep('otp');
     }
   };
@@ -381,9 +429,8 @@ export function ProfileScreen({ navigation }: any) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      <SafeAreaView style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#064e3b', '#15803d']} style={styles.backgroundGradient}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.backgroundGradient}>
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
@@ -455,26 +502,64 @@ export function ProfileScreen({ navigation }: any) {
                 </TouchableOpacity>
               </View>
 
+              {/* Referral Banner */}
+              <TouchableOpacity activeOpacity={0.85} onPress={() => navigation.navigate('Referral')} style={styles.referBanner}>
+                <LinearGradient colors={['#134e4a', '#0f766e', '#0d9488']} style={styles.referBannerGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                  <View style={styles.referBannerLeft}>
+                    <View style={styles.referBannerIconBox}>
+                      <Users size={22} color="#2dd4bf" />
+                    </View>
+                    <View>
+                      <Text style={styles.referBannerTitle}>Invite friends, earn coins</Text>
+                      <Text style={styles.referBannerSub}>Share your code & both get rewards!</Text>
+                    </View>
+                  </View>
+                  <View style={styles.referBannerArrow}>
+                    <ArrowRight size={18} color="white" />
+                  </View>
+                </LinearGradient>
+              </TouchableOpacity>
+
               {/* Account Options */}
               <Text style={styles.sectionTitle}>My account</Text>
               <View style={styles.optionsBlock}>
                 <OptionRow onPress={openDemoModal} icon={<UserSquare2 size={18} color="#8b5cf6" />} bg="#f3e8ff" title="Personal details" sub="Age, gender, marital status..." />
                 <View style={styles.divider} />
-                <OptionRow icon={<MapPin size={18} color="#0284c7" />} bg="#f0f9ff" title="Saved addresses" sub={userProfile?.address || 'Manage home, office locations'} onPress={openAddressModal} />
+                <OptionRow icon={<MapPin size={18} color="#0284c7" />} bg="#f0f9ff" title="Saved addresses" sub={userProfile?.address || 'Manage home, office locations'} onPress={() => setShowAddressSearch(true)} />
                 <View style={styles.divider} />
-                <OptionRow icon={<Flame size={18} color="#ea580c" />} bg="#fff7ed" title="Family impact tracker" sub="LPG, fuel & diet metrics" />
+                <OptionRow
+                  icon={<Flame size={18} color="#ea580c" />}
+                  bg="#fff7ed"
+                  title="Family impact tracker"
+                  sub="LPG, fuel & diet metrics"
+                  onPress={() => showAlert('Coming soon!', "We're building your Family Impact Tracker — check back soon.")}
+                />
                 <View style={styles.divider} />
-                <OptionRow icon={<User size={18} color="#16a34a" />} bg="#f0fdf4" title="My network" sub="Referrals & downstream impact" />
+                <OptionRow icon={<Users size={18} color="#16a34a" />} bg="#f0fdf4" title="My network" sub="Referrals & downstream impact" onPress={() => navigation.navigate('Referral')} />
               </View>
 
               {/* General Options */}
               <Text style={styles.sectionTitle}>General</Text>
               <View style={styles.optionsBlock}>
-                <OptionRow icon={<Settings size={18} color="#475569" />} bg="#f8fafc" title="App settings" />
+                {Platform.OS !== 'web' && (
+                  <>
+                    <OptionRow icon={<Settings size={18} color="#475569" />} bg="#f8fafc" title="App settings" />
+                    <View style={styles.divider} />
+                  </>
+                )}
+                <OptionRow
+                  icon={<HeartHandshake size={18} color="#475569" />}
+                  bg="#f8fafc"
+                  title="Help & support"
+                  onPress={() => showAlert(
+                    'Help & support',
+                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nPhone: 070931 98828\nAddress: PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503'
+                  )}
+                />
                 <View style={styles.divider} />
-                <OptionRow icon={<HeartHandshake size={18} color="#475569" />} bg="#f8fafc" title="Help & support" />
+                <OptionRow icon={<FileText size={18} color="#475569" />} bg="#f8fafc" title="Terms & conditions" onPress={() => navigation.navigate('Legal', { type: 'terms' })} />
                 <View style={styles.divider} />
-                <OptionRow icon={<FileText size={18} color="#475569" />} bg="#f8fafc" title="Terms & privacy" />
+                <OptionRow icon={<ShieldCheck size={18} color="#475569" />} bg="#f8fafc" title="Privacy policy" onPress={() => navigation.navigate('Legal', { type: 'privacy' })} />
               </View>
 
               {/* Logout */}
@@ -489,7 +574,6 @@ export function ProfileScreen({ navigation }: any) {
           )}
         </View>
         </ScrollView>
-      </SafeAreaView>
 
       {/* Demographics View Modal */}
       <Modal visible={demoModalVisible} transparent={true} animationType="fade" onRequestClose={closeDemoModal}>
@@ -558,8 +642,8 @@ export function ProfileScreen({ navigation }: any) {
                   <View>
                     <Text style={styles.fieldLabel}>Your Age</Text>
                     <InputField placeholder="e.g. 24" value={demoEditForm.age} onChange={(t: any) => setDemoEditForm({...demoEditForm, age: t.replace(/[^0-9]/g, '')})} keyboardType="number-pad" maxLength={3} />
-                    {demoEditForm.age && (parseInt(demoEditForm.age) < 5 || parseInt(demoEditForm.age) > 100) && (
-                      <Text style={styles.fieldError}>Age must be between 5 and 100</Text>
+                    {demoEditForm.age && (parseInt(demoEditForm.age) < 13 || parseInt(demoEditForm.age) > 100) && (
+                      <Text style={styles.fieldError}>Age must be between 13 and 100</Text>
                     )}
                   </View>
                   <View>
@@ -576,8 +660,8 @@ export function ProfileScreen({ navigation }: any) {
                   </View>
                   <TouchableOpacity style={[styles.primaryActionBtn, { marginTop: 12 }]} onPress={async () => {
                       const parsedAge = parseInt(demoEditForm.age);
-                      if (!demoEditForm.age || isNaN(parsedAge) || parsedAge < 5 || parsedAge > 100) {
-                        Alert.alert('Invalid age', 'Please enter a valid age between 5 and 100.');
+                      if (!demoEditForm.age || isNaN(parsedAge) || parsedAge < 13 || parsedAge > 100) {
+                        showAlert('Invalid age', 'You must be at least 13 years old to use KarmaVerse.');
                         return;
                       }
                       try {
@@ -585,7 +669,7 @@ export function ProfileScreen({ navigation }: any) {
                         setUserProfile({...userProfile, demographics: { ...demoEditForm, age: parsedAge }});
                         setIsDemoEditing(false);
                       } catch (e) {
-                        Alert.alert('Error', 'Failed to update profile. Please try again.');
+                        showAlert('Error', 'Failed to update profile. Please try again.');
                       }
                   }}>
                     <Text style={styles.primaryActionText}>Update & Save</Text>
@@ -686,11 +770,11 @@ export function ProfileScreen({ navigation }: any) {
                 <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 1.5, borderColor: '#bbf7d0' }}>
                   <ShieldCheck size={24} color="#15803d" />
                 </View>
-                <Text style={{ fontSize: 20, fontWeight: '900', color: '#0f172a', marginBottom: 6 }}>Verify your {emailChanged ? 'email' : 'phone'}</Text>
-                <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', marginBottom: 4 }}>OTP sent to</Text>
-                <Text style={{ fontSize: 14, color: '#15803d', fontWeight: '800', marginBottom: 24 }}>{emailChanged ? editForm.email : editForm.phone}</Text>
+                <Text style={{ fontSize: 20, fontWeight: '900', color: '#0f172a', marginBottom: 6, textAlign: 'center' }}>Secure verification</Text>
+                <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', marginBottom: 4, textAlign: 'center' }}>OTP sent to your registered phone</Text>
+                <Text style={{ fontSize: 14, color: '#15803d', fontWeight: '800', marginBottom: 24, textAlign: 'center' }}>+91 {userProfile?.phone}</Text>
 
-                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 24 }}>
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 24, justifyContent: 'center' }}>
                   {profileOtp.map((digit: string, i: number) => (
                     <TextInput
                       key={i}
@@ -862,6 +946,14 @@ export function ProfileScreen({ navigation }: any) {
         </KeyboardAvoidingView>
       </Modal>
 
+      {/* Unified map-based address editor */}
+      <AddressSearch
+        visible={showAddressSearch}
+        userCoords={null}
+        onSelect={handleAddressSelected}
+        onCancel={() => setShowAddressSearch(false)}
+      />
+
     </View>
   );
 }
@@ -879,8 +971,8 @@ const OptionRow = ({ icon, bg, title, sub, onPress }: any) => (
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f0fdf6' },
-  backgroundGradient: { paddingBottom: 20 },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 20, paddingBottom: 16 },
+  backgroundGradient: { paddingTop: 60, paddingBottom: 20, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 16 },
   backBtn: { padding: 8, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 12 },
   headerTitle: { fontSize: 18, fontWeight: '700', color: 'white' },
   placeholderBox: { width: 40 },
@@ -904,6 +996,15 @@ const styles = StyleSheet.create({
   editBtn: { paddingHorizontal: 24, paddingVertical: 10, backgroundColor: '#f0fdf4', borderRadius: 100, borderWidth: 1, borderColor: '#bbf7d0', width: '100%', alignItems: 'center' },
   editBtnText: { color: '#16a34a', fontWeight: '800', fontSize: 14 },
   
+  /* Referral Banner */
+  referBanner: { marginBottom: 24, borderRadius: 20, overflow: 'hidden', elevation: 6, shadowColor: '#0d9488', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.25, shadowRadius: 14 },
+  referBannerGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, paddingVertical: 16 },
+  referBannerLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
+  referBannerIconBox: { width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
+  referBannerTitle: { color: 'white', fontSize: 15, fontWeight: '900', marginBottom: 2 },
+  referBannerSub: { color: 'rgba(255,255,255,0.65)', fontSize: 12, fontWeight: '600' },
+  referBannerArrow: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+
   /* Options Sections */
   sectionTitle: { fontSize: 15, fontWeight: '800', color: '#1e293b', marginBottom: 12, marginLeft: 6 },
   optionsBlock: { backgroundColor: 'white', borderRadius: 20, paddingHorizontal: 16, marginBottom: 24, elevation: 4, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.08, shadowRadius: 16, borderWidth: 1, borderColor: '#f1f5f9' },
@@ -943,9 +1044,9 @@ const styles = StyleSheet.create({
   logoutText: { color: '#ef4444', fontSize: 15, fontWeight: '800' },
 
   /* Modal Styles (Zomato/Swiggy Style) */
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
-  modalBackdropCloseArea: { flex: 1 },
-  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, elevation: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 16 : 0 },
+  modalBackdropCloseArea: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 32, borderTopRightRadius: 32, borderBottomLeftRadius: Platform.OS === 'web' ? 32 : 0, borderBottomRightRadius: Platform.OS === 'web' ? 32 : 0, padding: 24, paddingBottom: Platform.OS === 'ios' ? 40 : 24, elevation: 20, shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.1, shadowRadius: 20, width: '100%', maxWidth: 480, alignSelf: 'center', maxHeight: Platform.OS === 'web' ? '90%' : undefined },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   modalTitle: { fontSize: 20, fontWeight: '900', color: '#0f172a' },
   closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },

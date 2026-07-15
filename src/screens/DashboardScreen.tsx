@@ -8,7 +8,11 @@ import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
+import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { bookingService } from '../services/booking';
+import { BACKEND_BASE } from '../services/api';
+import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
+import { getStableUserSuffix } from '../utils/userId';
 
 const STATUS_COLOR: any = {
   Completed: { bg: "rgba(22,163,74,0.1)", text: "#16a34a", dot: "#16a34a" },
@@ -29,6 +33,8 @@ const FEATURES = [
     bg: ['#064e3b', '#065f46'] as [string, string],
     accent: '#4ade80',
     steps: ['Select waste type', 'Choose time slot', 'Earn Credits ✅'],
+    navTarget: 'SchedulePickup',
+    ctaLabel: 'Schedule now',
   },
   {
     id: 'upload',
@@ -46,13 +52,15 @@ const FEATURES = [
     id: 'earn',
     emoji: '🪙',
     tag: 'EARN',
-    title: 'Karma coins',
-    desc: 'Every kg of waste you recycle earns you Karma Coins. Keep your streaks up for even more rewards!',
+    title: 'KarmaCoins XP',
+    desc: 'Every kg of waste you recycle earns you KarmaCoins XP. Keep your streaks up for even more rewards!',
     benefit: 'Reward for Every kg',
     benefitIcon: <Star size={16} color="#fbbf24" fill="#fbbf24" />,
     bg: ['#312e81', '#4338ca'] as [string, string],
     accent: '#a78bfa',
     steps: ['Recycle waste', 'Maintain streak 🔥', 'Get rewarded'],
+    navTarget: 'Wallet',
+    ctaLabel: 'View my wallet',
   },
   {
     id: 'redeem',
@@ -65,6 +73,8 @@ const FEATURES = [
     bg: ['#831843', '#9d174d'] as [string, string],
     accent: '#f472b6',
     steps: ['Earn credits', 'Open Store 🛍️', 'Redeem & smile'],
+    navTarget: 'Store',
+    ctaLabel: 'Open store',
   },
   {
     id: 'impact',
@@ -77,18 +87,22 @@ const FEATURES = [
     bg: ['#0c4a6e', '#0369a1'] as [string, string],
     accent: '#38bdf8',
     steps: ['Recycle more', 'Climb ranks 📊', 'Become Eco Hero 🏆'],
+    navTarget: 'Profile',
+    ctaLabel: 'See my impact',
   },
   {
     id: 'refer',
     emoji: '👥',
     tag: 'REFER',
     title: 'Invite friends',
-    desc: 'Share your referral code. When your friend makes their first pickup, you both get bonus Karma Coins!',
+    desc: 'Share your referral code. When your friend makes their first pickup, you both get bonus KarmaCoins XP!',
     benefit: 'Bonus for Every Friend',
     benefitIcon: <Coins size={16} color="#fb923c" />,
     bg: ['#134e4a', '#0f766e'] as [string, string],
     accent: '#2dd4bf',
     steps: ['Share code', 'Friend joins 🤝', 'Both get rewards!'],
+    navTarget: 'Referral',
+    ctaLabel: 'Invite friends',
   },
 ];
 
@@ -135,6 +149,7 @@ export function DashboardScreen({ navigation }: any) {
   const { notifications, unreadCount, markRead, markAllRead, clearAll } = useNotifications();
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [selectedFeature, setSelectedFeature] = useState<typeof FEATURES[0] | null>(null);
+  const [quizPlayedToday, setQuizPlayedToday] = useState(false);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -180,8 +195,8 @@ export function DashboardScreen({ navigation }: any) {
     };
     
     const fetchQuizStreak = async () => {
-      const token = await AsyncStorage.getItem('userToken') || 'default';
-      const suffix = token.slice(-8);
+      const token = await AsyncStorage.getItem('userToken');
+      const suffix = getStableUserSuffix(token);
       const [storedDate, storedStreak, storedHistory] = await Promise.all([
         AsyncStorage.getItem(`lastQuizDate_${suffix}`),
         AsyncStorage.getItem(`quizStreak_${suffix}`),
@@ -195,11 +210,10 @@ export function DashboardScreen({ navigation }: any) {
       }
       setQuizHistory(history);
       if (!storedDate) { setQuizStreak(0); return; }
-      const utcNow = new Date();
-      const todayUTC = `${utcNow.getUTCFullYear()}-${String(utcNow.getUTCMonth() + 1).padStart(2, '0')}-${String(utcNow.getUTCDate()).padStart(2, '0')}`;
-      const y = new Date(utcNow); y.setUTCDate(y.getUTCDate() - 1);
-      const yesterdayUTC = `${y.getUTCFullYear()}-${String(y.getUTCMonth() + 1).padStart(2, '0')}-${String(y.getUTCDate()).padStart(2, '0')}`;
-      const valid = storedDate === todayUTC || storedDate === yesterdayUTC;
+      const todayStr = getLocalDateStr();
+      const yesterdayStr = getLocalYesterdayStr();
+      setQuizPlayedToday(storedDate === todayStr);
+      const valid = storedDate === todayStr || storedDate === yesterdayStr;
       if (!valid) {
         await AsyncStorage.setItem(`quizStreak_${suffix}`, '0');
         setQuizStreak(0);
@@ -214,7 +228,12 @@ export function DashboardScreen({ navigation }: any) {
     });
     fetchDashboardData();
     fetchQuizStreak();
-    
+
+    (async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+    })();
+
     return unsubscribe;
   }, [navigation]);
 
@@ -247,7 +266,7 @@ export function DashboardScreen({ navigation }: any) {
       const checkNet = () => {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), 5000);
-        fetch('https://karmacoin-backend-8.onrender.com/', { method: 'HEAD', cache: 'no-store', signal: controller.signal })
+        fetch(`${BACKEND_BASE}/`, { method: 'HEAD', cache: 'no-store', signal: controller.signal })
           .then(() => { clearTimeout(timer); setOnline(); })
           .catch(() => { clearTimeout(timer); setOffline(); });
       };
@@ -269,7 +288,7 @@ export function DashboardScreen({ navigation }: any) {
         <WifiOff size={15} color="white" />
         <Text style={styles.offlineText}>No internet connection</Text>
         <TouchableOpacity onPress={() => {
-          fetch('https://karmacoin-backend-8.onrender.com/', { method: 'HEAD', cache: 'no-store' })
+          fetch(`${BACKEND_BASE}/`, { method: 'HEAD', cache: 'no-store' })
             .then(() => { setIsOffline(false); })
             .catch(() => {});
         }}>
@@ -308,10 +327,10 @@ export function DashboardScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Karma Credits card */}
+        {/* KarmaCoins XP card */}
         <View style={styles.creditsCard}>
           <View style={styles.creditsHeader}>
-            <Text style={styles.creditsLabel}>Karma coins balance</Text>
+            <Text style={styles.creditsLabel}>KarmaCoins XP balance</Text>
             <TouchableOpacity style={styles.walletLink} onPress={() => navigation.navigate('Wallet')}>
               <Text style={styles.walletLinkText}>Wallet</Text>
               <ChevronRight size={14} color="#86efac" />
@@ -336,6 +355,11 @@ export function DashboardScreen({ navigation }: any) {
                 style={[styles.progressBarFill, { width: `${progress}%` }]}
               />
             </View>
+          </View>
+
+          {/* Redeem info banner */}
+          <View style={styles.redeemBanner}>
+            <Text style={styles.redeemBannerText}>{REDEEM_INFO_MESSAGE}</Text>
           </View>
         </View>
       </LinearGradient>
@@ -371,7 +395,7 @@ export function DashboardScreen({ navigation }: any) {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.quizTitle}>Daily eco-quiz 🧠</Text>
-              <Text style={styles.quizSub}>Answer correctly & earn Karma Coins daily!</Text>
+              <Text style={styles.quizSub}>Test your green IQ. Earn KarmaCoins XP daily.</Text>
             </View>
           </View>
 
@@ -381,45 +405,50 @@ export function DashboardScreen({ navigation }: any) {
         </LinearGradient>
       </View>
 
-      {/* Quick Actions — placed here for better UX: user sees context first, then acts */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick actions</Text>
-        <View style={styles.actionsGrid}>
-          <TouchableOpacity 
-            style={[styles.actionBtn, { backgroundColor: '#f0fdf4' }]}
-            onPress={() => navigation.navigate('SchedulePickup')}
-          >
-            <View style={[styles.actionIconBg, { backgroundColor: 'rgba(22,163,74,0.1)' }]}>
-              <Truck size={20} color="#16a34a" />
+      {/* Smart Quick Actions — context-aware based on user state */}
+      {(() => {
+        const hasActiveOrder = recentOrders.some(o => o.status === 'In Transit' || o.status === 'Scheduled');
+        type ActionConfig = { id: string; label: string; IconComp: any; color: string; bg: string; iconBg: string; navTarget: string; badge?: string };
+        const picked: ActionConfig[] = [];
+
+        if (!quizPlayedToday) picked.push({ id: 'quiz', label: "Today's\nquiz", IconComp: Gamepad2, color: '#d97706', bg: '#fffbeb', iconBg: 'rgba(217,119,6,0.1)', navTarget: 'Quiz', badge: '🔥 New' });
+        if (hasActiveOrder) picked.push({ id: 'track', label: 'Track\npickup', IconComp: Truck, color: '#0891b2', bg: '#f0f9ff', iconBg: 'rgba(8,145,178,0.1)', navTarget: 'Orders', badge: '● Live' });
+        if (balance >= 1000) picked.push({ id: 'redeem', label: 'Redeem\nrewards', IconComp: Gift, color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)', navTarget: 'Store' });
+
+        const defaults: ActionConfig[] = [
+          { id: 'pickup',  label: 'Schedule\npickup', IconComp: Truck,  color: '#16a34a', bg: '#f0fdf4', iconBg: 'rgba(22,163,74,0.1)',    navTarget: 'SchedulePickup' },
+          { id: 'refer',   label: 'Refer\n& earn',    IconComp: Users,  color: '#db2777', bg: '#fdf2f8', iconBg: 'rgba(219,39,119,0.1)',   navTarget: 'Referral' },
+          { id: 'orders',  label: 'My\norders',       IconComp: Clock,  color: '#7c3aed', bg: '#faf5ff', iconBg: 'rgba(124,58,237,0.1)',   navTarget: 'Orders' },
+          { id: 'wallet',  label: 'My\nwallet',       IconComp: Coins,  color: '#d97706', bg: '#fffbeb', iconBg: 'rgba(217,119,6,0.1)',    navTarget: 'Wallet' },
+          { id: 'quiz_d',  label: "Today's\nquiz",    IconComp: Gamepad2, color: '#d97706', bg: '#fffbeb', iconBg: 'rgba(217,119,6,0.1)', navTarget: 'Quiz' },
+        ];
+        for (const def of defaults) {
+          if (picked.length >= 4) break;
+          if (!picked.find(a => a.id === def.id && a.id !== 'quiz_d')) picked.push(def);
+        }
+        const actions = picked.slice(0, 4);
+
+        return (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Quick actions</Text>
+            <View style={styles.actionsGrid}>
+              {actions.map((action) => (
+                <TouchableOpacity key={action.id} style={[styles.actionBtn, { backgroundColor: action.bg }]} onPress={() => navigation.navigate(action.navTarget)}>
+                  {action.badge && (
+                    <View style={styles.actionBadge}>
+                      <Text style={styles.actionBadgeText}>{action.badge}</Text>
+                    </View>
+                  )}
+                  <View style={[styles.actionIconBg, { backgroundColor: action.iconBg }]}>
+                    <action.IconComp size={20} color={action.color} />
+                  </View>
+                  <Text style={styles.actionText}>{action.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-            <Text style={styles.actionText}>Schedule{'\n'}pickup</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.actionBtn, { backgroundColor: '#f0f9ff' }]}>
-            <View style={[styles.actionIconBg, { backgroundColor: 'rgba(8,145,178,0.1)' }]}>
-              <Camera size={20} color="#0891b2" />
-            </View>
-            <Text style={styles.actionText}>Upload{'\n'}waste</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionBtn, { backgroundColor: '#faf5ff' }]}
-            onPress={() => navigation.navigate('Orders')}
-          >
-            <View style={[styles.actionIconBg, { backgroundColor: 'rgba(124,58,237,0.1)' }]}>
-              <Clock size={20} color="#7c3aed" />
-            </View>
-            <Text style={styles.actionText}>My{'\n'}orders</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionBtn, { backgroundColor: '#fdf2f8' }]}
-            onPress={() => navigation.navigate('Referral')}
-          >
-            <View style={[styles.actionIconBg, { backgroundColor: 'rgba(219,39,119,0.1)' }]}>
-              <Users size={20} color="#db2777" />
-            </View>
-            <Text style={styles.actionText}>Refer{'\n'}& earn</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          </View>
+        );
+      })()}
 
       {/* Recent Orders */}
       <View style={styles.section}>
@@ -521,6 +550,20 @@ export function DashboardScreen({ navigation }: any) {
                 {selectedFeature.benefitIcon}
                 <Text style={[styles.modalBenefitText, { color: selectedFeature.accent }]}>{selectedFeature.benefit}</Text>
               </View>
+
+              {(selectedFeature as any).navTarget && (
+                <TouchableOpacity
+                  style={[styles.modalCta, { backgroundColor: selectedFeature.accent }]}
+                  activeOpacity={0.85}
+                  onPress={() => {
+                    setSelectedFeature(null);
+                    navigation.navigate((selectedFeature as any).navTarget);
+                  }}
+                >
+                  <Text style={styles.modalCtaText}>{(selectedFeature as any).ctaLabel || 'Open'}</Text>
+                  <ArrowRight size={16} color="white" />
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </View>
@@ -575,15 +618,19 @@ const styles = StyleSheet.create({
   progressPercent: { fontSize: 11, color: '#86efac', fontWeight: 'bold' },
   progressBarBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 3, overflow: 'hidden' },
   progressBarFill: { height: '100%', borderRadius: 3 },
+  redeemBanner: { marginTop: 14, padding: 12, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
+  redeemBannerText: { color: 'rgba(255,255,255,0.75)', fontSize: 11.5, fontWeight: '600', lineHeight: 16 },
   section: { paddingHorizontal: 20, marginTop: 24 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 12 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center' },
   seeAllText: { fontSize: 12, color: '#16a34a', fontWeight: '600' },
   actionsGrid: { flexDirection: 'row', gap: 12, justifyContent: 'space-between' },
-  actionBtn: { flex: 1, padding: 12, borderRadius: 16, alignItems: 'center', gap: 8 },
+  actionBtn: { flex: 1, padding: 12, borderRadius: 16, alignItems: 'center', gap: 8, position: 'relative' },
   actionIconBg: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   actionText: { fontSize: 10, color: '#374151', fontWeight: '600', textAlign: 'center' },
+  actionBadge: { position: 'absolute', top: 6, right: 6, backgroundColor: '#16a34a', borderRadius: 6, paddingHorizontal: 5, paddingVertical: 2 },
+  actionBadgeText: { color: 'white', fontSize: 8, fontWeight: '800' },
   impactGrid: { flexDirection: 'row', gap: 12 },
   impactCard: { flex: 1, padding: 16, borderRadius: 16, elevation: 1 },
   impactCardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
@@ -648,4 +695,6 @@ const styles = StyleSheet.create({
   modalStepText: { fontSize: 15, fontWeight: '600', color: '#374151', flex: 1 },
   modalBenefit: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, borderRadius: 16, borderWidth: 1 },
   modalBenefitText: { fontSize: 15, fontWeight: '800' },
+  modalCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16, paddingVertical: 14, borderRadius: 100 },
+  modalCtaText: { color: 'white', fontWeight: '900', fontSize: 15 },
 });

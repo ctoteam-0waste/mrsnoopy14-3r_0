@@ -2,7 +2,7 @@ import api from './api';
 
 export const profileService = {
   // Update demographics during signup or from profile edit
-  updateDemographics: async (data: { age?: number, gender?: string, maritalStatus?: string, employment?: string }) => {
+  updateDemographics: async (data: { age?: number, gender?: string, maritalStatus?: string, employment?: string, sexualOrientation?: string }) => {
     try {
       const response = await api.patch('/api/v1/users/profile', data);
       return response.data;
@@ -15,7 +15,7 @@ export const profileService = {
   // Update Account Details
   updateAccount: async (data: { name?: string, email?: string, phone?: string }) => {
     try {
-      const response = await api.patch('/api/v1/users/account', data);
+      const response = await api.patch('/api/v1/users/profile', data);
       return response.data;
     } catch (error) {
       console.error('Update Account Error:', error);
@@ -57,14 +57,20 @@ export const profileService = {
   },
 
   // Send OTP for profile change verification
-  sendProfileOtp: async (emailOrPhone: string) => {
-    const response = await api.post('/api/v1/auth/send-otp', { email: emailOrPhone });
+  sendProfileOtp: async (value: string, isEmail: boolean, currentPhone?: string, currentEmail?: string) => {
+    const payload = isEmail
+      ? { email: value, phone: currentPhone, purpose: 'change-email' }
+      : { phone: value, email: currentEmail, purpose: 'change-phone' };
+    const response = await api.post('/api/v1/auth/send-otp', payload);
     return response.data;
   },
 
   // Verify profile change OTP
-  verifyProfileOtp: async (emailOrPhone: string, otp: string) => {
-    const response = await api.post('/api/v1/auth/verify-otp', { email: emailOrPhone, otp });
+  verifyProfileOtp: async (value: string, otp: string, isEmail: boolean, currentPhone?: string, currentEmail?: string) => {
+    const payload = isEmail
+      ? { email: value, otp, phone: currentPhone, purpose: 'change-email' }
+      : { phone: value, otp, email: currentEmail, purpose: 'change-phone' };
+    const response = await api.post('/api/v1/auth/verify-otp', payload);
     return response.data;
   },
 

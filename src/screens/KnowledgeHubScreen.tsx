@@ -68,11 +68,11 @@ export function KnowledgeHubScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 40, paddingBottom: 16 },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 40, paddingBottom: 16, maxWidth: 800, width: '100%', alignSelf: 'center' },
   backBtn: { padding: 8, backgroundColor: 'white', borderRadius: 12, elevation: 1 },
   headerTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a' },
   placeholderBox: { width: 40 },
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 40 },
+  scrollContent: { paddingHorizontal: 20, paddingBottom: 40, maxWidth: 800, width: '100%', alignSelf: 'center' },
   
   featuredCard: { backgroundColor: 'white', borderRadius: 24, overflow: 'hidden', elevation: 3, shadowColor: '#000', shadowOffset: {height: 4, width: 0}, shadowOpacity: 0.1, shadowRadius: 10, marginBottom: 32 },
   featuredImgPlaceholder: { height: 180, backgroundColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },

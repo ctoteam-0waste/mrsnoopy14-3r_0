@@ -4,11 +4,16 @@ import api from '../services/api';
 
 let Notifications: any = null;
 let Device: any = null;
+let Constants: any = null;
 
 try {
   Notifications = require('expo-notifications');
   Device = require('expo-device');
+  Constants = require('expo-constants').default;
 } catch (_) {}
+
+// Push tokens from Expo Go are sandbox tokens the backend rejects — skip entirely
+const isExpoGo = Constants?.appOwnership === 'expo';
 
 if (Notifications) {
   Notifications.setNotificationHandler({
@@ -24,6 +29,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
   if (!Notifications || !Device) return null;
   if (!Device.isDevice) return null;
   if (Platform.OS === 'web') return null;
+  if (isExpoGo) return null; // Expo Go tokens are rejected by backend — needs APK build
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {

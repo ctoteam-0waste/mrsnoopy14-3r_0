@@ -7,6 +7,9 @@ import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { WebFooter } from '../components/shared/WebFooter';
 import { profileService } from '../services/profile';
 import { bookingService } from '../services/booking';
+import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
+import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
+import { getStableUserSuffix } from '../utils/userId';
 
 const MAX = 1200;
 
@@ -14,14 +17,14 @@ const FEATURE_DETAILS = [
   {
     id: 'pickup', title: 'Schedule a pickup', emoji: '🚛',
     desc: 'Book a doorstep pickup for your recyclable waste in just 3 taps. We collect plastic, metal, paper, e-waste & more.',
-    steps: ['Select waste type', 'Choose date & time slot', 'Agent comes to your door', 'Earn Karma Coins instantly'],
+    steps: ['Select waste type', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
     benefit: 'Earn coins on every pickup',
     gradient: ['#052e16', '#15803d'] as [string, string],
     accent: '#4ade80',
   },
   {
     id: 'refer', title: 'Refer & earn', emoji: '👥',
-    desc: 'Share your referral code with friends. When they make their first pickup, you both get bonus Karma Coins!',
+    desc: 'Share your referral code with friends. When they make their first pickup, you both get bonus KarmaCoins XP!',
     steps: ['Share your unique code', 'Friend signs up & books pickup', 'Both earn bonus coins', 'No limit on referrals'],
     benefit: 'Bonus coins for every friend',
     gradient: ['#881337', '#e11d48'] as [string, string],
@@ -45,7 +48,7 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'instant', title: 'Instant credit', emoji: '⚡',
-    desc: 'No waiting — Karma Coins are credited to your wallet immediately after the agent verifies and collects your waste.',
+    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your waste.',
     steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
     benefit: 'Zero wait for rewards',
     gradient: ['#312e81', '#4f46e5'] as [string, string],
@@ -105,18 +108,22 @@ export function DashboardScreen({ navigation }: any) {
       }
     };
     const loadQuiz = async () => {
-      const token = await AsyncStorage.getItem('userToken') || 'x';
-      const sfx = token.slice(-8);
+      const token = await AsyncStorage.getItem('userToken');
+      const sfx = getStableUserSuffix(token);
       const [sd, ss] = await Promise.all([AsyncStorage.getItem(`lastQuizDate_${sfx}`), AsyncStorage.getItem(`quizStreak_${sfx}`)]);
       if (!sd) { setQuizStreak(0); return; }
-      const now = new Date();
-      const today = `${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`;
-      const y = new Date(now); y.setUTCDate(y.getUTCDate()-1);
-      const yest = `${y.getUTCFullYear()}-${String(y.getUTCMonth()+1).padStart(2,'0')}-${String(y.getUTCDate()).padStart(2,'0')}`;
+      const today = getLocalDateStr();
+      const yest = getLocalYesterdayStr();
       setQuizStreak(sd === today || sd === yest ? Number(ss) || 0 : 0);
     };
     const unsub = navigation.addListener('focus', () => { load(); loadQuiz(); });
     load(); loadQuiz();
+
+    (async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+    })();
+
     return unsub;
   }, [navigation]);
 
@@ -144,7 +151,7 @@ export function DashboardScreen({ navigation }: any) {
                 </View>
                 <View>
                   <Text style={[z.heroBalNum, isMobile && { fontSize: 32 }]}>{balance.toLocaleString()}</Text>
-                  <Text style={z.heroBalLabel}>Karma Coins</Text>
+                  <Text style={z.heroBalLabel}>KarmaCoins XP</Text>
                 </View>
               </View>
               <View style={[z.heroProgressWrap, isMobile && { maxWidth: '100%' }]}>
@@ -152,6 +159,9 @@ export function DashboardScreen({ navigation }: any) {
                   <LinearGradient colors={['#4ade80', '#22d3ee']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[z.heroProgressFill, { width: `${progress}%` as any }]} />
                 </View>
                 <Text style={z.heroProgressText}>{progress}% to next reward</Text>
+              </View>
+              <View style={[z.redeemBanner, isMobile && { maxWidth: '100%' }]}>
+                <Text style={z.redeemBannerText}>{REDEEM_INFO_MESSAGE}</Text>
               </View>
             </View>
 
@@ -235,7 +245,7 @@ export function DashboardScreen({ navigation }: any) {
                 </View>
               </View>
               <Text style={z.actionCardTitle}>Daily eco-quiz</Text>
-              <Text style={z.actionCardSub}>Test your recycling knowledge and earn up to 200 Karma Coins every day!</Text>
+              <Text style={z.actionCardSub}>Test your green IQ. Earn KarmaCoins XP daily.</Text>
               <View style={z.actionCardCTA}>
                 <Text style={[z.actionCardCTAText, { color: '#c084fc' }]}>Play now</Text>
                 <ArrowRight size={14} color="#c084fc" />
@@ -361,7 +371,7 @@ export function DashboardScreen({ navigation }: any) {
           <View style={z.referBannerDecor} />
           <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
             <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
-            <Text style={z.referSub}>Share your referral code and both of you earn bonus Karma Coins on their first pickup.</Text>
+            <Text style={z.referSub}>Share your referral code and both of you earn bonus KarmaCoins XP on their first pickup.</Text>
           </View>
           <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
             <Users size={18} color="#052e16" />
@@ -432,6 +442,8 @@ const z = StyleSheet.create({
   heroProgressTrack: { height: 5, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 },
   heroProgressFill: { height: 5, borderRadius: 3 },
   heroProgressText: { color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: '600' },
+  redeemBanner: { marginTop: 14, maxWidth: 320, padding: 12, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
+  redeemBannerText: { color: 'rgba(255,255,255,0.75)', fontSize: 11.5, fontWeight: '600', lineHeight: 16 },
 
   // Stats — single horizontal row on right
   heroRight: { flexDirection: 'row', gap: 10 },

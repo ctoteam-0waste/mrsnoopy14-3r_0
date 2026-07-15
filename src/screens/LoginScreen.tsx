@@ -1,11 +1,15 @@
-﻿import React, { useState, useRef } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, Alert, KeyboardAvoidingView } from 'react-native';
+﻿import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image } from 'react-native';
+import { showAlert } from '../utils/alert';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
-import { ArrowRight, Lock, User, CheckCircle2, CalendarDays, Heart, Briefcase, Eye, EyeOff } from 'lucide-react-native';
+import { ArrowRight, Lock, User, CheckCircle2, CalendarDays, Heart, Briefcase, Eye, EyeOff, Gift, Info, Check } from 'lucide-react-native';
 import { authService } from '../services/auth';
+import { BACKEND_BASE } from '../services/api';
 import { profileService } from '../services/profile';
+import { referralService } from '../services/referral';
 import { useUserSocket } from '../context/UserSocketContext';
 let GoogleSignin: any = null;
 let isErrorWithCode: any = null;
@@ -17,7 +21,46 @@ try {
   statusCodes = gs.statusCodes;
 } catch (_) {}
 
-type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'demographics' | 'reset_password';
+// Web OAuth client (karmaverse.earth) — configured for Google Identity Services on web only.
+// Native (Android/iOS) still uses the separate webClientId passed to GoogleSignin.configure in App.tsx.
+const GOOGLE_WEB_CLIENT_ID = '152765471990-4g23up0gau0bclvkm3gk67fa1mpbe5r8.apps.googleusercontent.com';
+
+let googleIdentityScriptPromise: Promise<void> | null = null;
+function loadGoogleIdentityScript(): Promise<void> {
+  if (googleIdentityScriptPromise) return googleIdentityScriptPromise;
+  // Don't cache a failure forever — reject paths null this out first so a future
+  // mount (e.g. navigating back to this step) can retry loading the script instead
+  // of staying permanently stuck on one failed attempt.
+  const failAndReset = (reject: (err: Error) => void, err: Error) => {
+    googleIdentityScriptPromise = null;
+    reject(err);
+  };
+  googleIdentityScriptPromise = new Promise<void>((resolve, reject) => {
+    if ((window as any).google?.accounts?.id) { resolve(); return; }
+    // A script tag that never fires onload OR onerror (e.g. silently blocked by an ad
+    // blocker/extension/network policy) would otherwise hang this promise forever,
+    // leaving the button permanently invisible with no error shown.
+    const timeout = setTimeout(() => {
+      failAndReset(reject, new Error('Google Sign-In script timed out loading — check for an ad blocker, browser extension, or network/firewall blocking accounts.google.com.'));
+    }, 8000);
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => { clearTimeout(timeout); resolve(); };
+    script.onerror = () => { clearTimeout(timeout); failAndReset(reject, new Error('Could not load Google Sign-In. Check your connection.')); };
+    document.head.appendChild(script);
+  });
+  return googleIdentityScriptPromise;
+}
+
+type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'referral_bonus' | 'demographics' | 'reset_password';
+
+// Covers the common emoji Unicode blocks — used to reject emojis in email fields.
+// Two copies: EMOJI_REGEX (no 'g') for .test(), EMOJI_REGEX_GLOBAL for .replace() —
+// a single 'g'-flagged regex would carry lastIndex state across repeated .test() calls.
+const EMOJI_REGEX = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/u;
+const EMOJI_REGEX_GLOBAL = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E0}-\u{1F1FF}]/gu;
 
 // Reusable Components
 function InputField({ placeholder, value, onChange, secureTextEntry = false, icon, autoFocus = false, keyboardType = 'default', maxLength, showToggle = false, onSubmitEditing, returnKeyType, inputRef, textContentType, autoComplete }: any) {
@@ -55,7 +98,7 @@ function InputField({ placeholder, value, onChange, secureTextEntry = false, ico
 function PrimaryButton({ onPress, disabled, loading, children, style }: any) {
   return (
     <TouchableOpacity
-      style={[styles.button, disabled || loading ? styles.buttonDisabled : undefined, style]}
+      style={[styles.button, disabled && !loading ? styles.buttonDisabled : undefined, style]}
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}
@@ -89,6 +132,15 @@ function SelectionPills({ options, selected, onSelect }: { options: string[], se
 export function LoginScreen({ navigation }: any) {
   const { reconnect } = useUserSocket();
   const [step, setStep] = useState<Step>('entry');
+  const [checkingSlow, setCheckingSlow] = useState(false);
+
+  // Backend runs on a free-tier host that cold-starts after inactivity — if the
+  // account check takes a while, let the user know it's not stuck.
+  useEffect(() => {
+    if (step !== 'checking') { setCheckingSlow(false); return; }
+    const t = setTimeout(() => setCheckingSlow(true), 4000);
+    return () => clearTimeout(t);
+  }, [step]);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -104,25 +156,45 @@ export function LoginScreen({ navigation }: any) {
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [emailError, setEmailError] = useState('');
-  const [signupErrors, setSignupErrors] = useState<{ name?: string; phone?: string; password?: string; general?: string }>({});
+  const [signupErrors, setSignupErrors] = useState<{ name?: string; email?: string; phone?: string; password?: string; general?: string }>({});
   // OTP token — memory only, never persisted (valid 10 min)
   const [otpToken, setOtpToken] = useState('');
   // Resend countdown timer (seconds), driven by server retryAfter
   const [resendTimer, setResendTimer] = useState(0);
   // Phone used in forgot password flow
   const [forgotPhone, setForgotPhone] = useState('');
+  // Set when Google Identity Services fails to load/init on web (e.g. origin not authorized yet)
+  const [googleBtnError, setGoogleBtnError] = useState('');
+
+  // Referral code (optional, signup only)
+  const [referralCode, setReferralCode] = useState('');
+  const [referralStatus, setReferralStatus] = useState<'idle' | 'loading' | 'valid' | 'invalid'>('idle');
+  const [referralValidName, setReferralValidName] = useState('');
+  const referralTimerRef = useRef<any>(null);
+
+  // Deep link — auto-fill referral code if app was opened via referral link
+  React.useEffect(() => {
+    AsyncStorage.getItem('pendingReferralCode').then(code => {
+      if (code) {
+        setReferralCode(code);
+        AsyncStorage.removeItem('pendingReferralCode');
+      }
+    });
+  }, []);
 
   // Demographics State
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
+  const [sexualOrientation, setSexualOrientation] = useState('');
   const [maritalStatus, setMaritalStatus] = useState('');
   const [employment, setEmployment] = useState('');
 
   // BUG-002: Check connectivity immediately when signup step opens
   React.useEffect(() => {
     if (step === 'signup' || step === 'login') {
-      fetch('https://karmacoin-backend-8.onrender.com/', { method: 'HEAD' })
+      fetch(`${BACKEND_BASE}/`, { method: 'HEAD' })
         .then(() => setIsOffline(false))
         .catch(() => setIsOffline(true));
     } else {
@@ -137,6 +209,30 @@ export function LoginScreen({ navigation }: any) {
     return () => clearTimeout(t);
   }, [resendTimer]);
 
+  // Debounced referral code validation (500ms)
+  React.useEffect(() => {
+    if (referralTimerRef.current) clearTimeout(referralTimerRef.current);
+    const code = referralCode.trim().toUpperCase();
+    if (!code) { setReferralStatus('idle'); setReferralValidName(''); return; }
+    setReferralStatus('loading');
+    referralTimerRef.current = setTimeout(async () => {
+      try {
+        const data = await referralService.validateCode(code);
+        if (data.valid) {
+          setReferralValidName(data.referrerName || '');
+          setReferralStatus('valid');
+        } else {
+          setReferralStatus('invalid');
+          setReferralValidName('');
+        }
+      } catch {
+        setReferralStatus('invalid');
+        setReferralValidName('');
+      }
+    }, 500);
+    return () => { if (referralTimerRef.current) clearTimeout(referralTimerRef.current); };
+  }, [referralCode]);
+
   // Focus new password field via ref when substep opens (avoids autoFocus + secureTextEntry iOS bug)
   React.useEffect(() => {
     if (resetSubStep === 'new_password') {
@@ -145,9 +241,68 @@ export function LoginScreen({ navigation }: any) {
     }
   }, [resetSubStep]);
 
-  const handleGoogleSignIn = async () => {
+  const finishGoogleLogin = async (idToken: string) => {
+    setIsLoading(true);
+    try {
+      await authService.googleLogin(idToken);
+      reconnect();
+      navigation.replace('App');
+    } catch (error: any) {
+      showAlert('Google sign-in failed', error?.response?.data?.message || 'Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Mounts Google's own "Sign in with Google" button into `node` (web only).
+  // Used as a ref callback so it re-attaches whenever the container remounts.
+  const mountGoogleButton = useCallback((node: any) => {
+    if (!node || Platform.OS !== 'web') return;
+    (async () => {
+      try {
+        await loadGoogleIdentityScript();
+        const google = (window as any).google;
+        google.accounts.id.initialize({
+          client_id: GOOGLE_WEB_CLIENT_ID,
+          callback: (resp: any) => {
+            if (resp?.credential) finishGoogleLogin(resp.credential);
+            else showAlert('Google sign-in failed', 'Please try again.');
+          },
+          log_level: 'debug',
+        });
+        node.innerHTML = '';
+        // Defer measuring until after layout settles (the ref callback can fire before
+        // the container has a real width, e.g. mid-mount at width 0) — a double rAF
+        // guarantees at least one paint has happened first.
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          // GIS's button takes a fixed pixel width (no responsive/percentage option,
+          // and 400 is its own max) — measure the container so it still reads full-width.
+          const rawWidth = node.getBoundingClientRect?.().width || node.offsetWidth;
+          const width = Number.isFinite(rawWidth) && rawWidth > 0
+            ? Math.min(400, Math.max(220, Math.round(rawWidth)))
+            : 320; // safe fallback if measurement ever comes back 0/NaN/undefined
+          google.accounts.id.renderButton(node, { type: 'standard', text: 'continue_with', shape: 'rectangular', theme: 'outline', size: 'large', width });
+          // GIS fails silently (logs to console, doesn't throw) when the origin isn't
+          // authorized for this client ID — detect the empty result and surface it.
+          setTimeout(() => {
+            if (!node.children || node.children.length === 0) {
+              setGoogleBtnError(
+                `Google didn't render a button for origin ${window.location.origin}. ` +
+                `This origin is most likely not yet added as an Authorized JavaScript origin for client ID ${GOOGLE_WEB_CLIENT_ID} in Google Cloud Console. Check the browser console for the exact GSI error.`
+              );
+            }
+          }, 1200);
+        }));
+      } catch (error: any) {
+        setGoogleBtnError(error?.message || 'Failed to load Google Sign-In.');
+        console.warn('Google Identity Services failed to load', error);
+      }
+    })();
+  }, []);
+
+  const handleGoogleSignInNative = async () => {
     if (!GoogleSignin) {
-      Alert.alert('Not available', 'Google Sign-In requires a native build. Use APK to test.');
+      showAlert('Not available', 'Google Sign-In requires a native build. Use APK to test.');
       return;
     }
     try {
@@ -155,22 +310,17 @@ export function LoginScreen({ navigation }: any) {
       const response = await GoogleSignin.signIn();
       const idToken = response.data?.idToken;
       if (!idToken) throw new Error('No ID token received from Google');
-      setIsLoading(true);
-      await authService.googleLogin(idToken);
-      reconnect();
-      navigation.replace('App');
+      await finishGoogleLogin(idToken);
     } catch (error: any) {
       if (isErrorWithCode(error)) {
         if (error.code === statusCodes.SIGN_IN_CANCELLED) return;
         if (error.code === statusCodes.IN_PROGRESS) return;
         if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-          Alert.alert('Not available', 'Google Play Services not available on this device.');
+          showAlert('Not available', 'Google Play Services not available on this device.');
           return;
         }
       }
-      Alert.alert('Google sign-in failed', error?.response?.data?.message || 'Please try again.');
-    } finally {
-      setIsLoading(false);
+      showAlert('Google sign-in failed', error?.response?.data?.message || 'Please try again.');
     }
   };
 
@@ -185,6 +335,11 @@ export function LoginScreen({ navigation }: any) {
       return;
     }
 
+    if (EMOJI_REGEX.test(identifier)) {
+      setEmailError('Email address cannot contain emojis.');
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(identifier.trim())) {
       setEmailError('Please enter a valid email address.');
@@ -196,7 +351,7 @@ export function LoginScreen({ navigation }: any) {
     setStep('checking');
     try {
       const res = await authService.checkUser(identifier.trim());
-      
+
       if (res?.data?.isRegistered) {
         setStep('login');
       } else {
@@ -204,16 +359,24 @@ export function LoginScreen({ navigation }: any) {
         setStep('signup');
       }
     } catch (error: any) {
-      Alert.alert('Error', error?.response?.data?.message || 'Failed to check account.');
+      const isNetworkError = !error?.response;
+      showAlert(
+        isNetworkError ? 'No internet connection' : 'Error',
+        isNetworkError
+          ? 'Please check your network connection and try again.'
+          : (error?.response?.data?.message || 'Failed to check account.')
+      );
       setStep('entry');
     }
   };
 
   const handleSignupSubmit = async () => {
-    const errs: { name?: string; phone?: string; password?: string; general?: string } = {};
+    const errs: { name?: string; email?: string; phone?: string; password?: string; general?: string } = {};
     if (!name.trim() || !email.trim() || !phone.trim() || !password) return;
+    if (EMOJI_REGEX.test(email)) errs.email = 'Email address cannot contain emojis.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = 'Please enter a valid email address.';
     if (!/^[a-zA-Z\s]+$/.test(name.trim())) errs.name = 'Full name should contain only letters.';
-    if (!/^\d{10}$/.test(phone.trim())) errs.phone = 'Please enter a valid 10-digit phone number.';
+    if (!/^[6-9]\d{9}$/.test(phone.trim())) errs.phone = 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).';
     if (password.length < 6) errs.password = 'Password must be at least 6 characters.';
     if (Object.keys(errs).length > 0) { setSignupErrors(errs); return; }
     setSignupErrors({});
@@ -246,12 +409,15 @@ export function LoginScreen({ navigation }: any) {
       const verifyRes = await authService.verifyOtp(phone.trim(), otp, 'registration');
       const token = verifyRes?.data?.otpToken;
       if (!token) throw new Error('OTP verification failed — no token received.');
-      await authService.register({ name, email, phone: phone.trim(), password, otpToken: token });
+      await authService.register({
+        name, email, phone: phone.trim(), password, otpToken: token,
+        ...(referralStatus === 'valid' && referralCode.trim() ? { referralCode: referralCode.trim().toUpperCase() } : {}),
+      });
       try {
         await authService.login(email, password);
-        setStep('demographics');
+        setStep(referralStatus === 'valid' ? 'referral_bonus' : 'demographics');
       } catch (_) {
-        Alert.alert('Account created!', 'Your account was created. Please log in.', [{ text: 'Login', onPress: () => setStep('login') }]);
+        showAlert('Account created!', 'Your account was created. Please log in.', [{ text: 'Login', onPress: () => setStep('login') }]);
       }
     } catch (error: any) {
       const msg = error?.response?.data?.message || error?.message;
@@ -261,7 +427,7 @@ export function LoginScreen({ navigation }: any) {
         setStep('signup');
         setSignupErrors({ general: msg || 'Too many attempts. Please request a new OTP.' });
       } else {
-        Alert.alert('Verification failed', msg || 'Invalid or expired OTP. Please try again.');
+        showAlert('Verification failed', msg || 'Invalid or expired OTP. Please try again.');
       }
     } finally {
       setIsLoading(false);
@@ -292,11 +458,11 @@ export function LoginScreen({ navigation }: any) {
       navigation.replace('App');
     } catch (error: any) {
       const isNetworkError = !error?.response;
-      Alert.alert(
-        isNetworkError ? 'No Internet Connection' : 'Login Failed',
+      showAlert(
+        isNetworkError ? 'No internet connection' : 'Login failed',
         isNetworkError
           ? 'Please check your network connection and try again.'
-          : (error?.response?.data?.message || 'Invalid email or password.')
+          : (error?.response?.data?.message || 'Incorrect email or password. Please try again.')
       );
     } finally {
       setIsLoading(false);
@@ -305,18 +471,18 @@ export function LoginScreen({ navigation }: any) {
 
   const handleCompleteRegistration = async () => {
     const ageNum = parseInt(age);
-    if (!age || isNaN(ageNum) || ageNum < 5 || ageNum > 100) {
-      Alert.alert('Invalid age', 'Please enter a valid age between 5 and 100.');
+    if (!age || isNaN(ageNum) || ageNum < 13 || ageNum > 100) {
+      showAlert('Invalid age', 'You must be at least 13 years old to use KarmaVerse.');
       return;
     }
     setIsLoading(true);
     try {
-      await profileService.updateDemographics({ age: ageNum, gender, maritalStatus, employment });
+      await profileService.updateDemographics({ age: ageNum, gender, sexualOrientation, maritalStatus, employment });
       reconnect();
       navigation.replace('App');
     } catch (error: any) {
       const isNetworkError = !error?.response;
-      Alert.alert(
+      showAlert(
         isNetworkError ? 'No Internet Connection' : 'Failed to Save',
         isNetworkError
           ? 'Could not save your details. Please check your connection.'
@@ -333,15 +499,15 @@ export function LoginScreen({ navigation }: any) {
 
   const handleResetPassword = async () => {
     if (!newPassword || newPassword.length < 6) {
-      Alert.alert('Invalid password', 'Password must be at least 6 characters.');
+      showAlert('Invalid password', 'Password must be at least 6 characters.');
       return;
     }
     if (newPassword !== confirmPassword) {
-      Alert.alert('Passwords do not match', 'New password and confirm password must be the same.');
+      showAlert('Passwords do not match', 'New password and confirm password must be the same.');
       return;
     }
     if (!otpToken) {
-      Alert.alert('Session expired', 'OTP session expired. Please start again.');
+      showAlert('Session expired', 'OTP session expired. Please start again.');
       setResetSubStep('send_otp');
       return;
     }
@@ -353,7 +519,7 @@ export function LoginScreen({ navigation }: any) {
       setNewPassword('');
       setConfirmPassword('');
       setForgotPhone('');
-      Alert.alert('Password reset!', 'Your password has been reset successfully. Please log in.');
+      showAlert('Password reset!', 'Your password has been reset successfully. Please log in.');
       setStep('login');
     } catch (error: any) {
       const msg = error?.response?.data?.message || 'Failed to reset password.';
@@ -361,9 +527,9 @@ export function LoginScreen({ navigation }: any) {
       if (error?.response?.status === 400 && msg.toLowerCase().includes('expired')) {
         setOtpToken('');
         setResetSubStep('send_otp');
-        Alert.alert('Session expired', 'OTP expired. Please request a new one.');
+        showAlert('Session expired', 'OTP expired. Please request a new one.');
       } else {
-        Alert.alert('Reset failed', msg);
+        showAlert('Reset failed', msg);
       }
     } finally {
       setIsLoading(false);
@@ -373,7 +539,7 @@ export function LoginScreen({ navigation }: any) {
   const renderStep = () => {
     if (step === 'entry') {
       return (
-        <View style={styles.stepContent}>
+        <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.stepContent}>
           <View>
             <Text style={styles.title}>Welcome 👋</Text>
             <Text style={styles.subtitle}>Enter your email address to get started</Text>
@@ -382,7 +548,7 @@ export function LoginScreen({ navigation }: any) {
             key="entry-email"
             placeholder="Email address"
             value={identifier}
-            onChange={(t: string) => { setIdentifier(t); if (emailError) setEmailError(''); }}
+            onChange={(t: string) => { setIdentifier(t.replace(EMOJI_REGEX_GLOBAL, '')); if (emailError) setEmailError(''); }}
             icon={<User size={18} color="#94a3b8" />}
             keyboardType="email-address"
             maxLength={254}
@@ -396,65 +562,79 @@ export function LoginScreen({ navigation }: any) {
             <ArrowRight size={18} color="#fff" />
           </PrimaryButton>
 
-          {/* Social Login Separator */}
+          {/* Social login */}
           <View style={styles.dividerRow}>
-            <View style={styles.dividerLine} />
-            <Text style={styles.dividerText}>or continue with</Text>
-            <View style={styles.dividerLine} />
-          </View>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or continue with</Text>
+                <View style={styles.dividerLine} />
+              </View>
 
-          {/* Social Login Buttons Row */}
-          <View style={styles.socialRow}>
-            {/* Google */}
-            <TouchableOpacity
-              style={styles.socialIconBtnZomato}
-              activeOpacity={0.8}
-              onPress={handleGoogleSignIn}
-            >
-              <Svg width="26" height="26" viewBox="0 0 48 48">
-                <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
-                <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
-                <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
-                <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
-              </Svg>
-            </TouchableOpacity>
+              {Platform.OS === 'web' ? (
+                googleBtnError ? (
+                  <TouchableOpacity
+                    style={[styles.googleFullBtn, { borderColor: '#fca5a5' }]}
+                    activeOpacity={0.8}
+                    onPress={() => showAlert('Google sign-in unavailable', googleBtnError)}
+                  >
+                    <Info size={20} color="#dc2626" />
+                    <Text style={[styles.googleFullBtnText, { color: '#dc2626' }]}>Google sign-in unavailable</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View style={styles.googleFullBtnWrap}>
+                    <View style={styles.googleFullBtn} pointerEvents="none">
+                      <Svg width="20" height="20" viewBox="0 0 48 48">
+                        <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
+                        <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                        <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                        <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                      </Svg>
+                      <Text style={styles.googleFullBtnText}>Continue with Google</Text>
+                    </View>
+                    <View ref={mountGoogleButton} style={styles.googleOverlayMount} />
+                  </View>
+                )
+              ) : (
+                <TouchableOpacity
+                  style={styles.googleFullBtn}
+                  activeOpacity={0.8}
+                  onPress={handleGoogleSignInNative}
+                >
+                  <Svg width="20" height="20" viewBox="0 0 48 48">
+                    <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
+                    <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                    <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                    <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                  </Svg>
+                  <Text style={styles.googleFullBtnText}>Continue with Google</Text>
+                </TouchableOpacity>
+              )}
 
-            {/* Apple */}
-            {Platform.OS === 'ios' && (
-              <TouchableOpacity
-                style={styles.socialIconBtnZomato}
-                activeOpacity={0.8}
-                onPress={() => Alert.alert('Coming soon', 'Apple login coming soon!')}
-              >
-                <Svg width="30" height="30" viewBox="0 0 384 512">
-                  <Path fill="#000" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
-                </Svg>
-              </TouchableOpacity>
-            )}
-
-            {/* Facebook */}
-            <TouchableOpacity
-              style={styles.socialIconBtnZomato}
-              activeOpacity={0.8}
-              onPress={() => Alert.alert('Coming soon', 'Facebook login coming soon!')}
-            >
-              <Svg width="26" height="26" viewBox="0 0 24 24">
-                <Path fill="#1877F2" d="M24 12.073C24 5.449 18.627 0 12 0S0 5.449 0 12.073c0 5.986 4.388 10.942 10.125 11.905v-8.428H7.078v-3.477h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.477h-2.796v8.428C19.612 23.015 24 18.059 24 12.073z" />
-                <Path fill="#FFF" d="M16.671 15.55l.532-3.477h-3.328v-2.25c0-.949.465-1.874 1.956-1.874h1.514V5.006s-1.374-.235-2.686-.235c-2.741 0-4.533 1.662-4.533 4.669v2.643H7.078v3.477h3.047v8.428a12.04 12.04 0 003.75 0v-8.428h2.796z" />
-              </Svg>
-            </TouchableOpacity>
-          </View>
-        </View>
+              <View style={styles.socialRow}>
+                {Platform.OS === 'ios' && (
+                  <TouchableOpacity
+                    style={styles.socialIconBtnZomato}
+                    activeOpacity={0.8}
+                    onPress={() => showAlert('Coming soon', 'Apple login coming soon!')}
+                  >
+                    <Svg width="30" height="30" viewBox="0 0 384 512">
+                      <Path fill="#000" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+                    </Svg>
+                  </TouchableOpacity>
+                )}
+              </View>
+        </ScrollView>
       );
     }
-    
+
     if (step === 'checking') {
       return (
         <View style={[styles.stepContent, { alignItems: 'center', justifyContent: 'center', marginTop: 40 }]}>
           <ActivityIndicator size="large" color="#16a34a" />
-          <Text style={[styles.subtitle, { marginTop: 16 }]}>Checking your account...</Text>
+          <Text style={[styles.subtitle, { marginTop: 16 }]}>
+            {checkingSlow ? 'Waking up the server, this can take up to a minute...' : 'Checking your account...'}
+          </Text>
         </View>
-    
+
       );
     }
 
@@ -514,8 +694,8 @@ export function LoginScreen({ navigation }: any) {
               autoFocus
             />
             <PrimaryButton onPress={async () => {
-              if (!/^\d{10}$/.test(forgotPhone.trim())) {
-                Alert.alert('Invalid phone', 'Please enter a valid 10-digit phone number.');
+              if (!/^[6-9]\d{9}$/.test(forgotPhone.trim())) {
+                showAlert('Invalid phone', 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).');
                 return;
               }
               setIsLoading(true);
@@ -527,11 +707,11 @@ export function LoginScreen({ navigation }: any) {
               } catch (error: any) {
                 const d = error?.response?.data;
                 const msg = d?.message || d?.error || d?.msg || (typeof d === 'string' ? d : null);
-                Alert.alert('Could not send OTP', msg || 'Please try again.');
+                showAlert('Could not send OTP', msg || 'Please try again.');
               } finally {
                 setIsLoading(false);
               }
-            }} disabled={forgotPhone.length !== 10} loading={isLoading}>
+            }} disabled={!/^[6-9]\d{9}$/.test(forgotPhone.trim())} loading={isLoading}>
               <Text style={styles.buttonText}>Send OTP</Text>
               <ArrowRight size={18} color="#fff" />
             </PrimaryButton>
@@ -578,9 +758,9 @@ export function LoginScreen({ navigation }: any) {
                   setOtpToken('');
                   setOtpValue('');
                   setResetSubStep('send_otp');
-                  Alert.alert('Too many attempts', msg || 'Please request a new OTP.');
+                  showAlert('Too many attempts', msg || 'Please request a new OTP.');
                 } else {
-                  Alert.alert('Verification failed', msg || 'Invalid or expired OTP.');
+                  showAlert('Verification failed', msg || 'Invalid or expired OTP.');
                 }
               } finally {
                 setIsLoading(false);
@@ -600,7 +780,7 @@ export function LoginScreen({ navigation }: any) {
                   setResendTimer(res?.data?.retryAfter || 60);
                   setOtpValue('');
                 } catch (error: any) {
-                  Alert.alert('Could not resend', error?.response?.data?.message || 'Please try again.');
+                  showAlert('Could not resend', error?.response?.data?.message || 'Please try again.');
                 } finally {
                   setIsLoading(false);
                 }
@@ -673,15 +853,16 @@ export function LoginScreen({ navigation }: any) {
           )}
             <View>
               <Text style={styles.title}>Create your account 🌱</Text>
-              <Text style={styles.subtitle}>Join us and earn Karma Coins!</Text>
+              <Text style={styles.subtitle}>Join us and earn KarmaCoins XP!</Text>
             </View>
             <InputField
               placeholder="Email address"
               value={email}
-              onChange={setEmail}
+              onChange={(v: string) => { setEmail(v.replace(EMOJI_REGEX_GLOBAL, '')); setSignupErrors(e => ({ ...e, email: undefined })); }}
               keyboardType="email-address"
               icon={<User size={18} color="#94a3b8" />}
             />
+            {signupErrors.email ? <Text style={styles.fieldError}>{signupErrors.email}</Text> : null}
             <InputField
               placeholder="Full name"
               value={name}
@@ -707,8 +888,50 @@ export function LoginScreen({ navigation }: any) {
               icon={<Lock size={18} color="#94a3b8" />}
             />
             {signupErrors.password ? <Text style={styles.fieldError}>{signupErrors.password}</Text> : null}
+            <InputField
+              placeholder="Referral code (optional)"
+              value={referralCode}
+              onChange={(v: string) => setReferralCode(v.replace(/\s/g, '').toUpperCase())}
+              icon={<Gift size={18} color="#94a3b8" />}
+              autoCapitalize="characters"
+            />
+            {referralStatus === 'loading' && (
+              <Text style={styles.referralHint}>Checking code...</Text>
+            )}
+            {referralStatus === 'valid' && (
+              <Text style={[styles.referralHint, { color: '#16a34a' }]}>
+                ✓ Referred by {referralValidName} — you'll both get 1,000 KarmaCoins XP!
+              </Text>
+            )}
+            {referralStatus === 'invalid' && (
+              <Text style={[styles.referralHint, { color: '#dc2626' }]}>Invalid referral code</Text>
+            )}
             {signupErrors.general ? <Text style={styles.fieldError}>{signupErrors.general}</Text> : null}
-            <PrimaryButton onPress={handleSignupSubmit} disabled={!password || !name || !email || !phone || isLoading} loading={isLoading}>
+
+            <View style={styles.termsRow}>
+              <TouchableOpacity
+                style={[styles.checkbox, agreedToTerms && styles.checkboxOn]}
+                onPress={() => setAgreedToTerms(v => !v)}
+                activeOpacity={0.7}
+              >
+                {agreedToTerms && <Check size={14} color="#fff" strokeWidth={3} />}
+              </TouchableOpacity>
+              <Text style={styles.termsText}>
+                I agree to the{' '}
+                <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms' })}>Terms & Conditions</Text>
+                {' '}and{' '}
+                <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>Privacy Policy</Text>
+              </Text>
+              <TouchableOpacity
+                style={styles.infoBtn}
+                onPress={() => navigation.navigate('Legal', { type: 'privacy' })}
+                activeOpacity={0.7}
+              >
+                <Info size={16} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+
+            <PrimaryButton onPress={handleSignupSubmit} disabled={!password || !name || !email || !phone || !agreedToTerms || isLoading} loading={isLoading}>
               <Text style={styles.buttonText}>Sign up</Text>
               <ArrowRight size={18} color="#fff" />
             </PrimaryButton>
@@ -751,6 +974,7 @@ export function LoginScreen({ navigation }: any) {
               onPress={handleVerifySignupOtp}
               disabled={signupOtp.join('').length < 6}
               loading={isLoading}
+              style={{ width: '100%' }}
             >
               <Text style={styles.buttonText}>Verify & create account</Text>
             </PrimaryButton>
@@ -766,7 +990,7 @@ export function LoginScreen({ navigation }: any) {
                   setResendTimer(res?.data?.retryAfter || 60);
                   setSignupOtp(['', '', '', '', '', '']);
                 } catch (error: any) {
-                  Alert.alert('Failed', error?.response?.data?.message || 'Could not resend OTP.');
+                  showAlert('Failed', error?.response?.data?.message || 'Could not resend OTP.');
                 } finally { setIsLoading(false); }
               }}
             >
@@ -783,8 +1007,63 @@ export function LoginScreen({ navigation }: any) {
       );
     }
 
+    if (step === 'referral_bonus') {
+      return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 }}>
+          <View style={{ width: 96, height: 96, borderRadius: 48, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 24, borderWidth: 2, borderColor: '#bbf7d0' }}>
+            <KarmaCoin size={56} glow animated />
+          </View>
+
+          <Text style={{ fontSize: 28, fontWeight: '900', color: '#064e3b', textAlign: 'center', marginBottom: 8 }}>
+            Welcome gift unlocked!
+          </Text>
+          <Text style={{ fontSize: 16, color: '#166534', fontWeight: '700', textAlign: 'center', marginBottom: 4 }}>
+            +1,000 KarmaCoins XP added to your wallet
+          </Text>
+          {referralValidName ? (
+            <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
+              You and {referralValidName} both received 1,000 KarmaCoins XP for joining together.
+            </Text>
+          ) : (
+            <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', textAlign: 'center', marginBottom: 32, lineHeight: 20 }}>
+              You've both been rewarded with 1,000 KarmaCoins XP each.
+            </Text>
+          )}
+
+          <View style={{ width: '100%', backgroundColor: '#f0fdf4', borderRadius: 20, padding: 20, borderWidth: 1, borderColor: '#bbf7d0', marginBottom: 32, gap: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+                <KarmaCoin size={20} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: '#064e3b' }}>Your starting balance</Text>
+                <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '500' }}>1,000 coins waiting in your wallet</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ fontSize: 18 }}>♻️</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 13, fontWeight: '800', color: '#064e3b' }}>Schedule your first pickup</Text>
+                <Text style={{ fontSize: 11, color: '#64748b', fontWeight: '500' }}>Recycle waste & earn even more coins</Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            style={{ backgroundColor: '#15803d', width: '100%', paddingVertical: 18, borderRadius: 16, alignItems: 'center', shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 5 }}
+            onPress={() => setStep('demographics')}
+            activeOpacity={0.85}
+          >
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: '900' }}>Continue to setup profile</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
     if (step === 'demographics') {
-      const isComplete = age && gender && maritalStatus && employment;
+      const isComplete = age && gender && sexualOrientation && maritalStatus && employment;
 
       return (
         <ScrollView style={{flex: 1, marginHorizontal: -24}} contentContainerStyle={styles.scrollStepContent} showsVerticalScrollIndicator={false}>
@@ -794,7 +1073,7 @@ export function LoginScreen({ navigation }: any) {
           </View>
 
           <View style={styles.formCard}>
-            
+
             <View style={styles.fieldSection}>
               <View style={styles.labelRow}>
                 <CalendarDays size={18} color="#0f172a" />
@@ -816,10 +1095,24 @@ export function LoginScreen({ navigation }: any) {
                 <User size={18} color="#0f172a" />
                 <Text style={styles.fieldLabel}>Identity (gender)</Text>
               </View>
-              <SelectionPills 
-                options={['Male', 'Female', 'Other', 'Select Later']} 
-                selected={gender} 
-                onSelect={setGender} 
+              <SelectionPills
+                options={['Male', 'Female', 'Other']}
+                selected={gender}
+                onSelect={setGender}
+              />
+            </View>
+
+            <View style={styles.fieldDivider} />
+
+            <View style={styles.fieldSection}>
+              <View style={styles.labelRow}>
+                <Heart size={18} color="#0f172a" />
+                <Text style={styles.fieldLabel}>Sexual orientation</Text>
+              </View>
+              <SelectionPills
+                options={['Straight', 'Lesbian', 'Gay', 'Others']}
+                selected={sexualOrientation}
+                onSelect={setSexualOrientation}
               />
             </View>
 
@@ -853,15 +1146,18 @@ export function LoginScreen({ navigation }: any) {
 
           </View>
 
-          <PrimaryButton 
-            onPress={handleCompleteRegistration} 
-            disabled={!isComplete} 
+          <PrimaryButton
+            onPress={handleCompleteRegistration}
+            disabled={!isComplete}
             loading={isLoading}
             style={{marginTop: 8}}
           >
             <Text style={styles.buttonText}>Complete registration</Text>
             <CheckCircle2 size={20} color="#fff" />
           </PrimaryButton>
+          <TouchableOpacity style={{ alignItems: 'center', paddingVertical: 12 }} onPress={() => { reconnect(); navigation.replace('App'); }}>
+            <Text style={{ color: '#64748b', fontWeight: '700', fontSize: 14 }}>Skip for now</Text>
+          </TouchableOpacity>
         </ScrollView>
       );
     }
@@ -869,7 +1165,7 @@ export function LoginScreen({ navigation }: any) {
 
   return (
     <KeyboardAvoidingView
-      style={[styles.rootContainer, { backgroundColor: step === 'demographics' ? '#f0fdf4' : '#ffffff' }]}
+      style={[styles.rootContainer, { backgroundColor: (step === 'demographics' || step === 'referral_bonus') ? '#f0fdf4' : '#ffffff' }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
@@ -878,11 +1174,12 @@ export function LoginScreen({ navigation }: any) {
 
       <SafeAreaView style={{ flex: 1 }}>
         <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
-          <KarmaCoin size={54} glow />
-          <Text style={styles.headerTitle}>KarmaCoins XP</Text>
+          <View style={styles.logoCard}>
+            <Image source={require('../../assets/logo.png')} style={styles.logoImg} resizeMode="contain" />
+          </View>
         </LinearGradient>
 
-        <View style={[styles.body, step === 'demographics' && { paddingHorizontal: 0, paddingBottom: 0 }]}>
+        <View style={[styles.body, (step === 'demographics' || step === 'referral_bonus') && { paddingHorizontal: 0, paddingBottom: 0 }]}>
           {renderStep()}
         </View>
       </SafeAreaView>
@@ -895,6 +1192,7 @@ const styles = StyleSheet.create({
   offlineBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 8 },
   offlineBannerText: { color: '#dc2626', fontSize: 13, fontWeight: '700', textAlign: 'center' },
   fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
+  referralHint: { fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4, color: '#64748b' },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 100, backgroundColor: '#064e3b' },
   container: { flex: 1, backgroundColor: '#ffffff', maxWidth: 900, width: '100%', alignSelf: 'center' },
   header: {
@@ -906,6 +1204,14 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 12, letterSpacing: 0.5 },
+  logoCard: { alignItems: 'center', justifyContent: 'center' },
+  logoImg: { width: 240, height: 150 },
+  termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 4 },
+  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
+  termsText: { flex: 1, fontSize: 13, color: '#475569', lineHeight: 19, fontWeight: '500' },
+  termsLink: { color: '#16a34a', fontWeight: '800' },
+  infoBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center', marginTop: -2 },
   
   body: { flex: 1, paddingHorizontal: 24, paddingTop: 32 },
   
@@ -951,6 +1257,37 @@ const styles = StyleSheet.create({
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginTop: 32, marginBottom: 20 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#f1f5f9' },
   dividerText: { marginHorizontal: 16, color: '#94a3b8', fontSize: 13, fontWeight: '700' },
+
+  // Full-width "Continue with Google" button (native) / mount point (web, where
+  // Google's own GIS button renders itself inside this container).
+  googleFullBtn: {
+    width: '100%',
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: 'white',
+    borderWidth: 1.5,
+    borderColor: '#e2e8f0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  googleFullBtnText: { color: '#1f2937', fontWeight: '700', fontSize: 15 },
+  googleFullBtnMount: { width: '100%', minHeight: 44, alignItems: 'center', justifyContent: 'center' },
+  // Web: our own button renders immediately (so the slot is never blank while GIS
+  // loads); Google's real button is layered exactly on top, fully transparent, so
+  // clicks land on the genuine iframe (required for the OAuth popup to be trusted).
+  googleFullBtnWrap: { width: '100%', height: 56, position: 'relative' },
+  googleOverlayMount: {
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    opacity: 0.01, overflow: 'hidden', zIndex: 2,
+    alignItems: 'center', justifyContent: 'center',
+  },
 
   // Zomato Style Circular Social Login Buttons
   socialRow: { flexDirection: 'row', gap: 20, justifyContent: 'center' },
@@ -1018,12 +1355,12 @@ const styles = StyleSheet.create({
   readonlyEmailText: { flex: 1, fontSize: 15, color: '#475569', fontWeight: '500' },
 
   // OTP Verification
-  otpContainer: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 24, paddingVertical: 40 },
-  otpIconBg: { width: 64, height: 64, borderRadius: 20, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#bbf7d0' },
-  otpTitle: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginBottom: 8 },
-  otpSubtitle: { fontSize: 14, color: '#64748b', fontWeight: '500' },
-  otpEmail: { fontSize: 15, color: '#15803d', fontWeight: '800', marginBottom: 28 },
-  otpBoxRow: { flexDirection: 'row', gap: 10, marginBottom: 28 },
+  otpContainer: { alignItems: 'center', paddingHorizontal: 24, paddingTop: 32, paddingBottom: 40 },
+  otpIconBg: { width: 64, height: 64, borderRadius: 20, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center', marginBottom: 20, borderWidth: 1.5, borderColor: '#86efac' },
+  otpTitle: { fontSize: 24, fontWeight: '900', color: '#0f172a', marginBottom: 8, textAlign: 'center' },
+  otpSubtitle: { fontSize: 14, color: '#64748b', fontWeight: '500', textAlign: 'center' },
+  otpEmail: { fontSize: 15, color: '#15803d', fontWeight: '800', marginBottom: 28, textAlign: 'center' },
+  otpBoxRow: { flexDirection: 'row', gap: 10, marginBottom: 28, justifyContent: 'center' },
   otpBox: { width: 48, height: 56, borderRadius: 14, borderWidth: 2, borderColor: '#e2e8f0', backgroundColor: '#f8fafc', textAlign: 'center', fontSize: 22, fontWeight: '900', color: '#0f172a' },
   otpBoxFilled: { borderColor: '#15803d', backgroundColor: '#f0fdf4' },
   otpResendBtn: { marginTop: 16 },

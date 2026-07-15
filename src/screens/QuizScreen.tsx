@@ -1,15 +1,20 @@
 ﻿import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, StatusBar,
-  ActivityIndicator, Animated, Alert, BackHandler, Dimensions,
+  ActivityIndicator, Animated, BackHandler, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { X, Trophy, Timer, Flame, CheckCircle2, XCircle, ArrowRight, WifiOff } from 'lucide-react-native';
+import { X, Trophy, Timer, Flame, CheckCircle2, XCircle, ArrowRight, WifiOff, Leaf } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { quizService } from '../services/quiz';
+import { BACKEND_BASE } from '../services/api';
 import { useNotifications } from '../context/NotificationContext';
+import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
+import { showAlert } from '../utils/alert';
+import { showRedeemInfoOnce } from '../utils/redeemInfo';
+import { getStableUserSuffix } from '../utils/userId';
 
 const CONFETTI_COLORS = ['#fbbf24', '#4ade80', '#f472b6', '#60a5fa', '#fb923c', '#a78bfa', '#34d399', '#f87171'];
 const CONFETTI_COUNT = 40;
@@ -69,12 +74,6 @@ function Confetti() {
 
 const TIMER_DURATION = 20;
 
-// Local date string â€” quiz resets at local midnight (12:00 AM)
-const getUTCDateStr = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-};
-
 type ScreenState = 'init' | 'lobby' | 'playing' | 'results';
 
 interface Question {
@@ -88,10 +87,10 @@ interface AnswerResult {
   correctAnswer: string;
 }
 
-function RuleRow({ icon, text }: { icon: string; text: string }) {
+function RuleRow({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
     <View style={styles.ruleRow}>
-      <Text style={styles.ruleIcon}>{icon}</Text>
+      <View style={styles.ruleIconWrap}>{icon}</View>
       <Text style={styles.ruleText}>{text}</Text>
     </View>
   );
@@ -123,11 +122,15 @@ export function QuizScreen({ navigation }: any) {
   const correctCountRef = useRef(0);
   const totalCoinsRef = useRef(0);
   const questionsAttemptedRef = useRef(0);
+  // Guards against double-submission from a fast double-tap: React state updates
+  // (selectedAnswer/isSubmitting) aren't synchronous, so a second tap can fire before
+  // the first render reflects them. A ref updates immediately, closing that window.
+  const isSubmittingRef = useRef(false);
 
   useEffect(() => {
     const init = async () => {
-      const token = await AsyncStorage.getItem('userToken') || 'default';
-      const suffix = token.slice(-8);
+      const token = await AsyncStorage.getItem('userToken');
+      const suffix = getStableUserSuffix(token);
       const dateKey = `lastQuizDate_${suffix}`;
       const streakKey = `quizStreak_${suffix}`;
       setQuizDateKey(dateKey);
@@ -136,14 +139,12 @@ export function QuizScreen({ navigation }: any) {
         AsyncStorage.getItem(dateKey),
         AsyncStorage.getItem(streakKey),
       ]);
-      const todayUTC = getUTCDateStr();
-      const d = new Date();
-      d.setUTCDate(d.getUTCDate() - 1);
-      const yesterdayUTC = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`;
+      const todayStr = getLocalDateStr();
+      const yesterdayStr = getLocalYesterdayStr();
       // Old format was toDateString() e.g. "Wed May 28 2026" â€” treat as stale if not YYYY-MM-DD
       const isValidFormat = storedDate ? /^\d{4}-\d{2}-\d{2}$/.test(storedDate) : false;
-      const isToday = isValidFormat && storedDate === todayUTC;
-      const isYesterday = isValidFormat && storedDate === yesterdayUTC;
+      const isToday = isValidFormat && storedDate === todayStr;
+      const isYesterday = isValidFormat && storedDate === yesterdayStr;
       if (isToday) setIsLocked(true);
       if (storedDate && !isToday && !isYesterday) {
         await AsyncStorage.setItem(streakKey, '0');
@@ -171,7 +172,7 @@ export function QuizScreen({ navigation }: any) {
     const checkNet = () => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 5000);
-      fetch('https://karmacoin-backend-8.onrender.com/', { method: 'HEAD', cache: 'no-store', signal: controller.signal })
+      fetch(`${BACKEND_BASE}/`, { method: 'HEAD', cache: 'no-store', signal: controller.signal })
         .then(() => {
           clearTimeout(timer);
           if (isOfflineRef.current) {
@@ -222,29 +223,32 @@ export function QuizScreen({ navigation }: any) {
   }, [timeLeft, screenState, selectedAnswer, isSubmitting, isOffline]);
 
   const finishQuiz = async () => {
-    const newStreak = streak + 1;
-    const todayUTC = getUTCDateStr();
-    await AsyncStorage.setItem(quizDateKey, todayUTC);
+    // Base the new streak on the validated local streak (storedStreak), not the
+    // backend value — this grows the streak reliably day over day on the client.
+    const newStreak = storedStreak + 1;
+    const todayStr = getLocalDateStr();
+    await AsyncStorage.setItem(quizDateKey, todayStr);
     await AsyncStorage.setItem(quizStreakKey, String(newStreak));
     addNotification({
       type: 'QUIZ_COMPLETED',
       title: 'Daily quiz complete!',
       message: totalCoinsRef.current > 0
-        ? `You got ${correctCountRef.current}/${questions.length} correct and earned ${totalCoinsRef.current} Karma Coins!`
+        ? `You got ${correctCountRef.current}/${questions.length} correct and earned ${totalCoinsRef.current} KarmaCoins XP!`
         : `You attempted the quiz. Try again tomorrow!`,
     });
     const histKey = quizStreakKey.replace('quizStreak_', 'quizHistory_');
     const raw = await AsyncStorage.getItem(histKey);
     const history: string[] = raw ? JSON.parse(raw) : [];
-    if (!history.includes(todayUTC)) history.push(todayUTC);
+    if (!history.includes(todayStr)) history.push(todayStr);
     await AsyncStorage.setItem(histKey, JSON.stringify(history));
     setStreak(newStreak);
     setScreenState('results');
+    showRedeemInfoOnce(quizStreakKey.replace('quizStreak_', 'firstQuizRedeemInfo_'));
   };
 
   const handleQuitPress = () => {
     const hasAttempted = questionsAttemptedRef.current > 0;
-    Alert.alert(
+    showAlert(
       'Exit quiz?',
       hasAttempted
         ? `You've earned ${totalCoinsRef.current} coins so far. Exit and save your progress? Quiz will be locked for today.`
@@ -274,7 +278,8 @@ export function QuizScreen({ navigation }: any) {
   };
 
   const handleSelectAnswer = async (option: string) => {
-    if (selectedAnswer !== null || isSubmitting) return;
+    if (selectedAnswer !== null || isSubmitting || isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     questionsAttemptedRef.current += 1;
     setSelectedAnswer(option);
     setIsSubmitting(true);
@@ -293,6 +298,14 @@ export function QuizScreen({ navigation }: any) {
         setShowCoinToast(true);
       }
     } catch (err: any) {
+      // "Already answered" means an earlier submission for this question already
+      // succeeded (and was already scored/credited) — don't clobber that real result
+      // with a fake incorrect/red one just because this duplicate call was rejected.
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message || '';
+      if (status === 400 && /already answered/i.test(message)) {
+        return;
+      }
       const errData = err?.response?.data?.data || err?.response?.data;
       setAnswerResult({
         correct: false,
@@ -308,6 +321,7 @@ export function QuizScreen({ navigation }: any) {
 
   const advanceQuestion = () => {
     setShowCoinToast(false);
+    isSubmittingRef.current = false;
     if (currentQ < questions.length - 1) {
       setCurrentQ(p => p + 1);
       setSelectedAnswer(null);
@@ -329,6 +343,7 @@ export function QuizScreen({ navigation }: any) {
       setCorrectCount(0);
       correctCountRef.current = 0;
       totalCoinsRef.current = 0;
+      isSubmittingRef.current = false;
       setSelectedAnswer(null);
       setAnswerResult(null);
       setTimeLeft(TIMER_DURATION);
@@ -336,14 +351,14 @@ export function QuizScreen({ navigation }: any) {
     } catch (err: any) {
       if (err?.response?.status === 429) {
         setIsLocked(true);
-        await AsyncStorage.setItem(quizDateKey, getUTCDateStr());
+        await AsyncStorage.setItem(quizDateKey, getLocalDateStr());
       } else if (!err?.response || err?.code === 'ECONNABORTED' || err?.message?.includes('Network')) {
-        Alert.alert(
+        showAlert(
           'Server is waking up',
           'Our server takes a few seconds to start. Please wait a moment and try again.',
         );
       } else {
-        Alert.alert('Could not start quiz', 'Something went wrong. Please try again.');
+        showAlert('Could not start quiz', 'Something went wrong. Please try again.');
       }
     } finally {
       setIsFetching(false);
@@ -411,10 +426,10 @@ export function QuizScreen({ navigation }: any) {
           </TouchableOpacity>
 
           <View style={styles.lobbyIconBg}>
-            <Text style={styles.lobbyIconEmoji}>ðŸŒ¿</Text>
+            <Leaf size={42} color="#4ade80" />
           </View>
           <Text style={styles.lobbyTitle}>Daily Eco-Quiz</Text>
-          <Text style={styles.lobbySub}>Test your eco-knowledge and earn Karma Coins!</Text>
+          <Text style={styles.lobbySub}>Test your eco-knowledge and earn KarmaCoins XP!</Text>
 
           {storedStreak > 0 && (
             <View style={styles.lobbyStreakPill}>
@@ -424,10 +439,10 @@ export function QuizScreen({ navigation }: any) {
           )}
 
           <View style={styles.rulesCard}>
-            <RuleRow icon="â“" text="5 questions per day" />
-            <RuleRow icon="â±ï¸" text="20 seconds per question" />
-            <RuleRow icon="ðŸª™" text="5 coins per question" />
-            <RuleRow icon="ðŸ†" text="Max 25 coins per day" />
+            <RuleRow icon={<CheckCircle2 size={20} color="#4ade80" />} text="3 questions per day" />
+            <RuleRow icon={<Timer size={20} color="#60a5fa" />} text="20 seconds per question" />
+            <RuleRow icon={<KarmaCoin size={20} />} text="10 coins per question" />
+            <RuleRow icon={<Trophy size={20} color="#fbbf24" />} text="Max 30 coins per day" />
           </View>
 
           {isLocked ? (
@@ -632,13 +647,12 @@ const styles = StyleSheet.create({
   // Lobby
   lobbyArea: { flex: 1, paddingHorizontal: 24, paddingTop: 8, maxWidth: 600, width: '100%', alignSelf: 'center' },
   lobbyIconBg: { width: 80, height: 80, borderRadius: 24, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginTop: 32, marginBottom: 20 },
-  lobbyIconEmoji: { fontSize: 42 },
   lobbyTitle: { fontSize: 28, fontWeight: '900', color: 'white', textAlign: 'center', marginBottom: 8 },
   lobbySub: { fontSize: 14, color: 'rgba(255,255,255,0.75)', fontWeight: '600', textAlign: 'center', lineHeight: 22, marginBottom: 32 },
 
   rulesCard: { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 20, padding: 20, gap: 14, marginBottom: 36, borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
   ruleRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  ruleIcon: { fontSize: 20, width: 28, textAlign: 'center' },
+  ruleIconWrap: { width: 28, alignItems: 'center' },
   ruleText: { fontSize: 15, fontWeight: '600', color: 'white' },
 
   playBtn: { backgroundColor: '#fcd34d', borderRadius: 18, paddingVertical: 18, alignItems: 'center', elevation: 4, shadowColor: '#f59e0b', shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } },

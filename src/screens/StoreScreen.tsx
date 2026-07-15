@@ -1,6 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag, Sparkles, Leaf, ArrowRight } from 'lucide-react-native';
 
@@ -8,11 +7,8 @@ export function StoreScreen({ navigation }: any) {
   return (
     <View style={styles.rootContainer}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.topNotchFiller} />
-      
-      <SafeAreaView style={styles.container}>
-        {/* Header */}
-        <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+      <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.headerTop}>
             <View>
               <Text style={styles.headerSubtitle}>Spend your rewards</Text>
@@ -25,6 +21,7 @@ export function StoreScreen({ navigation }: any) {
         </LinearGradient>
 
         <View style={styles.content}>
+
           <View style={styles.iconCircle}>
             <Sparkles size={48} color="#15803d" />
             <View style={styles.floatingLeaf}>
@@ -34,7 +31,7 @@ export function StoreScreen({ navigation }: any) {
 
           <Text style={styles.comingSoonText}>Coming soon!</Text>
           <Text style={styles.descText}>
-            We're curating a premium collection of zero-waste, eco-friendly products. Soon you'll be able to spend your Karma Coins here on sustainable goodies!
+            We're curating a premium collection of zero-waste, eco-friendly products. Soon you'll be able to spend your KarmaCoins XP here on sustainable goodies!
           </Text>
 
           <TouchableOpacity 
@@ -45,34 +42,27 @@ export function StoreScreen({ navigation }: any) {
             <ArrowRight size={20} color="white" />
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  rootContainer: { flex: 1, backgroundColor: '#064e3b' },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
+  rootContainer: { flex: 1, backgroundColor: '#f0fdf6' },
   container: { flex: 1, backgroundColor: '#f0fdf6' },
   header: {
-    paddingTop: 10,
+    paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 24,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    zIndex: 10,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', maxWidth: 800, width: '100%', alignSelf: 'center' },
   headerTitle: { color: 'white', fontSize: 28, fontWeight: '900', letterSpacing: 0.5 },
   headerSubtitle: { color: '#86efac', fontSize: 13, fontWeight: '800', letterSpacing: 1.5, marginBottom: 4 },
   headerIconBox: { width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   
-  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60 },
+  content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, maxWidth: 600, width: '100%', alignSelf: 'center' },
   iconCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center', marginBottom: 32, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 10 },
   floatingLeaf: { position: 'absolute', top: -10, right: -10, backgroundColor: 'white', padding: 8, borderRadius: 20, elevation: 5 },
   comingSoonText: { fontSize: 32, fontWeight: '900', color: '#0f172a', marginBottom: 16 },

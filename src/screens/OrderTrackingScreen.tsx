@@ -1,7 +1,7 @@
 ﻿import React, { useRef, useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  Animated, Dimensions, StatusBar, ActivityIndicator, Linking
+  Animated, Dimensions, StatusBar, ActivityIndicator, Linking, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -9,9 +9,10 @@ import {
   CheckCircle2, Circle, Loader2, XCircle
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
-import { Alert } from 'react-native';
+import { showAlert } from '../utils/alert';
 import { useUserSocket } from '../context/UserSocketContext';
 import { RatingModal } from '../components/shared/RatingModal';
+import { TrackingMap } from '../components/shared/TrackingMap';
 
 const { height } = Dimensions.get('window');
 
@@ -38,11 +39,11 @@ const STATUS_MESSAGES: Record<string, string> = {
   AGENT_ASSIGNED: 'Agent accepted your booking and is on the way!',
   AGENT_REACHED:  'Agent has reached your location!',
   VERIFICATION:   'Waste verified. KarmaCoins credited to your wallet!',
-  COMPLETED:      'Booking complete. Thank you for using KarmaCoins XP!',
+  COMPLETED:      'Booking complete. Thank you for using KarmaVer$e!',
   POOL:           'High demand in your area. Your booking is in our priority pool.',
 };
 
-// â”€â”€ Mock booking — replace with navigation params in production â”€â”€
+// â"€â"€ Mock booking — replace with navigation params in production â"€â"€
 const mockBooking = {
   id: 'KC12345',
   agent: { name: 'Ravi Kumar', rating: 4.8, phone: '+91 98765 43210', initials: 'RK' },
@@ -88,10 +89,10 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   const resolveInitialStatus = () => {
     const s = passedBooking?.status;
     if (!s) return 'ORDER_PLACED';
-    if (s === 'COMPLETED')                        return 'COMPLETED';
-    if (s === 'VERIFICATION' || s === 'PICKED_UP') return 'VERIFICATION';
-    if (s === 'AGENT_REACHED')                     return 'AGENT_REACHED';
-    if (s === 'ACCEPTED' || s === 'IN_TRANSIT')    return 'AGENT_ASSIGNED';
+    if (s === 'COMPLETED' || s === 'WAREHOUSE_REACHED') return 'COMPLETED';
+    if (s === 'VERIFICATION' || s === 'PICKED_UP')      return 'VERIFICATION';
+    if (s === 'REACHED' || s === 'AGENT_REACHED')       return 'AGENT_REACHED';
+    if (s === 'ASSIGNED' || s === 'ACCEPTED')           return 'AGENT_ASSIGNED';
     return 'ORDER_PLACED';
   };
 
@@ -135,13 +136,13 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       setIsCancelled(true);
     } catch (error: any) {
       const msg = error?.response?.data?.message;
-      Alert.alert('Cannot cancel', msg || 'Could not cancel booking. Please try again.');
+      showAlert('Cannot cancel', msg || 'Could not cancel booking. Please try again.');
     } finally {
       setIsCancelling(false);
     }
   };
 
-  const { latestUpdate, clearLatestUpdate } = useUserSocket();
+  const { latestUpdate, clearLatestUpdate, agentLocation } = useUserSocket();
 
   // Haversine distance in km between two GPS coords
   const calcDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
@@ -153,7 +154,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
-  // â”€â”€ Handle incoming socket events â”€â”€
+  // â"€â"€ Handle incoming socket events â"€â"€
   useEffect(() => {
     if (!latestUpdate) return;
 
@@ -175,15 +176,15 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       setLiveMessage(STATUS_MESSAGES['POOL']);
     } else if (latestUpdate.event === 'BOOKING_CANCEL_SUCCESS') {
       setLiveMessage('Booking cancelled.');
-    } else if (latestUpdate.event === 'AGENT_LOCATION_UPDATE' && latestUpdate.agentLocation) {
+    } else if (latestUpdate.event === 'AGENT_LOCATION' && latestUpdate.agentLocation) {
       const userCoords = passedBooking?.address?.location?.coordinates;
       if (userCoords) {
         const dist = calcDistance(
-          latestUpdate.agentLocation.latitude, latestUpdate.agentLocation.longitude,
+          latestUpdate.agentLocation.lat, latestUpdate.agentLocation.lng,
           userCoords[1], userCoords[0]
         );
         setDistanceKm(parseFloat(dist.toFixed(1)));
-        setEtaMins(Math.max(1, Math.round(dist / 0.5 * 10))); // ~30 km/h avg
+        setEtaMins(Math.max(1, Math.round(dist / 0.5 * 10)));
       }
     } else if (mappedStatus) {
       setIsPool(false);
@@ -220,19 +221,18 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       await bookingService.submitRating(rawBookingId, rating, comment);
       setIsRated(true);
       setShowRatingModal(false);
-      Alert.alert('Thank you!', 'Your rating has been submitted.');
+      showAlert('Thank you!', 'Your rating has been submitted.');
     } catch (error: any) {
       const msg = error?.response?.data?.message;
       if (msg === 'You have already rated this booking') {
         setIsRated(true);
         setShowRatingModal(false);
       } else {
-        Alert.alert('Could not submit rating', msg || 'Please try again.');
+        showAlert('Could not submit rating', msg || 'Please try again.');
       }
     }
   };
-
-  // â”€â”€ Pulse animation for active step â”€â”€
+  // â"€â"€ Pulse animation for active step â"€â"€
   useEffect(() => {
     const pulse = Animated.loop(
       Animated.sequence([
@@ -254,7 +254,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
 
 
 
-  // â”€â”€ Cancelled state — full screen replacement â”€â”€
+  // â"€â"€ Cancelled state — full screen replacement â"€â"€
   if (isCancelled) {
     return (
       <View style={styles.container}>
@@ -296,7 +296,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#15803d" />
 
-      {/* â”€â”€ Header â”€â”€ */}
+      {/* â"€â"€ Header â"€â"€ */}
       <SafeAreaView edges={['top']} style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <ArrowLeft size={20} color="white" />
@@ -308,7 +308,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
-      {/* â”€â”€ Booking Badge â”€â”€ */}
+      {/* â"€â"€ Booking Badge â"€â"€ */}
       <View style={[styles.bookingBadge, { maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
         <View style={styles.bookingBadgeLeft}>
           <Text style={styles.bookingIdLabel}>Booking ID</Text>
@@ -327,7 +327,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         )}
       </View>
 
-      {/* â”€â”€ Agent Card â”€â”€ */}
+      {/* â"€â"€ Agent Card â"€â"€ */}
       {activeAgent ? (
         <View style={styles.agentCard}>
           <View style={styles.agentAvatar}>
@@ -360,16 +360,24 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         </View>
       )}
 
-      {/* â”€â”€ Map Placeholder â”€â”€ */}
-      <View style={styles.mapContainer}>
-        <View style={styles.mapComingSoon}>
-          <Text style={styles.mapComingSoonIcon}>🗺️</Text>
-          <Text style={styles.mapComingSoonTitle}>Live route tracking coming soon</Text>
-          <Text style={styles.mapComingSoonSub}>Interactive map will be available once Google Maps API is configured. Your agent is on the way!</Text>
+      {/* Live Map — visible when agent is assigned or reached */}
+      {(currentStatus === 'AGENT_ASSIGNED' || currentStatus === 'AGENT_REACHED') && (
+        <View style={styles.mapContainer}>
+          {passedBooking?.address?.location?.coordinates ? (
+            <TrackingMap
+              userCoordinate={[passedBooking.address.location.coordinates[0], passedBooking.address.location.coordinates[1]]}
+              agentLocation={agentLocation}
+            />
+          ) : (
+            <View style={styles.mapComingSoon}>
+              <ActivityIndicator size="small" color="#16a34a" />
+              <Text style={styles.mapComingSoonTitle}>Initializing map...</Text>
+            </View>
+          )}
         </View>
-      </View>
+      )}
 
-      {/* â”€â”€ Bottom Sheet â”€â”€ */}
+      {/* â"€â"€ Bottom Sheet â"€â"€ */}
       <View style={styles.bottomSheet}>
 
         {/* Live Status */}
@@ -503,7 +511,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       </View>
       </ScrollView>
 
-      {/* â”€â”€ Rating Modal — appears after pickup COMPLETED â”€â”€ */}
+      {/* â"€â"€ Rating Modal — appears after pickup COMPLETED â"€â"€ */}
       <RatingModal
         visible={showRatingModal}
         agentName={activeAgent?.name || 'Your Agent'}
@@ -552,9 +560,9 @@ const styles = StyleSheet.create({
   // Map
   mapContainer: { marginHorizontal: 16, marginTop: 10, borderRadius: 20, overflow: 'hidden', height: height * 0.22, elevation: 3, shadowColor: '#000', shadowOpacity: 0.08, shadowRadius: 12, shadowOffset: { width: 0, height: 3 }, maxWidth: 900, width: '100%', alignSelf: 'center' },
   mapComingSoon: { flex: 1, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  mapComingSoonIcon: { fontSize: 36, marginBottom: 8 },
-  mapComingSoonTitle: { fontSize: 15, fontWeight: '700', color: '#15803d', marginBottom: 6, textAlign: 'center' },
-  mapComingSoonSub: { fontSize: 12, color: '#6b7280', textAlign: 'center', lineHeight: 18 },
+  mapComingSoonTitle: { fontSize: 14, fontWeight: '700', color: '#15803d', marginTop: 8, textAlign: 'center' },
+  userPin: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#dcfce7', borderWidth: 2, borderColor: '#16a34a', alignItems: 'center', justifyContent: 'center' },
+  agentPin: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#fff', borderWidth: 2, borderColor: '#0ea5e9', alignItems: 'center', justifyContent: 'center', elevation: 4, shadowColor: '#0ea5e9', shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 2 } },
   map: { flex: 1 },
   agentMarker: { backgroundColor: 'white', borderRadius: 20, padding: 4, elevation: 3, shadowColor: '#000', shadowOpacity: 0.15, shadowRadius: 4, shadowOffset: { width: 0, height: 2 } },
   agentMarkerEmoji: { fontSize: 22 },
