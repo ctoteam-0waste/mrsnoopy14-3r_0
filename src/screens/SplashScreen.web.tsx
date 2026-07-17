@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions, Image, Linking
+  View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated, Dimensions, Image, Linking, NativeSyntheticEvent, NativeScrollEvent
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
@@ -9,6 +9,7 @@ import {
   Package, Clock, BookOpen, Zap, Mail, Phone, MapPin
 } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { MascotPopupBanner } from '../components/shared/MascotPopupBanner';
 
 const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
@@ -19,9 +20,18 @@ export function SplashScreen({ navigation, route }: any) {
   const slideUp = useRef(new Animated.Value(40)).current;
   const scrollRef = useRef<ScrollView>(null);
   const sectionY = useRef({ howItWorks: 0, features: 0, rewards: 0 });
+  const [nearFooter, setNearFooter] = useState(false);
 
   const scrollToSection = (key: 'howItWorks' | 'features' | 'rewards') => {
     scrollRef.current?.scrollTo({ y: sectionY.current[key], animated: true });
+  };
+
+  // Mascot widget floats fixed bottom-right; fade it out once the footer's
+  // contact block scrolls into that same corner so it never covers real content.
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    const distanceFromBottom = contentSize.height - (contentOffset.y + layoutMeasurement.height);
+    setNearFooter(distanceFromBottom < 480);
   };
 
   useEffect(() => {
@@ -42,6 +52,8 @@ export function SplashScreen({ navigation, route }: any) {
 
   return (
     <View style={s.root}>
+      <MascotPopupBanner suppressed={nearFooter} />
+
       {/* ── NAV BAR ── */}
       <View style={s.navBar}>
         <View style={[s.navInner, isMobile && { paddingHorizontal: 20 }]}>
@@ -91,7 +103,7 @@ export function SplashScreen({ navigation, route }: any) {
         </View>
       </View>
 
-      <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} style={{ flex: 1 }}>
+      <ScrollView ref={scrollRef} showsVerticalScrollIndicator={false} style={{ flex: 1 }} onScroll={handleScroll} scrollEventThrottle={32}>
 
         {/* ── HERO ── */}
         <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={s.hero}>

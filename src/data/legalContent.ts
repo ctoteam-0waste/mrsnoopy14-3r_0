@@ -1,5 +1,6 @@
 // Legal content for KarmaVer$e. Edit the copy here — the LegalScreen renders it.
 // Source of truth: 3R Zero Waste legal documentation.
+// Kept in sync with /legal/TERMS_AND_CONDITIONS.md and /legal/PRIVACY_POLICY.md — update both together.
 
 export interface LegalSection {
   heading: string;
@@ -17,7 +18,7 @@ export interface LegalDoc {
 
 export const TERMS: LegalDoc = {
   title: 'Terms & conditions',
-  updated: 'June 2026',
+  updated: 'July 2026',
   intro:
     'Welcome to KarmaVer$e, operated by 3R Zero Waste. By downloading, installing, or using the KarmaVer$e app or website, you agree to be bound by these terms. If you do not agree, please do not use the service.',
   sections: [
@@ -42,7 +43,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Account registration',
       bullets: [
-        'Register using a valid email address and phone number.',
+        'Register using a valid email address and phone number, or sign in with your Google account.',
         'One account per person. Duplicate or fraudulent accounts may be terminated without notice.',
         'You are solely responsible for all activity under your account.',
         'We may suspend or terminate accounts that violate these terms.',
@@ -115,12 +116,26 @@ export const TERMS: LegalDoc = {
       ],
     },
     {
+      heading: 'Intellectual property',
+      bullets: [
+        'The KarmaVer$e app, website, logo, the names “KarmaVer$e” and “KarmaCoins XP,” and all related content, features, and functionality are owned by 3R Zero Waste and protected by applicable intellectual property laws.',
+        'You may not copy, modify, distribute, sell, or lease any part of the app or its content without our prior written consent.',
+        'Any feedback, ratings, or reviews you submit may be used by us to operate and improve the platform. You grant us a non-exclusive, royalty-free, worldwide license to use such content for that purpose.',
+      ],
+    },
+    {
       heading: 'Limitation of liability',
       bullets: [
         'The service is provided “as is” and “as available” without warranties of any kind.',
         'We are not liable for indirect, incidental, special, consequential, or punitive damages.',
         'We are not responsible for delays or failures beyond our control, including natural disasters, network outages, or government regulations.',
         'Our maximum liability shall not exceed the value of KarmaCoins XP in your account at the time of dispute.',
+      ],
+    },
+    {
+      heading: 'Indemnification',
+      bullets: [
+        'You agree to indemnify and hold harmless 3R Zero Waste, its officers, employees, and Agents from any claims, damages, losses, or expenses (including reasonable legal fees) arising from your violation of these terms, misuse of the service, or violation of any law or third-party rights.',
       ],
     },
     {
@@ -133,11 +148,29 @@ export const TERMS: LegalDoc = {
       ],
     },
     {
-      heading: 'Governing law',
+      heading: 'Dispute resolution & governing law',
       bullets: [
         'These terms are governed by the laws of India.',
-        'Disputes are subject to the exclusive jurisdiction of the courts in Gurugram, Haryana.',
-        'Both parties agree to attempt informal resolution for at least 30 days before any legal claim.',
+        'Before initiating any formal proceedings, both parties agree to attempt to resolve any dispute informally by contacting support for at least 30 days.',
+        'If unresolved, disputes shall be referred to and finally resolved by arbitration under the Arbitration and Conciliation Act, 1996, with a sole arbitrator appointed mutually by the parties, seated in Gurugram, Haryana, and conducted in English.',
+        'Subject to the above, the courts in Gurugram, Haryana shall have exclusive jurisdiction over any matter not covered by arbitration.',
+      ],
+    },
+    {
+      heading: 'General provisions',
+      bullets: [
+        'Entire agreement: these terms, together with our Privacy Policy, constitute the entire agreement between you and 3R Zero Waste regarding the service.',
+        'Severability: if any provision of these terms is found invalid or unenforceable, the remaining provisions continue in full force and effect.',
+        'No waiver: our failure to enforce any right or provision of these terms is not a waiver of that right or provision.',
+        'Assignment: we may assign or transfer these terms in connection with a merger, acquisition, or sale of assets. You may not assign your rights or obligations under these terms without our prior written consent.',
+        'Amendments: we may update these terms from time to time. Material changes will be notified in the app or via email at least 15 days before they take effect. Continued use after changes take effect constitutes acceptance.',
+        'Notices: we may provide notices to you via email, push notification, or in-app messaging.',
+      ],
+    },
+    {
+      heading: 'Grievance redressal',
+      body: [
+        'In accordance with the Information Technology Act, 2000 and rules made thereunder, grievances regarding this agreement may be raised with our Grievance Officer at the contact details below. We will acknowledge grievances within 24 hours and aim to resolve them within 15 days.',
       ],
     },
     {
@@ -157,7 +190,7 @@ export const TERMS: LegalDoc = {
 
 export const PRIVACY: LegalDoc = {
   title: 'Privacy policy',
-  updated: 'June 2026',
+  updated: 'July 2026',
   intro:
     'This policy explains what information KarmaVer$e (by 3R Zero Waste) collects, how we use it, and the choices you have. We are committed to protecting your privacy and handling your data responsibly.',
   sections: [
@@ -165,11 +198,12 @@ export const PRIVACY: LegalDoc = {
       heading: 'Information we collect',
       body: ['To provide and improve our services, we collect:'],
       bullets: [
-        'Account details: your name, email address, and phone number.',
+        'Account details: your name, email address, and phone number. You may also register or sign in using Google Sign-In.',
+        'Profile details (optional): age, gender, marital status, and employment status, if you choose to complete your profile.',
         'Pickup details: your address and the waste categories you schedule.',
-        'Location data: your device location to assign the nearest available Agent.',
+        'Location data: your device location to assign the nearest available Agent and to show live pickup tracking.',
         'Usage data: app activity such as quizzes played, coins earned, and bookings made.',
-        'Device data: device type and push notification token (via Firebase Cloud Messaging).',
+        'Device data: device type and push notification token, used to deliver notifications through our push notification service.',
       ],
     },
     {
@@ -235,9 +269,40 @@ export const PRIVACY: LegalDoc = {
     {
       heading: 'Third-party services',
       bullets: [
-        'We use Firebase Cloud Messaging for push notifications.',
+        'We use Google Sign-In for optional account login/registration.',
         'We use Mappls (MapmyIndia) for maps, address search, and location services.',
+        'We use our app platform’s push notification service to deliver notifications (relayed via Google’s and Apple’s underlying push infrastructure).',
         'These providers process limited data under their own privacy policies.',
+      ],
+    },
+    {
+      heading: 'Compliance with Indian data protection law',
+      bullets: [
+        'We process personal data in accordance with the Digital Personal Data Protection Act, 2023 (DPDP Act) and applicable rules made thereunder, and the Information Technology Act, 2000 and the IT (Reasonable Security Practices and Sensitive Personal Data or Information) Rules, 2011.',
+        'Where required by law, we obtain your explicit consent before collecting or processing personal data. You may withdraw consent at any time by contacting us or deleting your account, subject to data we are legally required to retain.',
+        'You have the right to access, correct, and erase your personal data, to know the purposes for which it is processed, and to file a grievance with our Grievance Officer or, where applicable, the Data Protection Board of India.',
+        'You may nominate another individual to exercise your rights under the DPDP Act on your behalf in the event of your death or incapacity, by writing to us.',
+      ],
+    },
+    {
+      heading: 'Data retention',
+      bullets: [
+        'We retain your account and profile data for as long as your account remains active.',
+        'Upon account deletion, we erase your personal data within 30 days, except where we are required to retain certain records (e.g., transaction logs, fraud or dispute records) for longer to comply with law or resolve disputes — such data is retained only for the minimum period necessary and then deleted.',
+        'Aggregated or anonymized data that no longer identifies you may be retained for analytics and service improvement.',
+      ],
+    },
+    {
+      heading: 'Sensitive personal data',
+      bullets: [
+        'We do not intentionally collect sensitive personal data such as health information, biometric data, sexual orientation, or religious or political beliefs.',
+        'If you believe any part of the app requests such information without a clear, lawful purpose and your explicit, informed consent, please contact us immediately so we can review and remove it.',
+      ],
+    },
+    {
+      heading: 'Grievance Officer',
+      body: [
+        'In accordance with the Information Technology Act, 2000, rules made thereunder, and the Digital Personal Data Protection Act, 2023, grievances regarding this policy may be directed to our Grievance Officer at the contact details below. We will acknowledge grievances within 24 hours and aim to resolve them within 15 days, as required by law.',
       ],
     },
     {

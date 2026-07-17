@@ -1174,6 +1174,9 @@ export function LoginScreen({ navigation }: any) {
 
       <SafeAreaView style={{ flex: 1 }}>
         <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+          {/* Decorative shapes so the header reads as a designed panel, not a flat block */}
+          <View style={[styles.headerCircle, { top: -50, right: -40, width: 160, height: 160, opacity: 0.08 }]} />
+          <View style={[styles.headerCircle, { bottom: -60, left: -50, width: 140, height: 140, opacity: 0.06 }]} />
           <View style={styles.logoCard}>
             <Image source={require('../../assets/logo.png')} style={styles.logoImg} resizeMode="contain" />
           </View>
@@ -1202,7 +1205,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     zIndex: 10,
+    overflow: 'hidden',
   },
+  headerCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
   headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 12, letterSpacing: 0.5 },
   logoCard: { alignItems: 'center', justifyContent: 'center' },
   logoImg: { width: 240, height: 150 },
