@@ -12,17 +12,17 @@ export const profileService = {
     }
   },
 
-  // Update Account Details
-  updateAccount: async (data: { name?: string, email?: string, phone?: string }) => {
+  // Update name (email/phone are no longer accepted by this endpoint — use changeEmail/changePhone below)
+  updateName: async (data: { name: string }) => {
     try {
       const response = await api.patch('/api/v1/users/profile', data);
       return response.data;
     } catch (error) {
-      console.error('Update Account Error:', error);
+      console.error('Update Name Error:', error);
       throw error;
     }
   },
-  
+
   // Get user profile
   getProfile: async () => {
     try {
@@ -56,22 +56,26 @@ export const profileService = {
     }
   },
 
-  // Send OTP for profile change verification
-  sendProfileOtp: async (value: string, isEmail: boolean, currentPhone?: string, currentEmail?: string) => {
-    const payload = isEmail
-      ? { email: value, phone: currentPhone, purpose: 'change-email' }
-      : { phone: value, email: currentEmail, purpose: 'change-phone' };
-    const response = await api.post('/api/v1/auth/send-otp', payload);
-    return response.data;
+  // Change email — requires otpToken from authService.verifyOtp(currentPhone, otp, 'change-email')
+  changeEmail: async (newEmail: string, otpToken: string) => {
+    try {
+      const response = await api.put('/api/v1/users/change-email', { newEmail, otpToken });
+      return response.data;
+    } catch (error) {
+      console.error('Change Email Error:', error);
+      throw error;
+    }
   },
 
-  // Verify profile change OTP
-  verifyProfileOtp: async (value: string, otp: string, isEmail: boolean, currentPhone?: string, currentEmail?: string) => {
-    const payload = isEmail
-      ? { email: value, otp, phone: currentPhone, purpose: 'change-email' }
-      : { phone: value, otp, email: currentEmail, purpose: 'change-phone' };
-    const response = await api.post('/api/v1/auth/verify-otp', payload);
-    return response.data;
+  // Change phone — requires otpToken from authService.verifyOtp(newPhone, otp, 'change-phone')
+  changePhone: async (newPhone: string, otpToken: string) => {
+    try {
+      const response = await api.put('/api/v1/users/change-phone', { newPhone, otpToken });
+      return response.data;
+    } catch (error) {
+      console.error('Change Phone Error:', error);
+      throw error;
+    }
   },
 
   // Get Transaction History

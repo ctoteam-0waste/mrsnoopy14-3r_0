@@ -12,7 +12,7 @@
 const http = require('http');
 const https = require('https');
 
-const TARGET = 'api.karmaverse.earth';
+const TARGET = 'karmacoin-backend-testing.onrender.com';
 const PORT = 8899; // kept clear of Expo's 8081/8082/8083 range
 
 const server = http.createServer((req, res) => {

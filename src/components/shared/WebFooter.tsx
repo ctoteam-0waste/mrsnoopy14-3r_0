@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
-import { Mail, Phone, MapPin } from 'lucide-react-native';
+import { Mail, MapPin } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const MAX = 1200;
@@ -17,6 +17,7 @@ export function WebFooter() {
     { label: 'Daily quiz', onPress: () => navigation.navigate('Quiz') },
     { label: 'Knowledge hub', onPress: () => navigation.navigate('KnowledgeHub') },
     { label: 'Referral program', onPress: () => navigation.navigate('Referral') },
+    { label: 'About us', onPress: () => navigation.navigate('AboutUs') },
   ];
 
   return (
@@ -52,10 +53,6 @@ export function WebFooter() {
                   <Text style={[s.contactText, { fontSize: 12 }]}>cto.team@0waste.co.in</Text>
                 </View>
                 <View style={s.contactRow}>
-                  <Phone size={13} color="#94a3b8" />
-                  <Text style={s.contactText}>070931 98828</Text>
-                </View>
-                <View style={s.contactRow}>
                   <MapPin size={13} color="#94a3b8" />
                   <Text style={s.contactText}>PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503</Text>
                 </View>
@@ -76,10 +73,6 @@ export function WebFooter() {
                 <View style={s.contactRow}>
                   <Mail size={14} color="#94a3b8" />
                   <Text style={s.contactText}>cto.team@0waste.co.in</Text>
-                </View>
-                <View style={s.contactRow}>
-                  <Phone size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>070931 98828</Text>
                 </View>
                 <View style={s.contactRow}>
                   <MapPin size={14} color="#94a3b8" />

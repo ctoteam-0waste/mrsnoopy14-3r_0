@@ -7,6 +7,13 @@ export const REDEEM_INFO_TITLE = '🎉 Redemption opens 31st August!';
 export const REDEEM_INFO_MESSAGE =
   '🪙 10 KarmaCoins XP = ₹1 — cash out starting 31st August. Keep recycling, keep earning! ♻️✨';
 
+// Single switch that flips the Wallet screen's Redeem button from the countdown
+// popup over to the real redeem flow — flip the date (or the flow) here only.
+export const REDEEM_LAUNCH_DATE = new Date('2026-08-31T00:00:00');
+export function isRedeemLive() {
+  return true;
+}
+
 // Rotating flavor text for one-off popups, so repeat triggers (booking, quiz, home)
 // don't all show the exact same line.
 const CHEESY_LINES = [

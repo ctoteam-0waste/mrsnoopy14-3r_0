@@ -7,7 +7,7 @@ function withMapplsMavenRepo(config) {
   return withDangerousMod(config, [
     'android',
     (config) => {
-      const buildGradlePath = path.join(config.modRequest.platformProjectRoot, '..', 'build.gradle');
+      const buildGradlePath = path.join(config.modRequest.platformProjectRoot, 'build.gradle');
       let content = fs.readFileSync(buildGradlePath, 'utf8');
 
       const mapplsMaven = "        maven { url 'https://maven.mappls.com/repository/mappls/' }";

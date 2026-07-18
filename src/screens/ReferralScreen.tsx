@@ -64,7 +64,7 @@ export function ReferralScreen({ navigation }: any) {
       <StatusBar barStyle="light-content" />
       <View style={styles.topNotchFiller} />
       <SafeAreaView style={styles.container}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
+        <ScrollView style={styles.scrollBg} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
 
           {/* ── Hero ── */}
           <LinearGradient colors={['#7e22ce', '#db2777']} style={styles.heroSection}>
@@ -189,6 +189,7 @@ export function ReferralScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   rootContainer: { flex: 1, backgroundColor: '#7e22ce' },
+  scrollBg: { flex: 1, backgroundColor: '#7e22ce' },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#7e22ce' },
   container: { flex: 1, maxWidth: 900, width: '100%', alignSelf: 'center' },
 

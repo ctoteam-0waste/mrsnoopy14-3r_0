@@ -15,6 +15,9 @@ import { ReferralScreen } from '../screens/ReferralScreen';
 import { OrderTrackingScreen } from '../screens/OrderTrackingScreen';
 import { BookingDetailsScreen } from '../screens/BookingDetailsScreen';
 import { LegalScreen } from '../screens/LegalScreen';
+import { RedeemScreen } from '../screens/RedeemScreen';
+import { RedeemHistoryScreen } from '../screens/RedeemHistoryScreen';
+import { AboutUsScreen } from '../screens/AboutUsScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
 
@@ -126,6 +129,9 @@ export function RootNavigator() {
         <Stack.Screen name="OrderTracking" component={OrderTrackingScreen} />
         <Stack.Screen name="BookingDetails" component={BookingDetailsScreen} />
         <Stack.Screen name="Legal" component={LegalScreen} />
+        <Stack.Screen name="Redeem" component={RedeemScreen} />
+        <Stack.Screen name="RedeemHistory" component={RedeemHistoryScreen} />
+        <Stack.Screen name="AboutUs" component={AboutUsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

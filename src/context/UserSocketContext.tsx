@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useRef, useState, useCallb
 import { io, Socket } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNotifications } from './NotificationContext';
+import { BACKEND_BASE } from '../services/api';
 
-const SOCKET_URL = 'https://api.karmaverse.earth';
+const SOCKET_URL = BACKEND_BASE;
 
 export type BookingStatusEvent =
   | 'BOOKING_ACCEPTED'

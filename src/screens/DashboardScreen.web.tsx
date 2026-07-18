@@ -131,7 +131,7 @@ export function DashboardScreen({ navigation }: any) {
   const nav = (screen: string, p?: any) => navigation.navigate(screen, p);
 
   return (
-    <ScrollView style={z.root} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+    <ScrollView style={z.root} showsVerticalScrollIndicator={false}>
 
       {/* ════════ HERO ════════ */}
       <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={z.hero}>
@@ -270,7 +270,12 @@ export function DashboardScreen({ navigation }: any) {
             const Icon = icons[i] || Package;
             const cardW = isMobile ? Math.floor((width - 2 * pad - 10) / 2) : undefined;
             return (
-              <TouchableOpacity key={f.id} style={[z.discoverCard, cardW ? { width: cardW } : undefined]} activeOpacity={0.85} onPress={() => setSelectedFeature(f)}>
+              <TouchableOpacity
+                key={f.id}
+                style={[z.discoverCard, cardW ? { width: cardW } : undefined]}
+                activeOpacity={0.85}
+                onPress={() => (f.id === 'knowledge' ? nav('KnowledgeHub') : setSelectedFeature(f))}
+              >
                 <LinearGradient colors={f.gradient} style={z.discoverCardInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
                   <View style={z.discoverCardDecor} />
                   <View style={z.discoverIconBg}>

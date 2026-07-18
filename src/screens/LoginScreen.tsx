@@ -141,6 +141,29 @@ export function LoginScreen({ navigation }: any) {
     const t = setTimeout(() => setCheckingSlow(true), 4000);
     return () => clearTimeout(t);
   }, [step]);
+
+  // This whole flow (Welcome/email entry → login/signup → OTP → ...) lives in one
+  // screen driven by local `step` state, not separate navigator routes — so the
+  // browser/hardware back button has no history entry for "Welcome" and would pop
+  // straight out to the landing page, skipping it. Intercept back and step the
+  // local flow backward instead, same as the on-screen back controls do.
+  useEffect(() => {
+    const backStep: Partial<Record<Step, Step>> = {
+      checking: 'entry',
+      login: 'entry',
+      signup: 'entry',
+      verify_signup_otp: 'signup',
+      reset_password: 'login',
+    };
+    const sub = navigation.addListener('beforeRemove', (e: any) => {
+      const prevStep = backStep[step];
+      if (!prevStep) return;
+      e.preventDefault();
+      setStep(prevStep);
+    });
+    return sub;
+  }, [navigation, step]);
+
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -1174,6 +1197,9 @@ export function LoginScreen({ navigation }: any) {
 
       <SafeAreaView style={{ flex: 1 }}>
         <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+          {/* Decorative shapes so the header reads as a designed panel, not a flat block */}
+          <View style={[styles.headerCircle, { top: -50, right: -40, width: 160, height: 160, opacity: 0.08 }]} />
+          <View style={[styles.headerCircle, { bottom: -60, left: -50, width: 140, height: 140, opacity: 0.06 }]} />
           <View style={styles.logoCard}>
             <Image source={require('../../assets/logo.png')} style={styles.logoImg} resizeMode="contain" />
           </View>
@@ -1202,7 +1228,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     zIndex: 10,
+    overflow: 'hidden',
   },
+  headerCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
   headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 12, letterSpacing: 0.5 },
   logoCard: { alignItems: 'center', justifyContent: 'center' },
   logoImg: { width: 240, height: 150 },

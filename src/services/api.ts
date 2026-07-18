@@ -1,8 +1,8 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Production backend (AWS).
-export const BACKEND_BASE = 'https://api.karmaverse.earth';
+// Testing backend (Render).
+export const BACKEND_BASE = 'https://karmacoin-backend-testing.onrender.com';
 const BASE_URL = BACKEND_BASE;
 
 const api = axios.create({

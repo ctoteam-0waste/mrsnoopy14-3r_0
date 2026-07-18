@@ -72,7 +72,7 @@ function Confetti() {
   );
 }
 
-const TIMER_DURATION = 20;
+const TIMER_DURATION = 12;
 
 type ScreenState = 'init' | 'lobby' | 'playing' | 'results';
 
@@ -84,6 +84,8 @@ interface Question {
 interface AnswerResult {
   correct: boolean;
   coinsEarned: number;
+  bonusCoins: number;
+  perfectScore: boolean;
   correctAnswer: string;
 }
 
@@ -110,6 +112,7 @@ export function QuizScreen({ navigation }: any) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [totalCoins, setTotalCoins] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
+  const [isPerfectScore, setIsPerfectScore] = useState(false);
   const [showCoinToast, setShowCoinToast] = useState(false);
   const [quizDateKey, setQuizDateKey] = useState('lastQuizDate_default');
   const [quizStreakKey, setQuizStreakKey] = useState('quizStreak_default');
@@ -292,10 +295,11 @@ export function QuizScreen({ navigation }: any) {
       setAnswerResult(result);
       if (result.correct) {
         correctCountRef.current += 1;
-        totalCoinsRef.current += result.coinsEarned;
+        totalCoinsRef.current += result.coinsEarned + (result.bonusCoins || 0);
         setCorrectCount(correctCountRef.current);
         setTotalCoins(totalCoinsRef.current);
         setShowCoinToast(true);
+        if (result.perfectScore) setIsPerfectScore(true);
       }
     } catch (err: any) {
       // "Already answered" means an earlier submission for this question already
@@ -310,6 +314,8 @@ export function QuizScreen({ navigation }: any) {
       setAnswerResult({
         correct: false,
         coinsEarned: 0,
+        bonusCoins: 0,
+        perfectScore: false,
         correctAnswer: errData?.correctAnswer || '',
       });
     } finally {
@@ -341,6 +347,7 @@ export function QuizScreen({ navigation }: any) {
       setCurrentQ(0);
       setTotalCoins(0);
       setCorrectCount(0);
+      setIsPerfectScore(false);
       correctCountRef.current = 0;
       totalCoinsRef.current = 0;
       isSubmittingRef.current = false;
@@ -349,9 +356,16 @@ export function QuizScreen({ navigation }: any) {
       setTimeLeft(TIMER_DURATION);
       setScreenState('playing');
     } catch (err: any) {
-      if (err?.response?.status === 429) {
+      // A 429 can mean "you've already played today" OR a generic rate-limit —
+      // only treat it as the daily lock when the message actually says so, otherwise
+      // this would falsely lock a user out of a quiz they never played (see bug where
+      // "Already played today" showed up on the very first attempt of the day).
+      const message429 = err?.response?.data?.message || '';
+      if (err?.response?.status === 429 && /already (played|answered|completed)/i.test(message429)) {
         setIsLocked(true);
         await AsyncStorage.setItem(quizDateKey, getLocalDateStr());
+      } else if (err?.response?.status === 429) {
+        showAlert('Too many attempts', 'Please wait a moment and try again.');
       } else if (!err?.response || err?.code === 'ECONNABORTED' || err?.message?.includes('Network')) {
         showAlert(
           'Server is waking up',
@@ -377,7 +391,7 @@ export function QuizScreen({ navigation }: any) {
 
   // â”€â”€ RESULTS â”€â”€
   if (screenState === 'results') {
-    const isPerfect = correctCount === questions.length && questions.length > 0;
+    const isPerfect = isPerfectScore;
     return (
       <View style={styles.container}>
         <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
@@ -585,7 +599,9 @@ export function QuizScreen({ navigation }: any) {
       {showCoinToast && answerResult?.correct && (
         <View style={styles.coinToast}>
           <KarmaCoin size={16} />
-          <Text style={styles.coinToastText}>+{answerResult.coinsEarned} coins!</Text>
+          <Text style={styles.coinToastText}>
+            +{answerResult.coinsEarned} coins!{answerResult.bonusCoins > 0 ? ` +${answerResult.bonusCoins} perfect score bonus!` : ''}
+          </Text>
         </View>
       )}
     </SafeAreaView>

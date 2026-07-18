@@ -6,9 +6,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import {
   Truck, Gamepad2, Gift, Star, Shield, ChevronRight,
   Recycle, Users, Coins, ArrowRight, Smartphone, CheckCircle2,
-  Package, Clock, BookOpen, Zap, Mail, Phone, MapPin
+  Package, Clock, BookOpen, Zap, Mail, MapPin, FileText, Cpu
 } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { PlanetBuddyWidget } from '../components/shared/PlanetBuddyWidget';
 
 const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
@@ -42,6 +43,8 @@ export function SplashScreen({ navigation, route }: any) {
 
   return (
     <View style={s.root}>
+      <PlanetBuddyWidget />
+
       {/* ── NAV BAR ── */}
       <View style={s.navBar}>
         <View style={[s.navInner, isMobile && { paddingHorizontal: 20 }]}>
@@ -107,11 +110,16 @@ export function SplashScreen({ navigation, route }: any) {
             </View>
 
             <Text style={[s.heroTitle, isMobile && { fontSize: 36 }]}>
-              Turn your waste{'\n'}into KarmaCoins XP.
+              Turn your Plastic, Paper, Metal,{'\n'}E-waste & more into KarmaCoins XP.
             </Text>
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
               India's first circular economy rewards platform — schedule free doorstep pickups for plastic, paper, metal, e-waste & more. Earn real rewards for every kg you recycle.
             </Text>
+
+            <View style={s.poweredByBadge}>
+              <View style={s.poweredByDot}><Text style={s.poweredByDotText}>3R</Text></View>
+              <Text style={s.poweredByText}>Powered by <Text style={{ color: 'white', fontWeight: '800' }}>3R Zero Waste</Text></Text>
+            </View>
 
             {/* CTA */}
             <View style={[s.heroCTA, isMobile && { flexDirection: 'column', gap: 12 }]}>
@@ -143,6 +151,31 @@ export function SplashScreen({ navigation, route }: any) {
             </View>
           </Animated.View>
         </LinearGradient>
+
+        {/* ── 3R ZERO WASTE / 4-BIN SYSTEM ── */}
+        <View style={[s.section, { paddingVertical: 40, backgroundColor: '#f8fafc' }]}>
+          <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
+            <Text style={s.sectionLabel}>3R ZERO WASTE · THE 4-BIN SYSTEM</Text>
+            <Text style={[s.sectionTitle, { fontSize: 24, marginBottom: 28 }, isMobile && { fontSize: 22 }]}>
+              Segregate into 4 bins — plastic, paper, metal & e-waste
+            </Text>
+            <View style={[s.binsRow, isMobile && { flexWrap: 'wrap' }]}>
+              {[
+                { icon: Recycle, color: '#16a34a', bg: '#f0fdf4', label: 'Plastic' },
+                { icon: FileText, color: '#0891b2', bg: '#ecfeff', label: 'Paper' },
+                { icon: Package, color: '#d97706', bg: '#fffbeb', label: 'Metal' },
+                { icon: Cpu, color: '#7c3aed', bg: '#f5f3ff', label: 'E-waste' },
+              ].map((bin, i) => (
+                <View key={i} style={[s.binCard, isMobile && { width: '47%' }]}>
+                  <View style={[s.binIconBg, { backgroundColor: bin.bg }]}>
+                    <bin.icon size={26} color={bin.color} />
+                  </View>
+                  <Text style={s.binLabel}>{bin.label}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
 
         {/* ── HOW IT WORKS ── */}
         <View style={s.section} onLayout={(e) => { sectionY.current.howItWorks = e.nativeEvent.layout.y; }}>
@@ -200,6 +233,7 @@ export function SplashScreen({ navigation, route }: any) {
         <LinearGradient colors={['#052e16', '#15803d']} style={s.coinBanner} onLayout={(e) => { sectionY.current.rewards = e.nativeEvent.layout.y; }}>
           <View style={[s.container, s.coinContent, isMobile && { flexDirection: 'column', paddingHorizontal: 20 }]}>
             <View style={{ flex: 1 }}>
+              <Text style={[s.sectionLabel, { color: '#4ade80' }]}>REWARDS</Text>
               <Text style={[s.coinTitle, isMobile && { fontSize: 28 }]}>Be part of India's circular economy</Text>
               <Text style={s.coinSub}>Turn your household waste into KarmaCoins XP — schedule a free pickup and start making a real difference today.</Text>
               <TouchableOpacity style={s.coinBtn} onPress={() => navigation.navigate('Login')}>
@@ -244,7 +278,7 @@ export function SplashScreen({ navigation, route }: any) {
 
               <View style={s.footerLinks}>
                 <Text style={s.footerLinkTitle}>Company</Text>
-                <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/about-us/')}>
+                <TouchableOpacity onPress={() => navigation.navigate('AboutUs')}>
                   <Text style={s.footerLink}>About us</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>
@@ -260,10 +294,6 @@ export function SplashScreen({ navigation, route }: any) {
                 <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('mailto:cto.team@0waste.co.in')}>
                   <Mail size={14} color="#4ade80" />
                   <Text style={s.footerLink}>cto.team@0waste.co.in</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('tel:+917093198828')}>
-                  <Phone size={14} color="#4ade80" />
-                  <Text style={s.footerLink}>+91 70931 98828</Text>
                 </TouchableOpacity>
                 <View style={s.footerContactRow}>
                   <MapPin size={14} color="#4ade80" style={{ marginTop: 2 }} />
@@ -317,12 +347,22 @@ const s = StyleSheet.create({
   trustRow: { flexDirection: 'row', gap: 28 },
   trustItem: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   trustText: { color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: '600' },
+  poweredByBadge: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignSelf: 'flex-start', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 7, borderWidth: 1, borderColor: 'rgba(255,255,255,0.1)' },
+  poweredByDot: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#4ade80', alignItems: 'center', justifyContent: 'center' },
+  poweredByDotText: { fontSize: 8, fontWeight: '900', color: '#052e16' },
+  poweredByText: { color: 'rgba(255,255,255,0.7)', fontSize: 13, fontWeight: '600' },
 
   // Sections
   section: { paddingVertical: 60 },
   container: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32 },
   sectionLabel: { fontSize: 12, fontWeight: '900', color: '#16a34a', letterSpacing: 2, marginBottom: 10 },
   sectionTitle: { fontSize: 36, fontWeight: '900', color: '#0f172a', letterSpacing: -1, marginBottom: 40, lineHeight: 44 },
+
+  // 4-bin waste category cards
+  binsRow: { flexDirection: 'row', gap: 16 },
+  binCard: { flex: 1, backgroundColor: 'white', borderRadius: 18, paddingVertical: 22, alignItems: 'center', borderWidth: 1, borderColor: '#e2e8f0' },
+  binIconBg: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', marginBottom: 10 },
+  binLabel: { fontSize: 14, fontWeight: '800', color: '#0f172a' },
 
   // Steps
   stepsRow: { flexDirection: 'row', gap: 20 },

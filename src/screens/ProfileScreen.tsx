@@ -324,30 +324,63 @@ export function ProfileScreen({ navigation }: any) {
     }).start(() => setDemoModalVisible(false));
   };
 
+  // On web, the browser/hardware back button pops the navigator's history entry
+  // directly — it doesn't know about these local modal flags, so it would leave
+  // the modal floating over whatever screen it lands on. Intercept back while any
+  // modal is open and close the modal instead of leaving the screen.
+  useEffect(() => {
+    const sub = navigation.addListener('beforeRemove', (e: any) => {
+      if (!modalVisible && !addressModalVisible && !demoModalVisible) return;
+      e.preventDefault();
+      if (modalVisible) closeModal();
+      if (addressModalVisible) closeAddressModal();
+      if (demoModalVisible) closeDemoModal();
+    });
+    return sub;
+  }, [navigation, modalVisible, addressModalVisible, demoModalVisible]);
+
   const [profileOtp, setProfileOtp] = useState(['', '', '', '', '', '']);
   const profileOtpRefs = useRef<Array<any>>([]);
+  // Which field the current OTP round is verifying — email OTP goes to the current phone,
+  // phone OTP goes to the new phone, so they can't share a single round-trip.
+  const [otpStage, setOtpStage] = useState<'email' | 'phone' | null>(null);
 
   const emailChanged = editForm.email && editForm.email !== userProfile?.email;
   const phoneChanged = editForm.phone && editForm.phone !== userProfile?.phone;
 
+  const startEmailOtp = async () => {
+    setFlowStep('loading');
+    try {
+      await authService.sendOtp(userProfile?.phone, 'change-email');
+      setOtpStage('email');
+      setProfileOtp(['', '', '', '', '', '']);
+      setFlowStep('otp');
+    } catch (error: any) {
+      showAlert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
+      setFlowStep('form');
+    }
+  };
+
+  const startPhoneOtp = async () => {
+    setFlowStep('loading');
+    try {
+      await authService.sendOtp(editForm.phone, 'change-phone');
+      setOtpStage('phone');
+      setProfileOtp(['', '', '', '', '', '']);
+      setFlowStep('otp');
+    } catch (error: any) {
+      showAlert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
+      setFlowStep('form');
+    }
+  };
+
   const handleSaveProfile = async () => {
     if (!editForm.name || !editForm.email || !editForm.phone) return;
 
-    if (emailChanged || phoneChanged) {
-      setFlowStep('loading');
-      try {
-        await profileService.sendProfileOtp(
-          emailChanged ? editForm.email : editForm.phone,
-          !!emailChanged,
-          userProfile?.phone,
-          userProfile?.email
-        );
-        setProfileOtp(['', '', '', '', '', '']);
-        setFlowStep('otp');
-      } catch (error: any) {
-        showAlert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
-        setFlowStep('form');
-      }
+    if (emailChanged) {
+      await startEmailOtp();
+    } else if (phoneChanged) {
+      await startPhoneOtp();
     } else {
       await saveProfileDirect();
     }
@@ -369,16 +402,14 @@ export function ProfileScreen({ navigation }: any) {
   const saveProfileDirect = async () => {
     setFlowStep('loading');
     try {
-      await profileService.updateAccount({
-        name: editForm.name,
-        email: editForm.email,
-        phone: editForm.phone
-      });
+      if (editForm.name !== userProfile?.name) {
+        await profileService.updateName({ name: editForm.name });
+      }
       await refreshProfile();
       setFlowStep('success');
       setTimeout(() => closeModal(), 2000);
     } catch (error: any) {
-      const msg = error?.response?.data?.message || error?.response?.data?.error || 'Failed to update account details';
+      const msg = error?.response?.data?.message || error?.response?.data?.error || 'Failed to update profile';
       showAlert('Update failed', msg);
       setFlowStep('form');
     }
@@ -392,17 +423,26 @@ export function ProfileScreen({ navigation }: any) {
     }
     setFlowStep('loading');
     try {
-      await profileService.verifyProfileOtp(
-        emailChanged ? editForm.email : editForm.phone,
-        otp,
-        !!emailChanged,
-        userProfile?.phone,
-        userProfile?.email
-      );
-      // If name also changed, save it
-      if (editForm.name !== userProfile?.name) {
-        await profileService.updateAccount({ name: editForm.name });
+      if (otpStage === 'email') {
+        const verifyRes = await authService.verifyOtp(userProfile?.phone, otp, 'change-email');
+        const otpToken = verifyRes?.data?.otpToken;
+        await profileService.changeEmail(editForm.email, otpToken);
+
+        if (phoneChanged) {
+          // Email done — now run the phone OTP round (sent to the new phone).
+          await startPhoneOtp();
+          return;
+        }
+      } else if (otpStage === 'phone') {
+        const verifyRes = await authService.verifyOtp(editForm.phone, otp, 'change-phone');
+        const otpToken = verifyRes?.data?.otpToken;
+        await profileService.changePhone(editForm.phone, otpToken);
       }
+
+      if (editForm.name !== userProfile?.name) {
+        await profileService.updateName({ name: editForm.name });
+      }
+      setOtpStage(null);
       await refreshProfile();
       setFlowStep('success');
       setTimeout(() => closeModal(), 2000);
@@ -553,7 +593,7 @@ export function ProfileScreen({ navigation }: any) {
                   title="Help & support"
                   onPress={() => showAlert(
                     'Help & support',
-                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nPhone: 070931 98828\nAddress: PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503'
+                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503'
                   )}
                 />
                 <View style={styles.divider} />
@@ -771,8 +811,12 @@ export function ProfileScreen({ navigation }: any) {
                   <ShieldCheck size={24} color="#15803d" />
                 </View>
                 <Text style={{ fontSize: 20, fontWeight: '900', color: '#0f172a', marginBottom: 6, textAlign: 'center' }}>Secure verification</Text>
-                <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', marginBottom: 4, textAlign: 'center' }}>OTP sent to your registered phone</Text>
-                <Text style={{ fontSize: 14, color: '#15803d', fontWeight: '800', marginBottom: 24, textAlign: 'center' }}>+91 {userProfile?.phone}</Text>
+                <Text style={{ fontSize: 13, color: '#64748b', fontWeight: '500', marginBottom: 4, textAlign: 'center' }}>
+                  {otpStage === 'phone' ? 'OTP sent to your new phone number' : 'OTP sent to your registered phone'}
+                </Text>
+                <Text style={{ fontSize: 14, color: '#15803d', fontWeight: '800', marginBottom: 24, textAlign: 'center' }}>
+                  +91 {otpStage === 'phone' ? editForm.phone : userProfile?.phone}
+                </Text>
 
                 <View style={{ flexDirection: 'row', gap: 8, marginBottom: 24, justifyContent: 'center' }}>
                   {profileOtp.map((digit: string, i: number) => (

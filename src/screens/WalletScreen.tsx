@@ -4,7 +4,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
-import { REDEEM_INFO_MESSAGE, showRedeemInfoNow } from '../utils/redeemInfo';
+import { REDEEM_INFO_MESSAGE, showRedeemInfoNow, isRedeemLive } from '../utils/redeemInfo';
 
 const showWithdrawInfo = () => showRedeemInfoNow();
 
@@ -60,7 +60,7 @@ export function WalletScreen({ navigation }: any) {
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.titleRow}>
             <Text style={styles.headerTitle}>My Wallet</Text>
-            <TouchableOpacity style={styles.historyBtn}>
+            <TouchableOpacity style={styles.historyBtn} onPress={() => navigation.navigate('RedeemHistory')}>
               <History size={18} color="white" />
             </TouchableOpacity>
           </View>
@@ -85,12 +85,18 @@ export function WalletScreen({ navigation }: any) {
 
         {/* Redeem info banner */}
         <View style={styles.redeemBanner}>
-          <Text style={styles.redeemBannerText}>{REDEEM_INFO_MESSAGE}</Text>
+          <Text style={styles.redeemBannerText}>
+            {isRedeemLive() ? '🪙 10 KarmaCoins XP = ₹1 — tap Redeem to cash out anytime! ♻️✨' : REDEEM_INFO_MESSAGE}
+          </Text>
         </View>
 
         {/* Action Buttons */}
         <View style={styles.actionRow}>
-          <TouchableOpacity style={[styles.actionBtn, styles.actionBtnGreen]} onPress={showWithdrawInfo} activeOpacity={0.8}>
+          <TouchableOpacity
+            style={[styles.actionBtn, styles.actionBtnGreen]}
+            onPress={() => (isRedeemLive() ? navigation.navigate('Redeem', { balance }) : showWithdrawInfo())}
+            activeOpacity={0.8}
+          >
             <ArrowDownLeft size={18} color="#16a34a" />
             <Text style={[styles.actionLabel, { color: '#16a34a' }]}>Redeem</Text>
           </TouchableOpacity>
