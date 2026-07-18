@@ -1,0 +1,9 @@
+{
+  "name": "karmaverse-email-service",
+  "version": "1.0.0",
+  "description": "Transactional email sending for KarmaVerse — reference module to drop into the api.karmaverse.earth backend.",
+  "main": "emailService.js",
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  }
+}

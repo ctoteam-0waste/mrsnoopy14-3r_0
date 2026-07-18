@@ -1,24 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Animated, Platform, Image, Linking, Easing } from 'react-native';
-import { X, ArrowRight, Sparkles } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Platform, Image, Linking, Easing } from 'react-native';
+import { X, ArrowRight } from 'lucide-react-native';
 
-const STORAGE_KEY = 'karmaverse_mascotPopupSeenAt';
-const REAPPEAR_AFTER_MS = 24 * 60 * 60 * 1000;
 const SHOW_DELAY_MS = 2200;
+const REAPPEAR_GAP_MS = 15000;
+const MAX_SHOWS_PER_VISIT = 3;
 
 const MESSAGES = [
-  "Hi! I'm Earth Buddy 👋",
+  "Hi! I'm Planet Buddy 👋",
   "Let's recycle together!",
   'Every kg you recycle helps me breathe easier.',
   'Ready to earn KarmaCoins XP?',
 ];
 
 interface Props {
-  onGetStarted: () => void;
+  // True while the page is scrolled near the footer, so the fixed
+  // bottom-right widget doesn't sit on top of the footer's contact info.
+  suppressed?: boolean;
 }
 
-export function MascotPopupBanner({ onGetStarted }: Props) {
+export function MascotPopupBanner({ suppressed = false }: Props) {
   const [visible, setVisible] = useState(false);
   const scale = useRef(new Animated.Value(0.9)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -28,27 +29,59 @@ export function MascotPopupBanner({ onGetStarted }: Props) {
   const bubbleScale = useRef(new Animated.Value(0.7)).current;
   const textOpacity = useRef(new Animated.Value(1)).current;
   const typingPulse = useRef(new Animated.Value(0.3)).current;
+  const mouthOpen = useRef(new Animated.Value(1)).current;
+  const blink = useRef(new Animated.Value(0)).current;
+  const armWave = useRef(new Animated.Value(0)).current;
+  const suppressOpacity = useRef(new Animated.Value(1)).current;
   const [typing, setTyping] = useState(true);
   const [messageIndex, setMessageIndex] = useState(0);
+  const [showCount, setShowCount] = useState(0);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
-    AsyncStorage.getItem(STORAGE_KEY).then((seenAt) => {
-      const last = seenAt ? Number(seenAt) : 0;
-      if (Date.now() - last < REAPPEAR_AFTER_MS) return;
-      timer = setTimeout(() => setVisible(true), SHOW_DELAY_MS);
-    });
+    Animated.timing(suppressOpacity, {
+      toValue: suppressed ? 0 : 1,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [suppressed]);
+
+  // First appearance, shortly after the page loads.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setVisible(true);
+      setShowCount(1);
+    }, SHOW_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
 
+  // Re-show a beat after each dismissal, up to MAX_SHOWS_PER_VISIT times per page load.
+  useEffect(() => {
+    if (visible || showCount === 0 || showCount >= MAX_SHOWS_PER_VISIT) return;
+    const timer = setTimeout(() => {
+      setVisible(true);
+      setShowCount((c) => c + 1);
+    }, REAPPEAR_GAP_MS);
+    return () => clearTimeout(timer);
+  }, [visible, showCount]);
+
   useEffect(() => {
     if (!visible) return;
+
+    // Reset entrance state so the whole intro (fade/scale + typing beat) replays on every reappearance.
+    scale.setValue(0.9);
+    opacity.setValue(0);
+    bubbleOpacity.setValue(0);
+    bubbleScale.setValue(0.7);
+    typingPulse.setValue(0.3);
+    setTyping(true);
+    setMessageIndex(0);
+
     Animated.parallel([
       Animated.spring(scale, { toValue: 1, friction: 7, useNativeDriver: true }),
       Animated.timing(opacity, { toValue: 1, duration: 250, useNativeDriver: true }),
     ]).start();
 
-    // Idle bob + wiggle loop, like Earth Buddy is waving hello.
+    // Idle bob + wiggle loop, like Planet Buddy is waving hello.
     const bounceLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(bounce, { toValue: -10, duration: 750, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
@@ -62,8 +95,38 @@ export function MascotPopupBanner({ onGetStarted }: Props) {
         Animated.timing(wiggle, { toValue: 0, duration: 1500, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
       ])
     );
+    // Alternate the open-mouth and closed-mouth frames the whole time Planet
+    // Buddy is on screen — actual lip movement, not a body-wide pulse.
+    const mouthLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(mouthOpen, { toValue: 1, duration: 190, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+        Animated.timing(mouthOpen, { toValue: 0, duration: 190, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      ])
+    );
+
+    // Quick blink every few seconds — eyes+mouth momentarily swap to the neutral frame.
+    const blinkLoop = Animated.loop(
+      Animated.sequence([
+        Animated.delay(3400),
+        Animated.timing(blink, { toValue: 1, duration: 70, useNativeDriver: true }),
+        Animated.timing(blink, { toValue: 0, duration: 90, useNativeDriver: true }),
+      ])
+    );
+
+    // Gentle continuous wave — just the arm, rotating back and forth like a greeting.
+    const armWaveLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(armWave, { toValue: 1, duration: 420, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(armWave, { toValue: -1, duration: 840, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        Animated.timing(armWave, { toValue: 0, duration: 420, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+      ])
+    );
+
     bounceLoop.start();
     wiggleLoop.start();
+    mouthLoop.start();
+    blinkLoop.start();
+    armWaveLoop.start();
 
     // Speech bubble pops in a beat after the mascot, shows a "typing…" moment,
     // then starts talking — cycling through a few friendly lines.
@@ -97,6 +160,9 @@ export function MascotPopupBanner({ onGetStarted }: Props) {
     return () => {
       bounceLoop.stop();
       wiggleLoop.stop();
+      mouthLoop.stop();
+      blinkLoop.stop();
+      armWaveLoop.stop();
       typingLoop.stop();
       clearTimeout(bubbleTimer);
       clearTimeout(typingTimer);
@@ -105,126 +171,122 @@ export function MascotPopupBanner({ onGetStarted }: Props) {
   }, [visible]);
 
   const rotate = wiggle.interpolate({ inputRange: [-1, 1], outputRange: ['-6deg', '6deg'] });
+  const armRotate = armWave.interpolate({ inputRange: [-1, 1], outputRange: ['-14deg', '14deg'] });
 
   const dismiss = () => {
     setVisible(false);
-    AsyncStorage.setItem(STORAGE_KEY, String(Date.now()));
   };
 
-  const handleGetStarted = () => {
+  const visitWebsite = () => {
     dismiss();
-    onGetStarted();
+    Linking.openURL('https://0waste.co.in/');
   };
 
   if (!visible) return null;
 
   return (
-    <Modal transparent animationType="fade" visible={visible} onRequestClose={dismiss}>
-      <TouchableOpacity style={s.backdrop} activeOpacity={1} onPress={dismiss}>
-        <Animated.View style={[s.card, { opacity, transform: [{ scale }] }]} onStartShouldSetResponder={() => true}>
-          <TouchableOpacity style={s.closeBtn} onPress={dismiss} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <X size={18} color="#64748b" />
-          </TouchableOpacity>
+    <View style={s.container} pointerEvents={suppressed ? 'none' : 'box-none'}>
+      <Animated.View style={[s.widget, { opacity: Animated.multiply(opacity, suppressOpacity), transform: [{ scale }] }]}>
+        <TouchableOpacity style={s.closeBtn} onPress={dismiss} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <X size={14} color="#64748b" />
+        </TouchableOpacity>
 
-          <View style={s.mascotWrap}>
-            <View style={s.mascotCircle}>
-              <Animated.View style={{ transform: [{ translateY: bounce }, { rotate }] }}>
-                <Image source={require('../../../assets/mascot-earth-buddy.png')} style={s.mascotImg} resizeMode="contain" />
-              </Animated.View>
+        <Animated.View style={[s.speechBubble, { opacity: bubbleOpacity, transform: [{ scale: bubbleScale }] }]}>
+          {typing ? (
+            <View style={s.typingRow}>
+              <Animated.View style={[s.typingDot, { opacity: typingPulse }]} />
+              <Animated.View style={[s.typingDot, { opacity: typingPulse, marginHorizontal: 3 }]} />
+              <Animated.View style={[s.typingDot, { opacity: typingPulse }]} />
             </View>
+          ) : (
+            <Animated.Text style={[s.speechText, { opacity: textOpacity }]}>{MESSAGES[messageIndex]}</Animated.Text>
+          )}
+          <View style={s.speechTail} />
+        </Animated.View>
 
-            <Animated.View style={[s.speechBubble, { opacity: bubbleOpacity, transform: [{ scale: bubbleScale }] }]}>
-              {typing ? (
-                <View style={s.typingRow}>
-                  <Animated.View style={[s.typingDot, { opacity: typingPulse }]} />
-                  <Animated.View style={[s.typingDot, { opacity: typingPulse, marginHorizontal: 3 }]} />
-                  <Animated.View style={[s.typingDot, { opacity: typingPulse }]} />
-                </View>
-              ) : (
-                <Animated.Text style={[s.speechText, { opacity: textOpacity }]}>{MESSAGES[messageIndex]}</Animated.Text>
-              )}
-              <View style={s.speechTail} />
+        <TouchableOpacity onPress={visitWebsite} activeOpacity={0.85}>
+          <View style={s.mascotCircle}>
+            <Animated.View style={{ transform: [{ translateY: bounce }, { rotate }] }}>
+              <Image source={require('../../../assets/mascot-mouth-closed-transparent.png')} style={s.mascotImg} resizeMode="contain" />
+              <Animated.Image
+                source={require('../../../assets/mascot-earth-buddy-transparent.png')}
+                style={[s.mascotImg, s.mascotImgOverlay, { opacity: mouthOpen }]}
+                resizeMode="contain"
+              />
+              <Animated.Image
+                source={require('../../../assets/mascot-blink-transparent.png')}
+                style={[s.mascotImg, s.mascotImgOverlay, { opacity: blink }]}
+                resizeMode="contain"
+              />
+              <Animated.View style={[s.armOverlayWrap, { transform: [{ rotate: armRotate }] }]}>
+                <Image source={require('../../../assets/mascot-arm-raised-transparent.png')} style={s.armOverlayImg} resizeMode="contain" />
+              </Animated.View>
             </Animated.View>
           </View>
+        </TouchableOpacity>
 
-          <View style={s.sparkleRow}>
-            <Sparkles size={14} color="#16a34a" />
-            <Text style={s.eyebrow}>MEET EARTH BUDDY</Text>
-          </View>
-
-          <Text style={s.title}>Turn your waste into KarmaCoins XP!</Text>
-          <Text style={s.body}>
-            KarmaVerse is India's first circular economy rewards app — free doorstep pickups for
-            recyclables, daily eco-quizzes, and real rewards for every kg you recycle. Earth Buddy
-            gets a little happier every time you do.
-          </Text>
-
-          <TouchableOpacity style={s.cta} onPress={handleGetStarted} activeOpacity={0.85}>
-            <Text style={s.ctaText}>Get started free</Text>
-            <ArrowRight size={16} color="#052e16" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={dismiss}>
-            <Text style={s.later}>Maybe later</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/')}>
-            <Text style={s.parentLink}>A 3R Zero Waste initiative · 0waste.co.in ↗</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      </TouchableOpacity>
-    </Modal>
+        <TouchableOpacity style={s.lookPill} onPress={visitWebsite} activeOpacity={0.85}>
+          <Text style={s.lookPillText}>We're part of the 3R Zero Waste movement</Text>
+          <ArrowRight size={12} color="#16a34a" />
+        </TouchableOpacity>
+      </Animated.View>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(5,46,22,0.55)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  card: {
-    width: '100%',
-    maxWidth: 380,
-    backgroundColor: 'white',
-    borderRadius: 24,
-    padding: 28,
-    alignItems: 'center',
+  container: {
     ...Platform.select({
-      web: { boxShadow: '0 20px 60px rgba(0,0,0,0.25)' } as any,
-      default: { shadowColor: '#000', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.25, shadowRadius: 30, elevation: 10 },
+      web: { position: 'fixed' } as any,
+      default: { position: 'absolute' },
+    }),
+    bottom: 20,
+    right: 20,
+    left: 20,
+    alignItems: 'flex-end',
+    zIndex: 9999,
+  },
+  widget: { alignItems: 'center', position: 'relative' },
+  closeBtn: {
+    position: 'absolute', top: -6, right: -6, width: 22, height: 22, borderRadius: 11, zIndex: 1,
+    backgroundColor: 'white', alignItems: 'center', justifyContent: 'center',
+    ...Platform.select({
+      web: { boxShadow: '0 2px 8px rgba(0,0,0,0.18)' } as any,
+      default: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 4 },
     }),
   },
-  closeBtn: { position: 'absolute', top: 14, right: 14, width: 32, height: 32, borderRadius: 16, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' },
-  mascotWrap: { alignItems: 'center', marginBottom: 16, marginTop: 4, position: 'relative' },
-  mascotCircle: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center' },
-  mascotImg: { width: 96, height: 96 },
-  mascotEmoji: { fontSize: 48 },
+  mascotCircle: { width: 76, height: 76, alignItems: 'center', justifyContent: 'center' },
+  mascotImg: { width: 76, height: 76 },
+  mascotImgOverlay: { position: 'absolute', top: 0, left: 0 },
+  // Positioned/sized to match the raised-arm crop's box within the 1254x1254
+  // source, scaled down to the 76px mascotImg display size (×0.0606).
+  armOverlayWrap: { position: 'absolute', left: 51, top: 24, width: 19, height: 22 },
+  armOverlayImg: { width: 19, height: 22 },
   speechBubble: {
-    position: 'absolute', top: -8, left: '55%', minWidth: 130, maxWidth: 170,
+    minWidth: 110, maxWidth: 200, marginBottom: 8,
     backgroundColor: 'white', borderRadius: 14, borderWidth: 1.5, borderColor: '#dcfce7',
-    paddingHorizontal: 12, paddingVertical: 9,
+    paddingHorizontal: 12, paddingVertical: 8, alignItems: 'center',
     ...Platform.select({
       web: { boxShadow: '0 6px 16px rgba(0,0,0,0.12)' } as any,
       default: { shadowColor: '#000', shadowOffset: { width: 0, height: 3 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 6 },
     }),
   },
-  speechText: { fontSize: 12.5, color: '#0f172a', fontWeight: '700', lineHeight: 17 },
+  speechText: { fontSize: 12, color: '#0f172a', fontWeight: '700', lineHeight: 16, textAlign: 'center' },
   speechTail: {
-    position: 'absolute', bottom: -7, left: 14, width: 0, height: 0,
-    borderLeftWidth: 7, borderRightWidth: 7, borderTopWidth: 8,
+    position: 'absolute', bottom: -7, left: '50%', marginLeft: -6, width: 0, height: 0,
+    borderLeftWidth: 6, borderRightWidth: 6, borderTopWidth: 7,
     borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: 'white',
   },
-  typingRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 2 },
-  typingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#16a34a' },
-  sparkleRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 10 },
-  eyebrow: { fontSize: 12, fontWeight: '900', color: '#16a34a', letterSpacing: 1 },
-  title: { fontSize: 22, fontWeight: '900', color: '#0f172a', textAlign: 'center', marginBottom: 10, letterSpacing: -0.5 },
-  body: { fontSize: 14, color: '#64748b', fontWeight: '500', textAlign: 'center', lineHeight: 21, marginBottom: 22 },
-  cta: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#4ade80', borderRadius: 14, paddingHorizontal: 26, paddingVertical: 14, marginBottom: 12 },
-  ctaText: { color: '#052e16', fontWeight: '900', fontSize: 15 },
-  later: { fontSize: 13, color: '#94a3b8', fontWeight: '600' },
-  parentLink: { fontSize: 12, color: '#16a34a', fontWeight: '700', marginTop: 10 },
+  typingRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 3 },
+  typingDot: { width: 7, height: 7, borderRadius: 3.5, backgroundColor: '#16a34a' },
+  lookPill: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 8,
+    backgroundColor: 'white', borderRadius: 12, borderWidth: 1.5, borderColor: '#dcfce7',
+    paddingHorizontal: 14, paddingVertical: 8, maxWidth: 200,
+    ...Platform.select({
+      web: { boxShadow: '0 4px 12px rgba(0,0,0,0.1)' } as any,
+      default: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 6, elevation: 4 },
+    }),
+  },
+  lookPillText: { flexShrink: 1, fontSize: 12, color: '#16a34a', fontWeight: '800', textAlign: 'center', lineHeight: 16 },
 });
