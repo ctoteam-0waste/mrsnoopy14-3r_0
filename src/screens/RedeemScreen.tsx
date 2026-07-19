@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   scroll: { flex: 1 },
 
   header: { paddingBottom: 20 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10, maxWidth: 800, width: '100%', alignSelf: 'center' },
   backBtnInner: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 20, fontWeight: '900', color: 'white', textAlign: 'center' },
 
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
   },
   balanceText: { color: 'white', fontWeight: '800', fontSize: 13 },
 
-  formContainer: { padding: 20 },
+  formContainer: { padding: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
   sectionTitle: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginTop: 8, marginBottom: 12 },
 
   inputGroup: { marginBottom: 16 },
