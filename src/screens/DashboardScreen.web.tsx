@@ -93,7 +93,6 @@ export function DashboardScreen({ navigation }: any) {
       ]);
       if (prof.name) { const first = prof.name.trim().split(/\s+/)[0]; setUserName(first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()); }
       setBalance(prof.karmaCoins || prof.coins || 0);
-      setStreak(prof.streak || prof.activeStreak || 0);
       if (Array.isArray(orders)) {
         setTotalPickups(orders.filter((o: any) => o.status === 'COMPLETED').length);
         setRecentOrders(orders.slice(0, 6).map((o: any) => {
@@ -111,10 +110,18 @@ export function DashboardScreen({ navigation }: any) {
       const token = await AsyncStorage.getItem('userToken');
       const sfx = getStableUserSuffix(token);
       const [sd, ss] = await Promise.all([AsyncStorage.getItem(`lastQuizDate_${sfx}`), AsyncStorage.getItem(`quizStreak_${sfx}`)]);
-      if (!sd) { setQuizStreak(0); return; }
       const today = getLocalDateStr();
       const yest = getLocalYesterdayStr();
-      setQuizStreak(sd === today || sd === yest ? Number(ss) || 0 : 0);
+      setQuizStreak(!sd ? 0 : (sd === today || sd === yest ? Number(ss) || 0 : 0));
+
+      // Day streak = consecutive days the app was opened (frontend-tracked, no backend dependency)
+      const [lad, ds] = await Promise.all([AsyncStorage.getItem(`lastActiveDate_${sfx}`), AsyncStorage.getItem(`dayStreak_${sfx}`)]);
+      let dayStreak: number;
+      if (lad === today) dayStreak = Number(ds) || 1;
+      else if (lad === yest) dayStreak = (Number(ds) || 0) + 1;
+      else dayStreak = 1;
+      await AsyncStorage.multiSet([[`lastActiveDate_${sfx}`, today], [`dayStreak_${sfx}`, String(dayStreak)]]);
+      setStreak(dayStreak);
     };
     const unsub = navigation.addListener('focus', () => { load(); loadQuiz(); });
     load(); loadQuiz();

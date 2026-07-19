@@ -614,14 +614,14 @@ const styles = StyleSheet.create({
   headerSub: { fontSize: 12, color: '#86efac', fontWeight: '700', textAlign: 'center', marginTop: 2, letterSpacing: 1 },
 
   stepContainer: { flex: 1 },
-  filterSection: { paddingTop: 20, paddingBottom: 10 },
+  filterSection: { paddingTop: 20, paddingBottom: 10, maxWidth: 900, width: '100%', alignSelf: 'center' },
   filterList: { paddingHorizontal: 20, gap: 10 },
   filterChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'white', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, borderWidth: 1, borderColor: '#e4e4e7' },
   filterText: { fontSize: 13, color: '#52525b', fontWeight: '600' },
   filterChipActive: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 100, elevation: 4 },
   filterTextActive: { fontSize: 13, color: 'white', fontWeight: '800' },
 
-  gridContent: { paddingBottom: 120 },
+  gridContent: { paddingBottom: 120, maxWidth: 900, width: '100%', alignSelf: 'center' },
   gridContainer: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 12, marginTop: 10, maxWidth: 900, alignSelf: 'center', width: '100%', justifyContent: 'center' },
   
   cardContainer: { width: CARD_WIDTH, backgroundColor: 'white', borderRadius: 18, marginBottom: 10, marginHorizontal: CARD_MARGIN, overflow: 'hidden', elevation: 2, borderWidth: 2, borderColor: 'transparent' },
@@ -645,7 +645,7 @@ const styles = StyleSheet.create({
   addedBtn: { backgroundColor: '#dcfce7', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 8, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
   addedBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '800' },
 
-  floatingCart: { position: 'absolute', bottom: 30, left: 20, right: 20, backgroundColor: '#1e293b', borderRadius: 24, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10 },
+  floatingCart: { position: 'absolute', bottom: 30, left: 20, right: 20, maxWidth: 860, marginHorizontal: 'auto', backgroundColor: '#1e293b', borderRadius: 24, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10 },
   cartInfo: { flex: 1 },
   cartItemText: { color: 'white', fontSize: 15, fontWeight: '800', marginBottom: 2 },
   cartRewardText: { color: '#fbbf24', fontSize: 12, fontWeight: '700' },

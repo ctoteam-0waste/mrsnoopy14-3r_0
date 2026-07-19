@@ -480,13 +480,22 @@ export function LoginScreen({ navigation }: any) {
       reconnect();
       navigation.replace('App');
     } catch (error: any) {
+      const status = error?.response?.status;
       const isNetworkError = !error?.response;
-      showAlert(
-        isNetworkError ? 'No internet connection' : 'Login failed',
-        isNetworkError
-          ? 'Please check your network connection and try again.'
-          : (error?.response?.data?.message || 'Incorrect email or password. Please try again.')
-      );
+      if (status === 429) {
+        showAlert(
+          'Too many attempts',
+          error?.response?.data?.message ||
+            'Too many login attempts. Please wait a while and try again.'
+        );
+      } else {
+        showAlert(
+          isNetworkError ? 'No internet connection' : 'Login failed',
+          isNetworkError
+            ? 'Please check your network connection and try again.'
+            : (error?.response?.data?.message || 'Incorrect email or password. Please try again.')
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -967,7 +976,7 @@ export function LoginScreen({ navigation }: any) {
 
     if (step === 'verify_signup_otp') {
       return (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <View style={styles.otpContainer}>
             <View style={styles.otpIconBg}>
               <Lock size={28} color="#15803d" />
@@ -1089,7 +1098,7 @@ export function LoginScreen({ navigation }: any) {
       const isComplete = age && gender && sexualOrientation && maritalStatus && employment;
 
       return (
-        <ScrollView style={{flex: 1, marginHorizontal: -24}} contentContainerStyle={styles.scrollStepContent} showsVerticalScrollIndicator={false}>
+        <ScrollView style={{flex: 1, marginHorizontal: 0}} contentContainerStyle={styles.scrollStepContent} showsVerticalScrollIndicator={false}>
           <View style={styles.demoHeader}>
             <Text style={styles.demoTitle}>Personalize profile</Text>
             <Text style={styles.demoSubtitle}>Help us tailor the best eco-rewards directly for you.</Text>
@@ -1223,8 +1232,8 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#ffffff', maxWidth: 900, width: '100%', alignSelf: 'center' },
   header: {
     alignItems: 'center',
-    paddingTop: 32,
-    paddingBottom: 40,
+    paddingTop: 16,
+    paddingBottom: 20,
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     zIndex: 10,
@@ -1233,7 +1242,7 @@ const styles = StyleSheet.create({
   headerCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
   headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 12, letterSpacing: 0.5 },
   logoCard: { alignItems: 'center', justifyContent: 'center' },
-  logoImg: { width: 240, height: 150 },
+  logoImg: { width: 180, height: 108 },
   termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 4 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
@@ -1241,9 +1250,9 @@ const styles = StyleSheet.create({
   termsLink: { color: '#16a34a', fontWeight: '800' },
   infoBtn: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center', marginTop: -2 },
   
-  body: { flex: 1, paddingHorizontal: 24, paddingTop: 32 },
-  
-  stepContent: { gap: 24 },
+  body: { flex: 1, paddingHorizontal: 24, paddingTop: 16, width: '100%', maxWidth: 800, alignSelf: 'center' },
+
+  stepContent: { gap: 14 },
   scrollStepContent: { paddingHorizontal: 24, paddingBottom: 50, gap: 16 },
   
   title: { fontSize: 24, fontWeight: '900', color: '#0f172a' },
@@ -1282,7 +1291,7 @@ const styles = StyleSheet.create({
   buttonDisabled: { backgroundColor: '#94a3b8', shadowOpacity: 0, elevation: 0 },
   buttonText: { color: '#ffffff', fontWeight: '900', fontSize: 16 },
   
-  dividerRow: { flexDirection: 'row', alignItems: 'center', marginTop: 32, marginBottom: 20 },
+  dividerRow: { flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 12 },
   dividerLine: { flex: 1, height: 1, backgroundColor: '#f1f5f9' },
   dividerText: { marginHorizontal: 16, color: '#94a3b8', fontSize: 13, fontWeight: '700' },
 

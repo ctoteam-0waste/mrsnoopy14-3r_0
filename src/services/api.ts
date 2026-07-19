@@ -13,12 +13,31 @@ const api = axios.create({
   },
 });
 
+// Auth endpoints must behave exactly like Postman: no stale Authorization header
+// on the way in, and a 401 (e.g. wrong password) must NOT wipe stored state.
+// A leftover token being sent to /auth/login was making the backend reject an
+// otherwise-valid login that worked fine in Postman.
+const isAuthEndpoint = (url?: string) => {
+  if (!url) return false;
+  return [
+    '/auth/login',
+    '/auth/register',
+    '/auth/check-user',
+    '/auth/send-otp',
+    '/auth/verify-otp',
+    '/auth/google-login',
+    '/auth/reset-password',
+  ].some((e) => url.includes(e));
+};
+
 // Add a request interceptor to automatically add the JWT token to headers
 api.interceptors.request.use(
   async (config) => {
-    const token = await AsyncStorage.getItem('userToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (!isAuthEndpoint(config.url)) {
+      const token = await AsyncStorage.getItem('userToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
@@ -31,8 +50,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      // Token expired or invalid, handle logout here
+    if (error.response && error.response.status === 401 && !isAuthEndpoint(error.config?.url)) {
+      // Token expired or invalid on a protected route — clear it.
       await AsyncStorage.removeItem('userToken');
       // Navigation to login should ideally be handled at the router/context level
     }

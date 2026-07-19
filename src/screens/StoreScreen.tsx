@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform } from 'react-native';
+import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag, Sparkles, Leaf, ArrowRight } from 'lucide-react-native';
 
@@ -42,6 +43,7 @@ export function StoreScreen({ navigation }: any) {
             <ArrowRight size={20} color="white" />
           </TouchableOpacity>
         </View>
+        {Platform.OS === 'web' && <WebFooter />}
       </ScrollView>
     </View>
   );

@@ -220,8 +220,12 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
       setDetailError('Please enter your house / flat number.');
       return;
     }
-    if (receiverPhone.trim() && !/^[6-9]\d{9}$/.test(receiverPhone.trim())) {
-      setDetailError('Enter a valid 10-digit mobile number, or leave it blank.');
+    if (!receiverName.trim()) {
+      setDetailError('Please enter the receiver name.');
+      return;
+    }
+    if (!/^[6-9]\d{9}$/.test(receiverPhone.trim())) {
+      setDetailError('Please enter a valid 10-digit receiver mobile number.');
       return;
     }
     const fullAddress = composeFullAddress(houseNo, building, resolvedAddress, landmark, receiverName, receiverPhone);

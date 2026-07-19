@@ -28,7 +28,7 @@ const SLIDES = [
     bg: ['#0f766e', '#0d9488'],
     accent: '#38bdf8',
     title: 'Real impact,\nreal numbers',
-    subtitle: 'Every pickup you schedule adds to a growing wave of change across India.',
+    subtitle: 'Every pickup you schedule adds to a growing wave of change across Delhi NCR.',
     buttonText: 'Next',
   },
   {
@@ -189,7 +189,7 @@ export function SplashScreen({ navigation }: any) {
             <View style={[styles.impactIconBg, { backgroundColor: 'rgba(34,197,94,0.15)' }]}><Trees color="#22c55e" size={24} /></View>
             <View style={{ flex: 1 }}>
               <Text style={styles.impactTitle}>Growing daily</Text>
-              <Text style={styles.impactDesc}>Circular economy network across India</Text>
+              <Text style={styles.impactDesc}>Circular economy network across Delhi NCR</Text>
             </View>
           </View>
           <Text style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 11, marginTop: 10 }}>3R Zero Waste • Haryana, India • 2026</Text>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Platform } from 'react-native';
+import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
@@ -54,7 +55,7 @@ export function WalletScreen({ navigation }: any) {
   return (
     <View style={{ flex: 1, backgroundColor: '#f0fdf6' }}>
       <StatusBar barStyle="light-content" />
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
@@ -153,6 +154,7 @@ export function WalletScreen({ navigation }: any) {
           )}
         </View>
 
+        {Platform.OS === 'web' && <WebFooter />}
       </ScrollView>
     </View>
   );

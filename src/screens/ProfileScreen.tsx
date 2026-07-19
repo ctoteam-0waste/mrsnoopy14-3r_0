@@ -1,5 +1,6 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
+import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
 import { ChevronLeft, User, MapPin, Flame, Settings, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -469,7 +470,7 @@ export function ProfileScreen({ navigation }: any) {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+        <ScrollView contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.backgroundGradient}>
         {/* Header */}
         <View style={styles.header}>
@@ -613,6 +614,7 @@ export function ProfileScreen({ navigation }: any) {
             </>
           )}
         </View>
+        {Platform.OS === 'web' && <WebFooter />}
         </ScrollView>
 
       {/* Demographics View Modal */}

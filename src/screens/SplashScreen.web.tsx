@@ -115,7 +115,7 @@ export function SplashScreen({ navigation, route }: any) {
             {/* Badge */}
             <View style={s.heroBadge}>
               <View style={s.heroBadgeDot} />
-              <Text style={s.heroBadgeText}>Free doorstep pickup across India</Text>
+              <Text style={s.heroBadgeText}>Free doorstep pickup in Delhi NCR</Text>
             </View>
 
             <Text style={[s.heroTitle, isMobile && { fontSize: 36 }]}>

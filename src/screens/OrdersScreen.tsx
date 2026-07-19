@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Platform } from 'react-native';
+import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Package, Truck, CheckCircle2, ChevronRight, Clock, Star } from 'lucide-react-native';
@@ -102,7 +103,7 @@ export function OrdersScreen({ navigation }: any) {
   return (
     <View style={styles.rootContainer}>
       <StatusBar barStyle="light-content" />
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
           <View style={styles.headerTop}>
@@ -224,6 +225,7 @@ export function OrdersScreen({ navigation }: any) {
             })
           )}
         </View>
+        {Platform.OS === 'web' && <WebFooter />}
       </ScrollView>
 
       {/* Rating Modal — triggered from History tab "Rate agent" button */}

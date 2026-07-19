@@ -2,6 +2,26 @@ import api from './api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { registerForPushNotifications, sendTokenToBackend, removeTokenFromBackend } from '../utils/notifications';
 
+// Pull the JWT out of a login/register/google response no matter which shape the
+// backend uses. Different endpoints have historically returned the token in
+// different places, so we check every known location before giving up.
+const extractToken = (data: any): string | undefined => {
+  if (!data) return undefined;
+  const d = data.data ?? data;
+  return (
+    d?.token ||
+    d?.accessToken ||
+    d?.access_token ||
+    d?.jwt ||
+    d?.authToken ||
+    d?.tokens?.access ||
+    d?.tokens?.accessToken ||
+    d?.user?.token ||
+    data?.token ||
+    data?.accessToken
+  );
+};
+
 export const authService = {
   // Login
   login: async (identifier: string, passwordOrOtp: string) => {
@@ -12,9 +32,10 @@ export const authService = {
       });
       
       // Safely extract token whether it's nested inside 'data' or directly on the response
-      const token = response.data?.data?.token || response.data?.token;
-      
+      const token = extractToken(response.data);
+
       if (!token) {
+        console.error('Login: no token in response', JSON.stringify(response.data));
         throw new Error('Authentication failed: No token received from server');
       }
 
@@ -70,7 +91,7 @@ export const authService = {
   googleLogin: async (idToken: string) => {
     try {
       const response = await api.post('/api/v1/auth/google-login', { idToken });
-      const token = response.data?.data?.token || response.data?.token;
+      const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
       await AsyncStorage.setItem('userToken', token);
 
