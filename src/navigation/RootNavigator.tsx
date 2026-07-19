@@ -100,6 +100,7 @@ export function RootNavigator() {
     <NavigationContainer
       ref={navRef}
       linking={linking}
+      documentTitle={{ enabled: false }}
       onReady={() => {
         routeNameRef.current = navRef.current?.getCurrentRoute()?.name;
         trackPageView(routeNameRef.current);
