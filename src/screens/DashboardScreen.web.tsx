@@ -39,7 +39,7 @@ const FEATURE_DETAILS = [
     accent: '#22d3ee',
   },
   {
-    id: 'waste', title: '8 waste categories', emoji: '♻️',
+    id: 'waste', title: '10 waste categories', emoji: '♻️',
     desc: 'We accept 8 types of waste — plastic, paper, metal, glass, e-waste, textile, organic, and hazardous. Proper segregation earns more coins.',
     steps: ['Plastic & PET bottles', 'Paper & cardboard', 'Metal & aluminium', 'E-waste, textile, glass & more'],
     benefit: 'More types = more coins',

@@ -61,24 +61,10 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   const passedBooking = route?.params?.booking;
   const rawBookingId = passedBooking?._id || passedBooking?.id || mockBooking.id;
 
-  // Estimate coins from categories using catalogue rates
-  const estimatedCoins = (() => {
-    if (passedBooking?.totalKarmaCoins) return passedBooking.totalKarmaCoins;
-    if (!passedBooking?.categories) return 0;
-    const COIN_RATES: Record<string, number> = {
-      'PET Bottle': 12, 'Milk Packets': 8, 'Containers': 10, 'Carry Bags': 5,
-      'Newspaper': 15, 'Books': 12, 'Cardboard': 10, 'Office Paper': 14,
-      'Aluminium Can': 35, 'Iron Scrap': 25, 'Steel Utensils': 30, 'Copper Wire': 80,
-      'Glass Bottle': 5, 'Broken Glass': 3,
-      'Mobile Phone': 50, 'Laptop': 200, 'Charger & Cables': 40, 'Small Appliances': 60,
-      'Old Clothes': 10, 'Fabric Waste': 8,
-      'Food Waste': 2, 'Vegetable Peels': 2, 'Garden Waste': 3,
-      'Batteries': 20, 'Paint Containers': 10, 'Sanitary Waste': 0,
-    };
-    return passedBooking.categories.reduce((sum: number, c: any) => {
-      return sum + (COIN_RATES[c.subCategory] || COIN_RATES[c.category] || 0);
-    }, 0);
-  })();
+  // Coins come from the backend, which computes them at verify time from the
+  // live rate card. Never estimate them client-side — a local rate table goes
+  // stale the moment the catalogue changes and shows the user a wrong number.
+  const estimatedCoins = passedBooking?.totalKarmaCoins || 0;
 
   const bookingData = {
     id: rawBookingId.length > 10 ? `#${rawBookingId.substring(0, 8).toUpperCase()}` : rawBookingId,

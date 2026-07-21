@@ -266,7 +266,7 @@ export function SplashScreen({ navigation, route }: any) {
               {[
                 { icon: Truck, color: '#16a34a', title: 'Free doorstep pickup', desc: 'Schedule anytime, our agents come to you' },
                 { icon: Gamepad2, color: '#7c3aed', title: 'Daily eco-quiz', desc: 'Test your green IQ. Earn KarmaCoins XP daily.' },
-                { icon: Recycle, color: '#0891b2', title: '8 waste categories', desc: 'Plastic, paper, metal, e-waste, textile & more' },
+                { icon: Recycle, color: '#0891b2', title: '10 waste categories', desc: 'Plastic, paper, metal, e-waste, textile & more' },
                 { icon: Gift, color: '#e11d48', title: 'Real rewards', desc: 'Redeem coins for products or donate to causes' },
                 { icon: Users, color: '#ea580c', title: 'Refer & earn', desc: 'Both you and your friend get 1,000 KarmaCoins XP instantly' },
                 { icon: Zap, color: '#d97706', title: 'Instant credit', desc: 'Coins credited immediately after verification' },
@@ -306,7 +306,7 @@ export function SplashScreen({ navigation, route }: any) {
           <View style={[s.container, s.footerContent, isMobile && { flexDirection: 'column', gap: 28, paddingHorizontal: 20 }]}>
             <View style={[s.footerBrand, isMobile && { width: '100%' }]}>
               <View style={s.footerLogoRow}>
-                <Image source={require('../../assets/logo.png')} resizeMode="contain" style={s.footerLogoImg} />
+                <Image source={require('../../assets/logo-nav.png')} resizeMode="contain" style={s.footerLogoImg} />
               </View>
               <Text style={s.footerDesc}>
                 3R Zero Waste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its doorstep recycling rewards app.
@@ -453,7 +453,7 @@ const s = StyleSheet.create({
   footerContent: { flexDirection: 'row', gap: 32, paddingBottom: 40 },
   footerBrand: { flex: 1.2 },
   footerLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 12 },
-  footerLogoImg: { width: 150, height: 100 },
+  footerLogoImg: { width: 170, height: 80 },
   footerDesc: { color: '#94a3b8', fontSize: 14, fontWeight: '500', lineHeight: 22, maxWidth: 320 },
   footerLinksRow: { flex: 2, flexDirection: 'row', justifyContent: 'space-between' },
   footerLinks: { gap: 12, flex: 1 },

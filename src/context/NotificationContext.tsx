@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getStableUserSuffix } from '../utils/userId';
 
 export interface AppNotification {
   id: string;
@@ -29,20 +30,57 @@ const NotificationContext = createContext<NotificationContextType>({
   clearAll: () => {},
 });
 
-const STORAGE_KEY = 'appNotifications';
+// Notifications are stored per user. This used to be one shared key, so a new
+// account signing in on the same device inherited the previous user's history
+// ("quiz played", past bookings) even though it had none of its own.
+const LEGACY_SHARED_KEY = 'appNotifications';
+const keyFor = (userSuffix: string) => `appNotifications_${userSuffix}`;
 const MAX_NOTIFICATIONS = 50;
 
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  // Ref (not state) because persist() runs inside setState updaters, which must
+  // read the current user synchronously without re-creating the callbacks.
+  const userKeyRef = useRef<string | null>(null);
 
+  // Drop the old shared bucket once, so its entries can never leak into an account.
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then(raw => {
-      if (raw) setNotifications(JSON.parse(raw));
-    });
+    AsyncStorage.removeItem(LEGACY_SHARED_KEY).catch(() => {});
+  }, []);
+
+  // Follow the logged-in user. Polling the token covers every path that changes
+  // it — login, logout, switch account, token refresh — without the provider
+  // needing to sit below the auth/socket contexts.
+  useEffect(() => {
+    let cancelled = false;
+
+    const sync = async () => {
+      const token = await AsyncStorage.getItem('userToken');
+      const next = token ? getStableUserSuffix(token) : null;
+      if (cancelled || next === userKeyRef.current) return;
+
+      userKeyRef.current = next;
+      if (!next) {
+        setNotifications([]); // logged out — show nothing
+        return;
+      }
+      try {
+        const raw = await AsyncStorage.getItem(keyFor(next));
+        if (!cancelled) setNotifications(raw ? JSON.parse(raw) : []);
+      } catch {
+        if (!cancelled) setNotifications([]);
+      }
+    };
+
+    sync();
+    const timer = setInterval(sync, 1500);
+    return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
   const persist = (items: AppNotification[]) => {
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    const key = userKeyRef.current;
+    if (!key) return; // never write notifications while logged out
+    AsyncStorage.setItem(keyFor(key), JSON.stringify(items));
   };
 
   const addNotification = useCallback((data: Omit<AppNotification, 'id' | 'timestamp' | 'read'>) => {
@@ -77,7 +115,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const clearAll = useCallback(() => {
     setNotifications([]);
-    AsyncStorage.removeItem(STORAGE_KEY);
+    const key = userKeyRef.current;
+    if (key) AsyncStorage.removeItem(keyFor(key));
   }, []);
 
   const unreadCount = notifications.filter(n => !n.read).length;

@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, ScrollView, StatusBar, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Image, Animated } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
@@ -10,7 +10,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, FileText, Magnet, Droplets, Wine, Smartphone } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery } from 'lucide-react-native';
+import { CupSoda, ShoppingBag, Archive, Newspaper as NewsIcon, BookOpen, Database, Cog, Utensils, Activity, Laptop, Cable, Tv, Battery, Shirt, Fan, AirVent, WashingMachine, Refrigerator, Flame } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
 import { profileService } from '../services/profile';
 import * as Location from 'expo-location';
@@ -20,18 +20,20 @@ const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
 const CARD_WIDTH = (Math.min(width, 900) - 40 - (CARD_MARGIN * 2 * COLS)) / COLS;
 
-// Waste catalogue — 9 categories. category/subCategory strings are sent to the
-// backend exactly as written here (Title Case, matched by exact string).
+// Waste catalogue — 10 categories. category/subCategory strings are sent to the
+// backend exactly as written here and are matched there by exact string
+// (booking.service.js), so renaming anything here breaks booking + verify.
 const CATEGORIES = [
   { id: '1', name: 'Phones & Computers', color: '#0ea5e9', icon: Smartphone },
-  { id: '2', name: 'Mixed e-waste', color: '#14b8a6', icon: Cable },
+  { id: '2', name: 'Mixed E-Waste', color: '#14b8a6', icon: Cable },
   { id: '3', name: 'Glass', color: '#10b981', icon: Wine },
   { id: '4', name: 'Paper', color: '#84cc16', icon: FileText },
-  { id: '5', name: 'Appliances & TV', color: '#8b5cf6', icon: Tv },
+  { id: '5', name: 'Home Appliances & Electronics', color: '#8b5cf6', icon: Tv },
   { id: '6', name: 'Batteries', color: '#ef4444', icon: Battery },
-  { id: '7', name: 'Shoes', color: '#f59e0b', icon: ShoppingBag },
-  { id: '8', name: 'Metal', color: '#64748b', icon: Magnet },
+  { id: '7', name: 'Footwear', color: '#f59e0b', icon: ShoppingBag },
+  { id: '8', name: 'Metals', color: '#64748b', icon: Magnet },
   { id: '9', name: 'Plastic', color: '#3b82f6', icon: Droplets },
+  { id: '10', name: 'Textile Waste', color: '#ec4899', icon: Shirt },
 ];
 
 const CONDITIONS = ['Working', 'Not Working'] as const;
@@ -41,12 +43,12 @@ type CatalogueItem = {
   id: string;
   catId: string;
   subCategory: string;             // exact backend name
-  unit: 'kg' | 'piece' | 'pickup';
+  unit: 'kg' | 'piece';
   coins?: number;                  // items without a condition dropdown
   coinsWorking?: number;           // condition items
   coinsNotWorking?: number;        // condition items
   hasCondition?: boolean;
-  minQty?: number;                 // e.g. Battery pickup = 10
+  minQty?: number;                 // in `unit` terms — e.g. Battery = 1 kg
   itemIcon: any;
   // Real product photo. Accepts a local require(...) or a { uri } remote image.
   // When absent, the card falls back to itemIcon.
@@ -59,61 +61,119 @@ type CatalogueItem = {
 // `image` (optional) shows a real product photo; when absent the card uses itemIcon.
 const ALL_ITEMS: CatalogueItem[] = [
   // 1. Phones & Computers (piece, condition)
-  { id: 'pc1', catId: '1', subCategory: 'Laptop', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 300, itemIcon: Laptop, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lenovo_G500s_laptop-2905.jpg/500px-Lenovo_G500s_laptop-2905.jpg' } },
-  { id: 'pc2', catId: '1', subCategory: 'Desktop', unit: 'piece', hasCondition: true, coinsWorking: 200, coinsNotWorking: 100, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/HP_ProDesk_600_G1_Tower_PC-001.jpg/500px-HP_ProDesk_600_G1_Tower_PC-001.jpg' } },
-  { id: 'pc3', catId: '1', subCategory: 'Monitor (LCD/LED)', unit: 'piece', hasCondition: true, coinsWorking: 400, coinsNotWorking: 100, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Dell_Professional_P2212H-9899_%28cropped%29.jpg/500px-Dell_Professional_P2212H-9899_%28cropped%29.jpg' } },
-  { id: 'pc4', catId: '1', subCategory: 'Printer', unit: 'piece', hasCondition: true, coinsWorking: 600, coinsNotWorking: 100, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/HP_Deskjet_All_in_One_Printer.jpg/500px-HP_Deskjet_All_in_One_Printer.jpg' } },
-  { id: 'pc5', catId: '1', subCategory: 'Tablet', unit: 'piece', hasCondition: true, coinsWorking: 200, coinsNotWorking: 100, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Samsung_Galaxy_Tab_A9%2B_tablet.jpg/500px-Samsung_Galaxy_Tab_A9%2B_tablet.jpg' } },
-  { id: 'pc6', catId: '1', subCategory: 'Smartphone-branded', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 100, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/IPhone_7_-_A1778_Rose_Gold_-_Back_%28retouch%29_%28white_BG_no_shadow%29.jpg/500px-IPhone_7_-_A1778_Rose_Gold_-_Back_%28retouch%29_%28white_BG_no_shadow%29.jpg' } },
-  { id: 'pc7', catId: '1', subCategory: 'Smartphone-non-branded', unit: 'piece', hasCondition: true, coinsWorking: 500, coinsNotWorking: 100, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Blackview_A60_Smartphone_Android_mobile_phone_front_face_logged_in_screen.jpg/500px-Blackview_A60_Smartphone_Android_mobile_phone_front_face_logged_in_screen.jpg' } },
-  { id: 'pc8', catId: '1', subCategory: 'Keyboard', unit: 'piece', hasCondition: true, coinsWorking: 10, coinsNotWorking: 8, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Wireless_Computer_Keyboard.jpg/500px-Wireless_Computer_Keyboard.jpg' } },
-  { id: 'pc9', catId: '1', subCategory: 'Mouse', unit: 'piece', hasCondition: true, coinsWorking: 10, coinsNotWorking: 8, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wired_Mouse_with_white_background.jpg/500px-Wired_Mouse_with_white_background.jpg' } },
-  { id: 'pc10', catId: '1', subCategory: 'Touchpad phone', unit: 'piece', hasCondition: true, coinsWorking: 20, coinsNotWorking: 10, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/5_different_Smartphones.jpg/500px-5_different_Smartphones.jpg' } },
+  { id: 'pc1', catId: '1', subCategory: 'Laptop', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 3000, itemIcon: Laptop, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Lenovo_G500s_laptop-2905.jpg/500px-Lenovo_G500s_laptop-2905.jpg' } },
+  { id: 'pc2', catId: '1', subCategory: 'Desktop', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 1000, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/HP_ProDesk_600_G1_Tower_PC-001.jpg/500px-HP_ProDesk_600_G1_Tower_PC-001.jpg' } },
+  { id: 'pc3', catId: '1', subCategory: 'Monitor (LCD/LED)', unit: 'piece', hasCondition: true, coinsWorking: 4000, coinsNotWorking: 1000, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Dell_Professional_P2212H-9899_%28cropped%29.jpg/500px-Dell_Professional_P2212H-9899_%28cropped%29.jpg' } },
+  { id: 'pc4', catId: '1', subCategory: 'Printer', unit: 'piece', hasCondition: true, coinsWorking: 6000, coinsNotWorking: 1000, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/HP_Deskjet_All_in_One_Printer.jpg/500px-HP_Deskjet_All_in_One_Printer.jpg' } },
+  { id: 'pc5', catId: '1', subCategory: 'Tablet', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 1000, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Samsung_Galaxy_Tab_A9%2B_tablet.jpg/500px-Samsung_Galaxy_Tab_A9%2B_tablet.jpg' } },
+  { id: 'pc6', catId: '1', subCategory: 'Branded Smartphone', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 1000, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/IPhone_7_-_A1778_Rose_Gold_-_Back_%28retouch%29_%28white_BG_no_shadow%29.jpg/500px-IPhone_7_-_A1778_Rose_Gold_-_Back_%28retouch%29_%28white_BG_no_shadow%29.jpg' } },
+  { id: 'pc7', catId: '1', subCategory: 'Non-Branded Smartphone', unit: 'piece', hasCondition: true, coinsWorking: 5000, coinsNotWorking: 1000, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Blackview_A60_Smartphone_Android_mobile_phone_front_face_logged_in_screen.jpg/500px-Blackview_A60_Smartphone_Android_mobile_phone_front_face_logged_in_screen.jpg' } },
+  { id: 'pc8', catId: '1', subCategory: 'Keyboard', unit: 'piece', hasCondition: true, coinsWorking: 100, coinsNotWorking: 50, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Wireless_Computer_Keyboard.jpg/500px-Wireless_Computer_Keyboard.jpg' } },
+  { id: 'pc9', catId: '1', subCategory: 'Mouse', unit: 'piece', hasCondition: true, coinsWorking: 100, coinsNotWorking: 10, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Wired_Mouse_with_white_background.jpg/500px-Wired_Mouse_with_white_background.jpg' } },
+  { id: 'pc10', catId: '1', subCategory: 'Touchpad Phone', unit: 'piece', hasCondition: true, coinsWorking: 200, coinsNotWorking: 100, itemIcon: Smartphone, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/5_different_Smartphones.jpg/500px-5_different_Smartphones.jpg' } },
 
-  // 2. Mixed e-waste (kg)
-  { id: 'me1', catId: '2', subCategory: 'Router, camera, HDD, etc', unit: 'kg', coins: 20, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
+  // 2. Mixed E-Waste (kg)
+  { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 200, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
 
-  // 3. Glass (kg) — Broken glass is not accepted, so it is omitted
-  { id: 'gl1', catId: '3', subCategory: 'Beer bottle', unit: 'kg', coins: 2, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Beer_bottles_2018_G1.jpg/500px-Beer_bottles_2018_G1.jpg' } },
-  { id: 'gl2', catId: '3', subCategory: 'Soft drink bottle', unit: 'kg', coins: 2, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg/500px-Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg' } },
-  { id: 'gl3', catId: '3', subCategory: 'Wine bottle', unit: 'kg', coins: 2, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Collection_Sparkling_wine_white_Lion_Gri.jpg' } },
-  { id: 'gl4', catId: '3', subCategory: 'Glass jar', unit: 'kg', coins: 2, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png/500px-A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png' } },
-  { id: 'gl5', catId: '3', subCategory: 'Other', unit: 'kg', coins: 1, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Amber_Glass_Flask.JPG/500px-Amber_Glass_Flask.JPG' } },
+  // 3. Glass (kg) — Broken Glass is not accepted, so it is omitted
+  { id: 'gl1', catId: '3', subCategory: 'Beer Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Beer_bottles_2018_G1.jpg/500px-Beer_bottles_2018_G1.jpg' } },
+  { id: 'gl2', catId: '3', subCategory: 'Soft Drink Bottles', unit: 'kg', coins: 20, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg/500px-Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg' } },
+  { id: 'gl3', catId: '3', subCategory: 'Wine Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Collection_Sparkling_wine_white_Lion_Gri.jpg' } },
+  { id: 'gl4', catId: '3', subCategory: 'Glass Jars', unit: 'kg', coins: 20, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png/500px-A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png' } },
+  { id: 'gl5', catId: '3', subCategory: 'Other Glass', unit: 'kg', coins: 10, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Amber_Glass_Flask.JPG/500px-Amber_Glass_Flask.JPG' } },
 
   // 4. Paper (kg)
-  { id: 'pa1', catId: '4', subCategory: 'Newspaper', unit: 'kg', coins: 10, itemIcon: NewsIcon, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/A_stack_of_newspapers.jpg/500px-A_stack_of_newspapers.jpg' } },
-  { id: 'pa2', catId: '4', subCategory: 'Cardboard', unit: 'kg', coins: 10, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cardboard_box.png/500px-Cardboard_box.png' } },
-  { id: 'pa3', catId: '4', subCategory: 'Magazines', unit: 'kg', coins: 8, itemIcon: BookOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gfp-stack-of-magazines-and-books.jpg/500px-Gfp-stack-of-magazines-and-books.jpg' } },
-  { id: 'pa4', catId: '4', subCategory: 'Other', unit: 'kg', coins: 4, itemIcon: FileText, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/10000_papers_from_ESO_data_%289740706856%29.jpg/500px-10000_papers_from_ESO_data_%289740706856%29.jpg' } },
+  { id: 'pa1', catId: '4', subCategory: 'Newspapers', unit: 'kg', coins: 100, itemIcon: NewsIcon, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/A_stack_of_newspapers.jpg/500px-A_stack_of_newspapers.jpg' } },
+  { id: 'pa2', catId: '4', subCategory: 'Cardboard', unit: 'kg', coins: 80, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cardboard_box.png/500px-Cardboard_box.png' } },
+  { id: 'pa3', catId: '4', subCategory: 'Magazines / Books', unit: 'kg', coins: 80, itemIcon: BookOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gfp-stack-of-magazines-and-books.jpg/500px-Gfp-stack-of-magazines-and-books.jpg' } },
+  { id: 'pa4', catId: '4', subCategory: 'Other Paper', unit: 'kg', coins: 40, itemIcon: FileText, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/10000_papers_from_ESO_data_%289740706856%29.jpg/500px-10000_papers_from_ESO_data_%289740706856%29.jpg' } },
 
-  // 5. Appliances & TV (piece, condition)
-  { id: 'ap1', catId: '5', subCategory: 'Television-below 40"', unit: 'piece', hasCondition: true, coinsWorking: 1000, coinsNotWorking: 200, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/9/91/1990s_Television_Set.jpg' } },
-  { id: 'ap2', catId: '5', subCategory: 'Television-above 40"', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 250, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Interactive_LED_Flat_Panel_Display.png/500px-Interactive_LED_Flat_Panel_Display.png' } },
-  { id: 'ap3', catId: '5', subCategory: 'Fridge', unit: 'piece', hasCondition: true, coinsWorking: 2000, coinsNotWorking: 500, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg/500px-Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg' } },
-  { id: 'ap4', catId: '5', subCategory: 'Large Appliance', unit: 'piece', hasCondition: true, coinsWorking: 1500, coinsNotWorking: 250, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/A_collection_of_washing_machines_in_a_laundry_shop.jpg/500px-A_collection_of_washing_machines_in_a_laundry_shop.jpg' } },
+  // 5. Home Appliances & Electronics (piece, condition)
+  { id: 'ap1', catId: '5', subCategory: 'TV (Below 40")', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/9/91/1990s_Television_Set.jpg' } },
+  { id: 'ap2', catId: '5', subCategory: 'TV (40" & Above)', unit: 'piece', hasCondition: true, coinsWorking: 20000, coinsNotWorking: 2500, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Interactive_LED_Flat_Panel_Display.png/500px-Interactive_LED_Flat_Panel_Display.png' } },
+  { id: 'ap3', catId: '5', subCategory: 'Refrigerator (Above 300L)', unit: 'piece', hasCondition: true, coinsWorking: 20000, coinsNotWorking: 5000, itemIcon: Refrigerator, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg/500px-Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg' } },
+  { id: 'ap4', catId: '5', subCategory: 'Refrigerator (Below 300L)', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Refrigerator, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg/500px-Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg' } },
+  { id: 'ap5', catId: '5', subCategory: 'Automatic Washing Machine', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: WashingMachine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/A_collection_of_washing_machines_in_a_laundry_shop.jpg/500px-A_collection_of_washing_machines_in_a_laundry_shop.jpg' } },
+  { id: 'ap6', catId: '5', subCategory: 'Semi-Automatic Washing Machine', unit: 'piece', hasCondition: true, coinsWorking: 8000, coinsNotWorking: 1500, itemIcon: WashingMachine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/A_collection_of_washing_machines_in_a_laundry_shop.jpg/500px-A_collection_of_washing_machines_in_a_laundry_shop.jpg' } },
+  { id: 'ap7', catId: '5', subCategory: 'Branded Air Conditioner', unit: 'piece', hasCondition: true, coinsWorking: 80000, coinsNotWorking: 10000, itemIcon: AirVent },
+  { id: 'ap8', catId: '5', subCategory: 'Geyser', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 1000, itemIcon: Flame },
+  { id: 'ap9', catId: '5', subCategory: 'Ceiling Fan', unit: 'piece', hasCondition: true, coinsWorking: 5000, coinsNotWorking: 1050, itemIcon: Fan },
+  { id: 'ap10', catId: '5', subCategory: 'Other Large Appliances', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Cog },
 
-  // 6. Batteries (pickup) — minimum 10 batteries
-  { id: 'ba1', catId: '6', subCategory: 'Battery pickup', unit: 'pickup', coins: 2, minQty: 10, itemIcon: Battery, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Three_AA_batteries_on_a_white_background.JPG/500px-Three_AA_batteries_on_a_white_background.JPG' } },
+  // 6. Batteries (kg) — minimum 1 kg
+  { id: 'ba1', catId: '6', subCategory: 'Battery', unit: 'kg', coins: 200, minQty: 1, itemIcon: Battery, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Three_AA_batteries_on_a_white_background.JPG/500px-Three_AA_batteries_on_a_white_background.JPG' } },
 
-  // 7. Shoes (piece)
-  { id: 'sh1', catId: '7', subCategory: 'Branded', unit: 'piece', coins: 200, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg/500px-NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg' } },
-  { id: 'sh2', catId: '7', subCategory: 'Non-branded', unit: 'piece', coins: 150, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Leather_shoes_4_man.JPG/500px-Leather_shoes_4_man.JPG' } },
+  // 7. Footwear (piece)
+  { id: 'sh1', catId: '7', subCategory: 'Branded', unit: 'piece', coins: 2000, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg/500px-NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg' } },
+  { id: 'sh2', catId: '7', subCategory: 'Non-Branded', unit: 'piece', coins: 500, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Leather_shoes_4_man.JPG/500px-Leather_shoes_4_man.JPG' } },
 
-  // 8. Metal (kg)
-  { id: 'mt1', catId: '8', subCategory: 'Aluminium', unit: 'kg', coins: 20, itemIcon: Database, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Beverage_cans.jpg/500px-Beverage_cans.jpg' } },
-  { id: 'mt2', catId: '8', subCategory: 'Copper wire', unit: 'kg', coins: 30, itemIcon: Activity, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg/500px-Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg' } },
-  { id: 'mt3', catId: '8', subCategory: 'Iron', unit: 'kg', coins: 10, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png/500px-Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png' } },
-  { id: 'mt4', catId: '8', subCategory: 'Utensils', unit: 'kg', coins: 10, itemIcon: Utensils, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Stainless_Steel_Utensils_Store_%283907497472%29.jpg/500px-Stainless_Steel_Utensils_Store_%283907497472%29.jpg' } },
-  { id: 'mt5', catId: '8', subCategory: 'Other', unit: 'kg', coins: 10, itemIcon: Magnet, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/157series_scrapped.jpg/500px-157series_scrapped.jpg' } },
+  // 8. Metals (kg)
+  { id: 'mt1', catId: '8', subCategory: 'Aluminium', unit: 'kg', coins: 500, itemIcon: Database, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Beverage_cans.jpg/500px-Beverage_cans.jpg' } },
+  { id: 'mt2', catId: '8', subCategory: 'Copper Wire', unit: 'kg', coins: 800, itemIcon: Activity, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg/500px-Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg' } },
+  { id: 'mt3', catId: '8', subCategory: 'Iron', unit: 'kg', coins: 100, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png/500px-Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png' } },
+  { id: 'mt4', catId: '8', subCategory: 'Steel/Utensils', unit: 'kg', coins: 100, itemIcon: Utensils, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Stainless_Steel_Utensils_Store_%283907497472%29.jpg/500px-Stainless_Steel_Utensils_Store_%283907497472%29.jpg' } },
+  { id: 'mt5', catId: '8', subCategory: 'Other Metals', unit: 'kg', coins: 100, itemIcon: Magnet, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/157series_scrapped.jpg/500px-157series_scrapped.jpg' } },
 
   // 9. Plastic (kg)
-  { id: 'pl1', catId: '9', subCategory: 'PET Bottles', unit: 'kg', coins: 10, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg/500px-1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg' } },
-  { id: 'pl2', catId: '9', subCategory: 'Hard (HDPE, LDPE, PP)', unit: 'kg', coins: 15, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Purple_plastic_bucket.jpg' } },
-  { id: 'pl3', catId: '9', subCategory: 'Thermocol', unit: 'kg', coins: 10, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Expanded_polystyrene_foam_dunnage.jpg/500px-Expanded_polystyrene_foam_dunnage.jpg' } },
-  { id: 'pl4', catId: '9', subCategory: 'Other', unit: 'kg', coins: 1, itemIcon: Droplets, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Evian_Bottle.jpg/500px-Evian_Bottle.jpg' } },
+  { id: 'pl1', catId: '9', subCategory: 'PET Bottles', unit: 'kg', coins: 100, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg/500px-1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg' } },
+  { id: 'pl2', catId: '9', subCategory: 'Hard Plastic (HDPE/PP)', unit: 'kg', coins: 150, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Purple_plastic_bucket.jpg' } },
+  { id: 'pl5', catId: '9', subCategory: 'LDPE', unit: 'kg', coins: 200, itemIcon: Droplets },
+  { id: 'pl3', catId: '9', subCategory: 'Thermocol', unit: 'kg', coins: 30, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Expanded_polystyrene_foam_dunnage.jpg/500px-Expanded_polystyrene_foam_dunnage.jpg' } },
+  { id: 'pl4', catId: '9', subCategory: 'Other Plastic', unit: 'kg', coins: 10, itemIcon: Droplets, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Evian_Bottle.jpg/500px-Evian_Bottle.jpg' } },
+
+  // 10. Textile Waste (kg) — per-item rates pending exact confirmation from backend
+  { id: 'tx1', catId: '10', subCategory: 'Grade 1 Clothing', unit: 'kg', coins: 500, itemIcon: Shirt },
+  { id: 'tx2', catId: '10', subCategory: 'Grade 2 Clothing', unit: 'kg', coins: 200, itemIcon: Shirt },
+  { id: 'tx3', catId: '10', subCategory: 'Jeans', unit: 'kg', coins: 300, itemIcon: Shirt },
+  { id: 'tx4', catId: '10', subCategory: 'Premium Sarees', unit: 'kg', coins: 500, itemIcon: Shirt },
+  { id: 'tx5', catId: '10', subCategory: 'Non-Premium Sarees', unit: 'kg', coins: 200, itemIcon: Shirt },
+  { id: 'tx6', catId: '10', subCategory: 'Cartons', unit: 'kg', coins: 50, itemIcon: PackageOpen },
+  { id: 'tx7', catId: '10', subCategory: 'Other Textiles', unit: 'kg', coins: 50, itemIcon: Shirt },
 ];
 
-const unitLabel = (unit: string) => (unit === 'kg' ? 'per kg' : unit === 'piece' ? 'per piece' : 'per pickup');
+const unitLabel = (unit: string) => (unit === 'kg' ? 'per kg' : 'per piece');
+
+// Working / Not Working switch. Tapping anywhere flips it; the thumb slides to
+// the active side so the current condition is readable at a glance.
+function ConditionToggle({ value, onChange }: { value: Condition; onChange: (c: Condition) => void }) {
+  const isWorking = value === 'Working';
+  const slide = useRef(new Animated.Value(isWorking ? 0 : 1)).current;
+
+  useEffect(() => {
+    Animated.timing(slide, {
+      toValue: isWorking ? 0 : 1,
+      duration: 160,
+      useNativeDriver: false,
+    }).start();
+  }, [isWorking, slide]);
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => onChange(isWorking ? 'Not Working' : 'Working')}
+      style={styles.toggleTrack}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: isWorking }}
+      accessibilityLabel={`Condition: ${value}`}
+    >
+      <Animated.View
+        style={[
+          styles.toggleThumb,
+          {
+            left: slide.interpolate({ inputRange: [0, 1], outputRange: ['2%', '50%'] }),
+            backgroundColor: isWorking ? '#16a34a' : '#64748b',
+          },
+        ]}
+      />
+      <View style={styles.toggleHalf}>
+        <Text style={[styles.toggleLabel, isWorking && styles.toggleLabelOn]}>Working</Text>
+      </View>
+      <View style={styles.toggleHalf}>
+        <Text style={[styles.toggleLabel, !isWorking && styles.toggleLabelOn]}>Not Working</Text>
+      </View>
+    </TouchableOpacity>
+  );
+}
 
 // A condition item stores each variant separately in the cart via a suffixed key.
 const condSuffix = (c: Condition) => (c === 'Working' ? 'W' : 'N');
@@ -392,24 +452,14 @@ export function SchedulePickupScreen({ navigation }: any) {
                   <Text style={styles.itemUnit}>{unitLabel(item.unit)}</Text>
 
                   {item.minQty ? (
-                    <Text style={styles.minHint}>Minimum {item.minQty} batteries</Text>
+                    <Text style={styles.minHint}>Minimum {item.minQty} {item.unit}</Text>
                   ) : null}
 
                   {hasCond && (
-                    <View style={styles.conditionRow}>
-                      {CONDITIONS.map((c) => {
-                        const on = activeCond === c;
-                        return (
-                          <TouchableOpacity
-                            key={c}
-                            style={[styles.condPill, on && styles.condPillActive]}
-                            onPress={() => setItemCondition(prev => ({ ...prev, [item.id]: c }))}
-                          >
-                            <Text style={[styles.condText, on && styles.condTextActive]}>{c}</Text>
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
+                    <ConditionToggle
+                      value={activeCond}
+                      onChange={(c) => setItemCondition(prev => ({ ...prev, [item.id]: c }))}
+                    />
                   )}
 
                   <View style={styles.coinPill}>
@@ -629,20 +679,29 @@ const styles = StyleSheet.create({
   cardImageArea: { height: 92, width: '100%', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', backgroundColor: '#f8fafc', padding: 10 },
   cardImage: { width: '100%', height: '100%' },
   cardInfo: { padding: 10, flex: 1 },
-  itemName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
+  // Fixed two-line block so a one-line name and a wrapping one push the toggle,
+  // rate and button down by the same amount — cards stay aligned across the grid.
+  itemName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2, lineHeight: 19, height: 38 },
   itemUnit: { fontSize: 12, color: '#71717a', fontWeight: '500', marginBottom: 8 },
   coinPill: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, gap: 4, marginBottom: 16 },
   coinValue: { fontSize: 12, fontWeight: '800', color: '#d97706' },
   minHint: { fontSize: 11, color: '#dc2626', fontWeight: '700', marginBottom: 8 },
-  conditionRow: { flexDirection: 'row', gap: 6, marginBottom: 10 },
-  condPill: { flex: 1, paddingVertical: 5, borderRadius: 8, borderWidth: 1, borderColor: '#e4e4e7', backgroundColor: 'white', alignItems: 'center' },
-  condPillActive: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  condText: { fontSize: 10, fontWeight: '700', color: '#71717a' },
-  condTextActive: { color: '#16a34a' },
+  toggleTrack: {
+    flexDirection: 'row', height: 28, borderRadius: 14, marginBottom: 10,
+    backgroundColor: '#f1f5f9', borderWidth: 1, borderColor: '#e4e4e7',
+    position: 'relative', overflow: 'hidden',
+  },
+  toggleThumb: { position: 'absolute', top: 2, bottom: 2, width: '48%', borderRadius: 12 },
+  toggleHalf: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  toggleLabel: { fontSize: 9.5, fontWeight: '800', color: '#71717a' },
+  toggleLabelOn: { color: '#ffffff' },
   
-  addBtn: { backgroundColor: '#1e293b', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 6, borderRadius: 8, gap: 4 },
+  // `marginTop: auto` pins the button to the bottom of the card, so buttons line
+  // up across a row even when the content above differs in height. Both states
+  // share the same height/radius so a card doesn't shift when it's added.
+  addBtn: { marginTop: 'auto', backgroundColor: '#1e293b', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: 'transparent' },
   addBtnText: { color: 'white', fontSize: 11, fontWeight: '800' },
-  addedBtn: { backgroundColor: '#dcfce7', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 8, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
+  addedBtn: { marginTop: 'auto', backgroundColor: '#dcfce7', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 32, borderRadius: 10, gap: 4, borderWidth: 1, borderColor: '#16a34a' },
   addedBtnText: { color: '#16a34a', fontSize: 12, fontWeight: '800' },
 
   floatingCart: { position: 'absolute', bottom: 30, left: 20, right: 20, maxWidth: 860, marginHorizontal: 'auto', backgroundColor: '#1e293b', borderRadius: 24, padding: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', elevation: 10, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10 },
