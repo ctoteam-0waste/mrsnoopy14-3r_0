@@ -108,6 +108,17 @@
         height: 100%;
         flex: 1;
       }
+      /* Kill the browser's default black focus ring on inputs — every field
+         already has its own styled container, so the ring double-highlights. */
+      input:focus,
+      input:focus-visible,
+      textarea:focus,
+      textarea:focus-visible,
+      select:focus,
+      select:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+      }
     </style>
   </head>
 

@@ -292,6 +292,39 @@ export function ProfileScreen({ navigation }: any) {
     }
   }, [modalVisible]);
 
+  // Back (browser/hardware) with a modal open should close the modal, not pop
+  // the screen — otherwise the screen pops while the modal's portal lingers,
+  // leaving "Edit details" floating over the dashboard.
+  useEffect(() => {
+    const sub = navigation.addListener('beforeRemove', (e: any) => {
+      // Browser back arrives as RESET_ROOT (react-navigation web linking), not
+      // POP/GO_BACK — so while a modal is open, intercept every removal.
+      if (modalVisible) {
+        e.preventDefault();
+        closeModal();
+      } else if (demoModalVisible) {
+        e.preventDefault();
+        closeDemoModal();
+      } else if (addressModalVisible) {
+        e.preventDefault();
+        closeAddressModal();
+      }
+    });
+    return sub;
+  }, [navigation, modalVisible, demoModalVisible, addressModalVisible]);
+
+  // Safety net: if the screen is actually left while a modal is open (any path
+  // that slips past beforeRemove), kill the modals instantly so their portal
+  // can never linger over the next screen.
+  useEffect(() => {
+    const sub = navigation.addListener('blur', () => {
+      setModalVisible(false);
+      setDemoModalVisible(false);
+      setAddressModalVisible(false);
+    });
+    return sub;
+  }, [navigation]);
+
   const openEditModal = () => {
     setEditForm({ ...userProfile });
     setModalVisible(true);

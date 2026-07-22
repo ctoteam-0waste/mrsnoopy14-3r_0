@@ -504,15 +504,15 @@ export function DashboardScreen({ navigation }: any) {
           </TouchableOpacity>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
-          <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { title: '5 Ways to Reduce Plastic at Home' })}>
+          <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'cut-plastic-at-home' })}>
             <View style={[styles.articleImgPlaceholder, { backgroundColor: '#dcfce7' }]}><BookOpen size={28} color="#16a34a" /></View>
-            <Text style={styles.articleTitle}>5 Ways to Reduce Plastic at Home</Text>
-            <Text style={styles.articleSource}>LinkedIn Top Picks</Text>
+            <Text style={styles.articleTitle}>5 easy ways to cut plastic waste at home</Text>
+            <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { title: 'The Future of E-Waste Recycling' })}>
+          <TouchableOpacity style={styles.articleCard} activeOpacity={0.8} onPress={() => navigation.navigate('ArticleDetail', { id: 'india-ewaste' })}>
             <View style={[styles.articleImgPlaceholder, { backgroundColor: '#e0f2fe' }]}><BookOpen size={28} color="#0284c7" /></View>
-            <Text style={styles.articleTitle}>The Future of E-Waste Recycling</Text>
-            <Text style={styles.articleSource}>Sustainability Weekly</Text>
+            <Text style={styles.articleTitle}>India's e-waste mountain — and the opportunity inside it</Text>
+            <Text style={styles.articleSource}>KarmaVerse editorial</Text>
           </TouchableOpacity>
         </ScrollView>
       </View>

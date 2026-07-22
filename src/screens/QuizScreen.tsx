@@ -72,7 +72,7 @@ function Confetti() {
   );
 }
 
-const TIMER_DURATION = 12;
+const TIMER_DURATION = 20;
 
 type ScreenState = 'init' | 'lobby' | 'playing' | 'results';
 

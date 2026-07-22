@@ -88,11 +88,16 @@ function TopNavbar({ state, navigation }: any) {
   return (
     <View style={s.navOuter}>
       <View style={s.nav}>
-        <View style={s.navLeft}>
+        <Pressable
+          style={({ hovered }: any) => [s.navLeft, HOVER_TRANSITION, hovered && { opacity: 0.85 }]}
+          onPress={() => navigation.navigate('Dashboard')}
+          accessibilityRole="link"
+          accessibilityLabel="KarmaVerse home"
+        >
           {/* logo-nav.png is the padding-trimmed variant (aspect ~2.12:1) — logo.png
               has ~35% transparent padding baked in, which shrank the mark to ~31px. */}
           <Image source={require('../../assets/logo-nav.png')} style={{ height: 44, width: 94, resizeMode: 'contain' }} />
-        </View>
+        </Pressable>
 
         <View style={s.navTabs}>
           {NAV_ITEMS.map((item, index) => {
