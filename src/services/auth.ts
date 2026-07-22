@@ -106,9 +106,7 @@ export const authService = {
     }
   },
 
-  // Facebook Login — send accessToken to backend, receive our JWT.
-  // Backend must verify the token against the Graph API and issue our JWT, mirroring
-  // /api/v1/auth/google-login — see /api/v1/auth/facebook-login (not yet implemented server-side).
+  // Facebook Login — send accessToken to backend, receive our JWT (mirrors googleLogin above).
   facebookLogin: async (accessToken: string) => {
     try {
       const response = await api.post('/api/v1/auth/facebook-login', { accessToken });

@@ -26,6 +26,7 @@ const isAuthEndpoint = (url?: string) => {
     '/auth/send-otp',
     '/auth/verify-otp',
     '/auth/google-login',
+    '/auth/facebook-login',
     '/auth/reset-password',
   ].some((e) => url.includes(e));
 };

@@ -62,6 +62,43 @@ function loadGoogleIdentityScript(): Promise<void> {
   return googleIdentityScriptPromise;
 }
 
+// Facebook Login for web — mirrors the Google Identity Services loader above.
+// Native (Android/iOS) uses react-native-fbsdk-next instead (see handleFacebookSignInNative).
+const FACEBOOK_APP_ID = '2040037600233582';
+const FACEBOOK_GRAPH_VERSION = 'v25.0';
+
+let facebookSdkScriptPromise: Promise<void> | null = null;
+function loadFacebookSdkScript(): Promise<void> {
+  if (facebookSdkScriptPromise) return facebookSdkScriptPromise;
+  const failAndReset = (reject: (err: Error) => void, err: Error) => {
+    facebookSdkScriptPromise = null;
+    reject(err);
+  };
+  facebookSdkScriptPromise = new Promise<void>((resolve, reject) => {
+    if ((window as any).FB) { resolve(); return; }
+    const timeout = setTimeout(() => {
+      failAndReset(reject, new Error('Facebook Sign-In script timed out loading — check for an ad blocker, browser extension, or network/firewall blocking connect.facebook.net.'));
+    }, 8000);
+    (window as any).fbAsyncInit = () => {
+      clearTimeout(timeout);
+      (window as any).FB.init({
+        appId: FACEBOOK_APP_ID,
+        cookie: true,
+        xfbml: false,
+        version: FACEBOOK_GRAPH_VERSION,
+      });
+      resolve();
+    };
+    const script = document.createElement('script');
+    script.src = 'https://connect.facebook.net/en_US/sdk.js';
+    script.async = true;
+    script.defer = true;
+    script.onerror = () => { clearTimeout(timeout); failAndReset(reject, new Error('Could not load Facebook Sign-In. Check your connection.')); };
+    document.head.appendChild(script);
+  });
+  return facebookSdkScriptPromise;
+}
+
 type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'referral_bonus' | 'demographics' | 'reset_password';
 
 // Covers the common emoji Unicode blocks — used to reject emojis in email fields.
@@ -363,13 +400,20 @@ export function LoginScreen({ navigation }: any) {
   };
 
   const finishFacebookLogin = async (accessToken: string) => {
+    if (__DEV__) console.log('[Facebook Login] accessToken:', accessToken);
     setIsLoading(true);
     try {
       await authService.facebookLogin(accessToken);
       reconnect();
       navigation.replace('App');
     } catch (error: any) {
-      showAlert('Facebook sign-in failed', error?.response?.data?.message || 'Please try again.');
+      const isNetworkError = !error?.response;
+      showAlert(
+        isNetworkError ? 'No internet connection' : 'Facebook sign-in failed',
+        isNetworkError
+          ? 'Please check your network connection and try again.'
+          : (error?.response?.data?.message || 'Please try again.')
+      );
     } finally {
       setIsLoading(false);
     }
@@ -388,6 +432,37 @@ export function LoginScreen({ navigation }: any) {
       await finishFacebookLogin(data.accessToken);
     } catch (error: any) {
       showAlert('Facebook sign-in failed', error?.response?.data?.message || 'Please try again.');
+    }
+  };
+
+  const handleFacebookSignInWeb = async () => {
+    try {
+      await loadFacebookSdkScript();
+    } catch (error: any) {
+      showAlert('Facebook sign-in failed', error?.message || 'Could not load Facebook Sign-In. Check your connection.');
+      return;
+    }
+    const FB = (window as any).FB;
+    if (!FB) {
+      showAlert('Facebook sign-in failed', 'Facebook Sign-In is unavailable right now. It may be blocked by an ad blocker or browser extension.');
+      return;
+    }
+    try {
+      FB.login((response: any) => {
+        const accessToken = response?.authResponse?.accessToken;
+        if (accessToken) {
+          finishFacebookLogin(accessToken);
+          return;
+        }
+        // status 'unknown' with no authResponse means the user closed the popup/dialog
+        // without acting — treat as a silent cancel, same as native's result.isCancelled.
+        if (response?.status === 'not_authorized') {
+          showAlert('Facebook sign-in failed', 'Permission was not granted. Please try again.');
+        }
+      }, { scope: 'public_profile' });
+    } catch (error: any) {
+      // FB.login throws synchronously if the login popup is blocked by the browser.
+      showAlert('Facebook sign-in failed', 'The Facebook login popup was blocked. Please allow popups for this site and try again.');
     }
   };
 
@@ -685,18 +760,23 @@ export function LoginScreen({ navigation }: any) {
                 </TouchableOpacity>
               )}
 
-              {Platform.OS !== 'web' && (
-                <TouchableOpacity
-                  style={styles.facebookFullBtn}
-                  activeOpacity={0.8}
-                  onPress={handleFacebookSignInNative}
-                >
-                  <Svg width="20" height="20" viewBox="0 0 24 24">
-                    <Path fill="#fff" d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z" />
-                  </Svg>
-                  <Text style={styles.facebookFullBtnText}>Continue with Facebook</Text>
-                </TouchableOpacity>
-              )}
+              <TouchableOpacity
+                style={[styles.facebookFullBtn, isLoading && styles.facebookFullBtnDisabled]}
+                activeOpacity={0.8}
+                disabled={isLoading}
+                onPress={Platform.OS === 'web' ? handleFacebookSignInWeb : handleFacebookSignInNative}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <>
+                    <Svg width="20" height="20" viewBox="0 0 24 24">
+                      <Path fill="#fff" d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z" />
+                    </Svg>
+                    <Text style={styles.facebookFullBtnText}>Continue with Facebook</Text>
+                  </>
+                )}
+              </TouchableOpacity>
 
               <View style={styles.socialRow}>
                 {Platform.OS === 'ios' && (
@@ -1383,7 +1463,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
-  // Full-width "Continue with Facebook" button (native only — the SDK doesn't support web).
+  // Full-width "Continue with Facebook" button — native uses react-native-fbsdk-next,
+  // web uses the Facebook JS SDK (both routed through handleFacebookSignIn{Native,Web}).
   facebookFullBtn: {
     width: '100%',
     height: 56,
@@ -1400,6 +1481,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 6,
   },
+  facebookFullBtnDisabled: { opacity: 0.7 },
   facebookFullBtnText: { color: 'white', fontWeight: '700', fontSize: 15 },
 
   // Zomato Style Circular Social Login Buttons
