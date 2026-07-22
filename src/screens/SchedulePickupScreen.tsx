@@ -78,59 +78,59 @@ const ALL_ITEMS: CatalogueItem[] = [
   { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 200, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
 
   // 3. Glass (kg) — Broken Glass is not accepted, so it is omitted
-  { id: 'gl1', catId: '3', subCategory: 'Beer Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Beer_bottles_2018_G1.jpg/500px-Beer_bottles_2018_G1.jpg' } },
-  { id: 'gl2', catId: '3', subCategory: 'Soft Drink Bottles', unit: 'kg', coins: 20, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg/500px-Bisby_Finley%2C_Glass_Soda_Bottle%2C_c._1940%2C_NGA_22676.jpg' } },
-  { id: 'gl3', catId: '3', subCategory: 'Wine Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/b/bf/Collection_Sparkling_wine_white_Lion_Gri.jpg' } },
-  { id: 'gl4', catId: '3', subCategory: 'Glass Jars', unit: 'kg', coins: 20, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png/500px-A_Glass_Jar_with_Threaded_Rim_On_a_Clear_Transparent_Background.png' } },
-  { id: 'gl5', catId: '3', subCategory: 'Other Glass', unit: 'kg', coins: 10, itemIcon: Wine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Amber_Glass_Flask.JPG/500px-Amber_Glass_Flask.JPG' } },
+  { id: 'gl1', catId: '3', subCategory: 'Beer Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: require('../../assets/catalogue/beer-bottles.jpg') },
+  { id: 'gl2', catId: '3', subCategory: 'Soft Drink Bottles', unit: 'kg', coins: 20, itemIcon: CupSoda, image: require('../../assets/catalogue/soft-drink-bottles.jpg') },
+  { id: 'gl3', catId: '3', subCategory: 'Wine Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: require('../../assets/catalogue/wine-bottles.jpg') },
+  { id: 'gl4', catId: '3', subCategory: 'Glass Jars', unit: 'kg', coins: 20, itemIcon: Archive, image: require('../../assets/catalogue/glass-jars.jpg') },
+  { id: 'gl5', catId: '3', subCategory: 'Other Glass', unit: 'kg', coins: 10, itemIcon: Wine, image: require('../../assets/catalogue/other-glass.jpg') },
 
   // 4. Paper (kg)
-  { id: 'pa1', catId: '4', subCategory: 'Newspapers', unit: 'kg', coins: 100, itemIcon: NewsIcon, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/A_stack_of_newspapers.jpg/500px-A_stack_of_newspapers.jpg' } },
-  { id: 'pa2', catId: '4', subCategory: 'Cardboard', unit: 'kg', coins: 80, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Cardboard_box.png/500px-Cardboard_box.png' } },
-  { id: 'pa3', catId: '4', subCategory: 'Magazines / Books', unit: 'kg', coins: 80, itemIcon: BookOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Gfp-stack-of-magazines-and-books.jpg/500px-Gfp-stack-of-magazines-and-books.jpg' } },
-  { id: 'pa4', catId: '4', subCategory: 'Other Paper', unit: 'kg', coins: 40, itemIcon: FileText, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/10000_papers_from_ESO_data_%289740706856%29.jpg/500px-10000_papers_from_ESO_data_%289740706856%29.jpg' } },
+  { id: 'pa1', catId: '4', subCategory: 'Newspapers', unit: 'kg', coins: 100, itemIcon: NewsIcon, image: require('../../assets/catalogue/newspapers.jpg') },
+  { id: 'pa2', catId: '4', subCategory: 'Cardboard', unit: 'kg', coins: 80, itemIcon: PackageOpen, image: require('../../assets/catalogue/cardboard.jpg') },
+  { id: 'pa3', catId: '4', subCategory: 'Magazines / Books', unit: 'kg', coins: 80, itemIcon: BookOpen, image: require('../../assets/catalogue/magazines-books.jpg') },
+  { id: 'pa4', catId: '4', subCategory: 'Other Paper', unit: 'kg', coins: 40, itemIcon: FileText, image: require('../../assets/catalogue/other-paper.jpg') },
 
   // 5. Home Appliances & Electronics (piece, condition)
-  { id: 'ap1', catId: '5', subCategory: 'TV (Below 40")', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/9/91/1990s_Television_Set.jpg' } },
-  { id: 'ap2', catId: '5', subCategory: 'TV (40" & Above)', unit: 'piece', hasCondition: true, coinsWorking: 20000, coinsNotWorking: 2500, itemIcon: Tv, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Interactive_LED_Flat_Panel_Display.png/500px-Interactive_LED_Flat_Panel_Display.png' } },
-  { id: 'ap3', catId: '5', subCategory: 'Refrigerator (Above 300L)', unit: 'piece', hasCondition: true, coinsWorking: 20000, coinsNotWorking: 5000, itemIcon: Refrigerator, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg/500px-Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg' } },
-  { id: 'ap4', catId: '5', subCategory: 'Refrigerator (Below 300L)', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Refrigerator, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg/500px-Panasonic_HOME_REFRIGERATOR_NR-C320WP-N.jpg' } },
-  { id: 'ap5', catId: '5', subCategory: 'Automatic Washing Machine', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: WashingMachine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/A_collection_of_washing_machines_in_a_laundry_shop.jpg/500px-A_collection_of_washing_machines_in_a_laundry_shop.jpg' } },
+  { id: 'ap1', catId: '5', subCategory: 'TV (Below 40")', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: Tv, image: require('../../assets/catalogue/tv-below-40.jpg') },
+  { id: 'ap2', catId: '5', subCategory: 'TV (40" & Above)', unit: 'piece', hasCondition: true, coinsWorking: 20000, coinsNotWorking: 2500, itemIcon: Tv, image: require('../../assets/catalogue/tv-above-40.jpg') },
+  { id: 'ap3', catId: '5', subCategory: 'Refrigerator (Above 300L)', unit: 'piece', hasCondition: true, coinsWorking: 20000, coinsNotWorking: 5000, itemIcon: Refrigerator, image: require('../../assets/catalogue/fridge-above-300l.jpg') },
+  { id: 'ap4', catId: '5', subCategory: 'Refrigerator (Below 300L)', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Refrigerator, image: require('../../assets/catalogue/fridge-below-300l.jpg') },
+  { id: 'ap5', catId: '5', subCategory: 'Automatic Washing Machine', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 2000, itemIcon: WashingMachine, image: require('../../assets/catalogue/automatic-washing-machine.jpg') },
   { id: 'ap6', catId: '5', subCategory: 'Semi-Automatic Washing Machine', unit: 'piece', hasCondition: true, coinsWorking: 8000, coinsNotWorking: 1500, itemIcon: WashingMachine, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/A_collection_of_washing_machines_in_a_laundry_shop.jpg/500px-A_collection_of_washing_machines_in_a_laundry_shop.jpg' } },
-  { id: 'ap7', catId: '5', subCategory: 'Branded Air Conditioner', unit: 'piece', hasCondition: true, coinsWorking: 80000, coinsNotWorking: 10000, itemIcon: AirVent },
-  { id: 'ap8', catId: '5', subCategory: 'Geyser', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 1000, itemIcon: Flame },
-  { id: 'ap9', catId: '5', subCategory: 'Ceiling Fan', unit: 'piece', hasCondition: true, coinsWorking: 5000, coinsNotWorking: 1050, itemIcon: Fan },
-  { id: 'ap10', catId: '5', subCategory: 'Other Large Appliances', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Cog },
+  { id: 'ap7', catId: '5', subCategory: 'Branded Air Conditioner', unit: 'piece', hasCondition: true, coinsWorking: 80000, coinsNotWorking: 10000, itemIcon: AirVent, image: require('../../assets/catalogue/branded-ac.jpg') },
+  { id: 'ap8', catId: '5', subCategory: 'Geyser', unit: 'piece', hasCondition: true, coinsWorking: 10000, coinsNotWorking: 1000, itemIcon: Flame, image: require('../../assets/catalogue/geyser.jpg') },
+  { id: 'ap9', catId: '5', subCategory: 'Ceiling Fan', unit: 'piece', hasCondition: true, coinsWorking: 5000, coinsNotWorking: 1050, itemIcon: Fan, image: require('../../assets/catalogue/ceiling-fan.jpg') },
+  { id: 'ap10', catId: '5', subCategory: 'Other Large Appliances', unit: 'piece', hasCondition: true, coinsWorking: 15000, coinsNotWorking: 2500, itemIcon: Cog, image: require('../../assets/catalogue/other-large-appliances.jpg') },
 
   // 6. Batteries (kg) — minimum 1 kg
-  { id: 'ba1', catId: '6', subCategory: 'Battery', unit: 'kg', coins: 200, minQty: 1, itemIcon: Battery, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Three_AA_batteries_on_a_white_background.JPG/500px-Three_AA_batteries_on_a_white_background.JPG' } },
+  { id: 'ba1', catId: '6', subCategory: 'Battery', unit: 'kg', coins: 200, minQty: 1, itemIcon: Battery, image: require('../../assets/catalogue/battery.jpg') },
 
   // 7. Footwear (piece)
-  { id: 'sh1', catId: '7', subCategory: 'Branded', unit: 'piece', coins: 2000, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg/500px-NIKE_Court_Zoom_Lite_3_Hard_Court_Sneakers_For_Men.jpg' } },
-  { id: 'sh2', catId: '7', subCategory: 'Non-Branded', unit: 'piece', coins: 500, itemIcon: ShoppingBag, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Leather_shoes_4_man.JPG/500px-Leather_shoes_4_man.JPG' } },
+  { id: 'sh1', catId: '7', subCategory: 'Branded', unit: 'piece', coins: 2000, itemIcon: ShoppingBag, image: require('../../assets/catalogue/branded-shoes.jpg') },
+  { id: 'sh2', catId: '7', subCategory: 'Non-Branded', unit: 'piece', coins: 500, itemIcon: ShoppingBag, image: require('../../assets/catalogue/non-branded-shoes.jpg') },
 
   // 8. Metals (kg)
-  { id: 'mt1', catId: '8', subCategory: 'Aluminium', unit: 'kg', coins: 500, itemIcon: Database, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Beverage_cans.jpg/500px-Beverage_cans.jpg' } },
-  { id: 'mt2', catId: '8', subCategory: 'Copper Wire', unit: 'kg', coins: 800, itemIcon: Activity, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg/500px-Continuously_Transposed_Conductor_Cu_%28Copper_CTC%29_3.jpg' } },
-  { id: 'mt3', catId: '8', subCategory: 'Iron', unit: 'kg', coins: 100, itemIcon: Cog, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png/500px-Scrap_metal_at_the_Burnside_Iron_Mills%2C_Dunedin._ATLIB_294035.png' } },
-  { id: 'mt4', catId: '8', subCategory: 'Steel/Utensils', unit: 'kg', coins: 100, itemIcon: Utensils, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Stainless_Steel_Utensils_Store_%283907497472%29.jpg/500px-Stainless_Steel_Utensils_Store_%283907497472%29.jpg' } },
-  { id: 'mt5', catId: '8', subCategory: 'Other Metals', unit: 'kg', coins: 100, itemIcon: Magnet, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/157series_scrapped.jpg/500px-157series_scrapped.jpg' } },
+  { id: 'mt1', catId: '8', subCategory: 'Aluminium', unit: 'kg', coins: 500, itemIcon: Database, image: require('../../assets/catalogue/aluminium.jpg') },
+  { id: 'mt2', catId: '8', subCategory: 'Copper Wire', unit: 'kg', coins: 800, itemIcon: Activity, image: require('../../assets/catalogue/copper-wire.jpg') },
+  { id: 'mt3', catId: '8', subCategory: 'Iron', unit: 'kg', coins: 100, itemIcon: Cog, image: require('../../assets/catalogue/iron.jpg') },
+  { id: 'mt4', catId: '8', subCategory: 'Steel/Utensils', unit: 'kg', coins: 100, itemIcon: Utensils, image: require('../../assets/catalogue/steel-utensils.jpg') },
+  { id: 'mt5', catId: '8', subCategory: 'Other Metals', unit: 'kg', coins: 100, itemIcon: Magnet, image: require('../../assets/catalogue/other-metals.jpg') },
 
   // 9. Plastic (kg)
-  { id: 'pl1', catId: '9', subCategory: 'PET Bottles', unit: 'kg', coins: 100, itemIcon: CupSoda, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg/500px-1989_HK_Sheung_Wan_Bonham_Strand_VITA_Distilled_Water.jpg' } },
-  { id: 'pl2', catId: '9', subCategory: 'Hard Plastic (HDPE/PP)', unit: 'kg', coins: 150, itemIcon: Archive, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Purple_plastic_bucket.jpg' } },
-  { id: 'pl5', catId: '9', subCategory: 'LDPE', unit: 'kg', coins: 200, itemIcon: Droplets },
-  { id: 'pl3', catId: '9', subCategory: 'Thermocol', unit: 'kg', coins: 30, itemIcon: PackageOpen, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Expanded_polystyrene_foam_dunnage.jpg/500px-Expanded_polystyrene_foam_dunnage.jpg' } },
-  { id: 'pl4', catId: '9', subCategory: 'Other Plastic', unit: 'kg', coins: 10, itemIcon: Droplets, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Evian_Bottle.jpg/500px-Evian_Bottle.jpg' } },
+  { id: 'pl1', catId: '9', subCategory: 'PET Bottles', unit: 'kg', coins: 100, itemIcon: CupSoda, image: require('../../assets/catalogue/pet-bottles.jpg') },
+  { id: 'pl2', catId: '9', subCategory: 'Hard Plastic (HDPE/PP)', unit: 'kg', coins: 150, itemIcon: Archive, image: require('../../assets/catalogue/hard-plastic.jpg') },
+  { id: 'pl5', catId: '9', subCategory: 'LDPE', unit: 'kg', coins: 200, itemIcon: Droplets, image: require('../../assets/catalogue/ldpe.jpg') },
+  { id: 'pl3', catId: '9', subCategory: 'Thermocol', unit: 'kg', coins: 30, itemIcon: PackageOpen, image: require('../../assets/catalogue/thermocol.jpg') },
+  { id: 'pl4', catId: '9', subCategory: 'Other Plastic', unit: 'kg', coins: 10, itemIcon: Droplets, image: require('../../assets/catalogue/other-plastic.jpg') },
 
   // 10. Textile Waste (kg) — per-item rates pending exact confirmation from backend
-  { id: 'tx1', catId: '10', subCategory: 'Grade 1 Clothing', unit: 'kg', coins: 500, itemIcon: Shirt },
-  { id: 'tx2', catId: '10', subCategory: 'Grade 2 Clothing', unit: 'kg', coins: 200, itemIcon: Shirt },
+  { id: 'tx1', catId: '10', subCategory: 'Grade 1 Clothing', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/grade-1-clothing.jpg') },
+  { id: 'tx2', catId: '10', subCategory: 'Grade 2 Clothing', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/grade-2-clothing.jpg') },
   { id: 'tx3', catId: '10', subCategory: 'Jeans', unit: 'kg', coins: 300, itemIcon: Shirt },
-  { id: 'tx4', catId: '10', subCategory: 'Premium Sarees', unit: 'kg', coins: 500, itemIcon: Shirt },
-  { id: 'tx5', catId: '10', subCategory: 'Non-Premium Sarees', unit: 'kg', coins: 200, itemIcon: Shirt },
+  { id: 'tx4', catId: '10', subCategory: 'Premium Sarees', unit: 'kg', coins: 500, itemIcon: Shirt, image: require('../../assets/catalogue/premium-sarees.jpg') },
+  { id: 'tx5', catId: '10', subCategory: 'Non-Premium Sarees', unit: 'kg', coins: 200, itemIcon: Shirt, image: require('../../assets/catalogue/non-premium-sarees.jpg') },
   { id: 'tx6', catId: '10', subCategory: 'Cartons', unit: 'kg', coins: 50, itemIcon: PackageOpen },
-  { id: 'tx7', catId: '10', subCategory: 'Other Textiles', unit: 'kg', coins: 50, itemIcon: Shirt },
+  { id: 'tx7', catId: '10', subCategory: 'Other Textiles', unit: 'kg', coins: 50, itemIcon: Shirt, image: require('../../assets/catalogue/other-textiles.jpg') },
 ];
 
 const unitLabel = (unit: string) => (unit === 'kg' ? 'per kg' : 'per piece');
