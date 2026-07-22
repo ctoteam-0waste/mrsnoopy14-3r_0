@@ -35,6 +35,8 @@ function loadLegalContent() {
   return mod.exports;
 }
 
+const { TERMS, PRIVACY, DATA_DELETION } = loadLegalContent();
+
 function renderLegalDocHtml(doc) {
   let html = `<h1>${escapeHtml(clean(doc.title))}</h1>`;
   if (doc.intro) html += `<p>${escapeHtml(clean(doc.intro))}</p>`;
@@ -48,8 +50,6 @@ function renderLegalDocHtml(doc) {
   if (doc.closing) html += `<p>${escapeHtml(clean(doc.closing))}</p>`;
   return html;
 }
-
-const { TERMS, PRIVACY } = loadLegalContent();
 
 const orgJsonLd = {
   '@context': 'https://schema.org',
@@ -73,9 +73,9 @@ const pages = [
   {
     urlPath: '', // home — already correct in the base file, but re-run for consistency
     outPath: 'index.html',
-    title: 'KarmaVerse — Recycle & Earn Rewards in India',
+    title: 'KarmaVerse — Turning Sustainable Gestures into Rewards',
     description:
-      "India's first circular economy rewards platform. Schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle.",
+      "KarmaVerse is India's sustainability rewards ecosystem. Earn KarmaCoins for everyday eco-friendly actions — from doorstep recycling pickups to eco-quizzes — and redeem them for real rewards while creating measurable environmental impact.",
     jsonLd: [
       orgJsonLd,
       {
@@ -86,7 +86,7 @@ const pages = [
         applicationCategory: 'LifestyleApplication',
         operatingSystem: 'Android, iOS, Web',
         description:
-          "India's first circular economy rewards platform. Schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle.",
+          "KarmaVerse is India's sustainability rewards ecosystem. Earn KarmaCoins for everyday eco-friendly actions — from doorstep recycling pickups to eco-quizzes — and redeem them for real rewards while creating measurable environmental impact.",
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
         publisher: { '@type': 'Organization', name: '3R Zero Waste', url: 'https://0waste.co.in/' },
       },
@@ -117,12 +117,13 @@ const pages = [
         ],
       },
     ],
-    noscriptBody: `<h1>KarmaVerse — Recycle &amp; Earn Rewards in India</h1>
+    noscriptBody: `<h1>KarmaVerse — Turning Sustainable Gestures into Rewards</h1>
     <p>
-      India's first circular economy rewards platform, built by 3R Zero Waste.
-      Schedule free doorstep pickups for plastic, paper, metal, e-waste, textile and more.
-      Every pickup is verified and weighed by an agent, and KarmaCoins XP are credited
-      instantly — redeemable for eco-friendly products, tree planting, or charitable donations.
+      KarmaVerse is India's sustainability rewards ecosystem, built by 3R Zero Waste.
+      Complete everyday sustainable actions — like doorstep recycling pickups for plastic,
+      paper, metal, e-waste, textile and more — and earn KarmaCoins XP. Every action is
+      verified, and coins are credited instantly, redeemable for eco-friendly products,
+      gift cards, discounts, tree planting, or charitable donations.
     </p>
     <h2>Frequently asked questions</h2>
     <dl>
@@ -197,6 +198,25 @@ const pages = [
       },
     ],
     noscriptBody: renderLegalDocHtml(TERMS),
+  },
+  {
+    urlPath: 'legal/data-deletion',
+    outPath: 'legal/data-deletion/index.html',
+    title: 'Data Deletion — KarmaVerse',
+    description:
+      'How to request deletion of your KarmaVerse account and associated data, including data from third-party sign-in providers.',
+    jsonLd: [
+      orgJsonLd,
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Data Deletion',
+        url: `${SITE}/legal/data-deletion`,
+        isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
+        publisher: { '@type': 'Organization', name: '3R Zero Waste', url: 'https://0waste.co.in/' },
+      },
+    ],
+    noscriptBody: renderLegalDocHtml(DATA_DELETION),
   },
 ];
 

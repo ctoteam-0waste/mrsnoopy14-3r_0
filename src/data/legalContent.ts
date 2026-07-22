@@ -1,6 +1,7 @@
 // Legal content for KarmaVer$e. Edit the copy here — the LegalScreen renders it.
 // Source of truth: 3R Zero Waste legal documentation.
-// Kept in sync with /legal/TERMS_AND_CONDITIONS.md and /legal/PRIVACY_POLICY.md — update both together.
+// Kept in sync with /legal/TERMS_AND_CONDITIONS.md, /legal/PRIVACY_POLICY.md and
+// /legal/DATA_DELETION.md — update together.
 
 export interface LegalSection {
   heading: string;
@@ -177,7 +178,7 @@ export const TERMS: LegalDoc = {
       heading: 'Contact us',
       body: ['For any questions or complaints about these terms or the service:'],
       bullets: [
-        'Email: cto.team@0waste.co.in',
+        'Email: info@0waste.co.in',
         'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
         'In-app: use the “Need help?” option',
       ],
@@ -197,7 +198,7 @@ export const PRIVACY: LegalDoc = {
       heading: 'Information we collect',
       body: ['To provide and improve our services, we collect:'],
       bullets: [
-        'Account details: your name, email address, and phone number. You may also register or sign in using Google Sign-In.',
+        'Account details: your name, email address, and phone number. You may also register or sign in using Google Sign-In or Facebook Login.',
         'Profile details (optional): age, gender, marital status, and employment status, if you choose to complete your profile.',
         'Pickup details: your address and the waste categories you schedule.',
         'Location data: your device location to assign the nearest available Agent and to show live pickup tracking.',
@@ -316,7 +317,52 @@ export const PRIVACY: LegalDoc = {
       heading: 'Contact us',
       body: ['For any privacy questions or requests:'],
       bullets: [
-        'Email: cto.team@0waste.co.in',
+        'Email: info@0waste.co.in',
+        'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
+      ],
+    },
+  ],
+  closing: '© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.',
+};
+
+export const DATA_DELETION: LegalDoc = {
+  title: 'Data deletion',
+  updated: 'July 2026',
+  intro:
+    'You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (such as Google or Facebook), at any time.',
+  sections: [
+    {
+      heading: 'How to request deletion',
+      body: [
+        'Email us from the address associated with your account:',
+      ],
+      bullets: [
+        'Email: info@0waste.co.in',
+        'Subject line: "Delete my account"',
+        'Include the phone number or email address you registered with, so we can locate your account.',
+      ],
+    },
+    {
+      heading: 'What we delete',
+      bullets: [
+        'Your account and profile details (name, email, phone number, and any optional profile fields).',
+        'Pickup history, addresses, and location data associated with your account.',
+        'Your KarmaCoins XP balance and transaction history.',
+        'Any data received from third-party sign-in providers (such as your Google or Facebook profile information).',
+      ],
+    },
+    {
+      heading: 'Timeline',
+      bullets: [
+        'We acknowledge deletion requests within 24 hours.',
+        'Your data is permanently erased within 30 days of a verified request, except where we are legally required to retain certain records (such as transaction or fraud-dispute logs) for a limited period, after which they are deleted.',
+      ],
+    },
+    {
+      heading: 'Contact us',
+      body: ['For questions about this process:'],
+      bullets: [
+        'Email: info@0waste.co.in',
         'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
       ],
     },

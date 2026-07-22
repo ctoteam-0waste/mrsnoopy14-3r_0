@@ -106,6 +106,27 @@ export const authService = {
     }
   },
 
+  // Facebook Login — send accessToken to backend, receive our JWT.
+  // Backend must verify the token against the Graph API and issue our JWT, mirroring
+  // /api/v1/auth/google-login — see /api/v1/auth/facebook-login (not yet implemented server-side).
+  facebookLogin: async (accessToken: string) => {
+    try {
+      const response = await api.post('/api/v1/auth/facebook-login', { accessToken });
+      const token = extractToken(response.data);
+      if (!token) throw new Error('No token received');
+      await AsyncStorage.setItem('userToken', token);
+
+      registerForPushNotifications().then(fcmToken => {
+        if (fcmToken) sendTokenToBackend(fcmToken);
+      }).catch(() => {});
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Facebook Login Error:', error?.response?.data || error);
+      throw error;
+    }
+  },
+
   sendOtp: async (phone: string, purpose: string) => {
     const response = await api.post('/api/v1/auth/send-otp', { phone, purpose });
     return response.data;

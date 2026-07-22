@@ -44,6 +44,18 @@
         }
       ],
       [
+        "react-native-fbsdk-next",
+        {
+          "appID": "2040037600233582",
+          "clientToken": "884043276ba41381b885f1daa4002741",
+          "displayName": "KarmaVerse",
+          "scheme": "fb2040037600233582",
+          "advertiserIDCollectionEnabled": false,
+          "autoLogAppEventsEnabled": false,
+          "isAutoInitEnabled": true
+        }
+      ],
+      [
         "expo-notifications",
         {
           "icon": "./assets/notification-icon.png",

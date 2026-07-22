@@ -91,7 +91,7 @@ To provide and improve our services, we collect:
 
 In accordance with the Information Technology Act, 2000, rules made thereunder, and the Digital Personal Data Protection Act, 2023, grievances regarding this policy may be directed to our Grievance Officer at:
 
-- **Email**: cto.team@0waste.co.in
+- **Email**: info@0waste.co.in
 - **Address**: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503
 - **Response time**: We will acknowledge grievances within 24 hours and aim to resolve them within 15 days, as required by law.
 
@@ -105,7 +105,7 @@ In accordance with the Information Technology Act, 2000, rules made thereunder, 
 
 For any privacy questions or requests:
 
-- **Email**: cto.team@0waste.co.in
+- **Email**: info@0waste.co.in
 - **Address**: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503
 
 ---

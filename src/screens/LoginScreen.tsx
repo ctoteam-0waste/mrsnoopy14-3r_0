@@ -21,6 +21,14 @@ try {
   statusCodes = gs.statusCodes;
 } catch (_) {}
 
+let FBLoginManager: any = null;
+let FBAccessToken: any = null;
+try {
+  const fb = require('react-native-fbsdk-next');
+  FBLoginManager = fb.LoginManager;
+  FBAccessToken = fb.AccessToken;
+} catch (_) {}
+
 // Web OAuth client (karmaverse.earth) — configured for Google Identity Services on web only.
 // Native (Android/iOS) still uses the separate webClientId passed to GoogleSignin.configure in App.tsx.
 const GOOGLE_WEB_CLIENT_ID = '152765471990-4g23up0gau0bclvkm3gk67fa1mpbe5r8.apps.googleusercontent.com';
@@ -347,6 +355,35 @@ export function LoginScreen({ navigation }: any) {
     }
   };
 
+  const finishFacebookLogin = async (accessToken: string) => {
+    setIsLoading(true);
+    try {
+      await authService.facebookLogin(accessToken);
+      reconnect();
+      navigation.replace('App');
+    } catch (error: any) {
+      showAlert('Facebook sign-in failed', error?.response?.data?.message || 'Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleFacebookSignInNative = async () => {
+    if (!FBLoginManager || !FBAccessToken) {
+      showAlert('Not available', 'Facebook Sign-In requires a native build. Use APK to test.');
+      return;
+    }
+    try {
+      const result = await FBLoginManager.logInWithPermissions(['public_profile']);
+      if (result.isCancelled) return;
+      const data = await FBAccessToken.getCurrentAccessToken();
+      if (!data?.accessToken) throw new Error('No access token received from Facebook');
+      await finishFacebookLogin(data.accessToken);
+    } catch (error: any) {
+      showAlert('Facebook sign-in failed', error?.response?.data?.message || 'Please try again.');
+    }
+  };
+
   const handleContinue = async () => {
     if (!identifier.trim()) {
       setEmailError('Please enter your email address.');
@@ -638,6 +675,19 @@ export function LoginScreen({ navigation }: any) {
                     <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
                   </Svg>
                   <Text style={styles.googleFullBtnText}>Continue with Google</Text>
+                </TouchableOpacity>
+              )}
+
+              {Platform.OS !== 'web' && (
+                <TouchableOpacity
+                  style={styles.facebookFullBtn}
+                  activeOpacity={0.8}
+                  onPress={handleFacebookSignInNative}
+                >
+                  <Svg width="20" height="20" viewBox="0 0 24 24">
+                    <Path fill="#fff" d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z" />
+                  </Svg>
+                  <Text style={styles.facebookFullBtnText}>Continue with Facebook</Text>
                 </TouchableOpacity>
               )}
 
@@ -1325,6 +1375,25 @@ const styles = StyleSheet.create({
     opacity: 0.01, overflow: 'hidden', zIndex: 2,
     alignItems: 'center', justifyContent: 'center',
   },
+
+  // Full-width "Continue with Facebook" button (native only — the SDK doesn't support web).
+  facebookFullBtn: {
+    width: '100%',
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: '#1877F2',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    marginTop: 12,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 6,
+  },
+  facebookFullBtnText: { color: 'white', fontWeight: '700', fontSize: 15 },
 
   // Zomato Style Circular Social Login Buttons
   socialRow: { flexDirection: 'row', gap: 20, justifyContent: 'center' },

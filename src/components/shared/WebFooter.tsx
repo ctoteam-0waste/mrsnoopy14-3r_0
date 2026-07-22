@@ -13,7 +13,7 @@ export function WebFooter() {
 
   const QUICK_LINKS = [
     { label: 'How it works', onPress: () => navigation.navigate('Splash', { scrollTo: 'howItWorks' }) },
-    { label: 'Features', onPress: () => navigation.navigate('Splash', { scrollTo: 'features' }) },
+    { label: 'Learn & earn', onPress: () => navigation.navigate('Splash', { scrollTo: 'learning' }) },
     { label: 'Daily quiz', onPress: () => navigation.navigate('Quiz') },
     { label: 'Knowledge hub', onPress: () => navigation.navigate('KnowledgeHub') },
     { label: 'Referral program', onPress: () => navigation.navigate('Referral') },
