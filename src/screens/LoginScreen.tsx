@@ -499,16 +499,20 @@ export function LoginScreen({ navigation }: any) {
 
     setEmailError('');
 
+    // check-user only understands email today (phone lookup pending on the
+    // backend) — the login endpoint DOES accept a phone identifier, so for a
+    // phone we skip the check and go straight to the password step.
+    if (isPhoneInput) {
+      setStep('login');
+      return;
+    }
+
     setStep('checking');
     try {
       const res = await authService.checkUser(raw);
 
       if (res?.data?.isRegistered) {
         setStep('login');
-      } else if (isPhoneInput) {
-        // New user arrived with a phone — prefill it; signup collects the email
-        setPhone(raw);
-        setStep('signup');
       } else {
         setEmail(raw);
         setStep('signup');
@@ -621,11 +625,14 @@ export function LoginScreen({ navigation }: any) {
             'Too many login attempts. Please wait a while and try again.'
         );
       } else {
+        const isPhoneId = /^\d+$/.test(identifier.trim());
         showAlert(
           isNetworkError ? 'No internet connection' : 'Login failed',
           isNetworkError
             ? 'Please check your network connection and try again.'
-            : (error?.response?.data?.message || 'Incorrect email or password. Please try again.')
+            : isPhoneId && status === 401
+              ? 'Incorrect password, or no account exists with this mobile number. New here? Go back and sign up with your email.'
+              : (error?.response?.data?.message || 'Incorrect email or password. Please try again.')
         );
       }
     } finally {

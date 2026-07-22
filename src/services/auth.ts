@@ -52,11 +52,16 @@ export const authService = {
     }
   },
 
-  // Check if User exists — accepts an email OR a mobile number. Both keys are
-  // sent so either backend field shape matches.
+  // Check if User exists — accepts an email OR a mobile number. The backend
+  // validates whichever key it receives, so a phone must NOT be sent under the
+  // email key (it gets rejected as "Invalid email address").
   checkUser: async (identifier: string) => {
+    const isPhone = /^\d+$/.test(identifier);
+    const payload = isPhone
+      ? { phone: identifier, identifier }
+      : { email: identifier, identifier };
     try {
-      const response = await api.post('/api/v1/auth/check-user', { email: identifier, identifier });
+      const response = await api.post('/api/v1/auth/check-user', payload);
       return response.data;
     } catch (error: any) {
       console.error('Check User Error:', error?.response?.data || error);
