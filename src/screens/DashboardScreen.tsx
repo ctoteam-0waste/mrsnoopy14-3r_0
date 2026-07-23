@@ -276,8 +276,6 @@ export function DashboardScreen({ navigation }: any) {
     }
   }, []);
 
-  const nextReward = Math.max(1290, balance + (50 - (balance % 50 || 50)));
-  const progress = balance % 50 === 0 && balance > 0 ? 100 : (balance % 50) * 2;
 
   return (
     <View style={{ flex: 1, backgroundColor: '#f0fdf6' }}>
@@ -339,22 +337,6 @@ export function DashboardScreen({ navigation }: any) {
           <View style={styles.balanceRow}>
             <KarmaCoin size={44} glow />
             <Text style={styles.balanceText}>{balance.toLocaleString()}</Text>
-          </View>
-
-          {/* Progress bar */}
-          <View style={styles.progressContainer}>
-            <View style={styles.progressTextRow}>
-              <Text style={styles.progressLabel}>{nextReward - balance} coins to next reward</Text>
-              <Text style={styles.progressPercent}>{Math.round(progress)}%</Text>
-            </View>
-            <View style={styles.progressBarBg}>
-              <LinearGradient
-                colors={['#4ade80', '#86efac']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.progressBarFill, { width: `${progress}%` }]}
-              />
-            </View>
           </View>
 
           {/* Redeem info banner */}
@@ -613,12 +595,6 @@ const styles = StyleSheet.create({
   walletLinkText: { fontSize: 12, color: '#86efac', fontWeight: '600' },
   balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   balanceText: { fontSize: 42, color: 'white', fontWeight: '800' },
-  progressContainer: { gap: 6 },
-  progressTextRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  progressLabel: { fontSize: 12, color: 'rgba(255,255,255,0.65)', fontWeight: '500' },
-  progressPercent: { fontSize: 11, color: '#86efac', fontWeight: 'bold' },
-  progressBarBg: { height: 6, backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: 3, overflow: 'hidden' },
-  progressBarFill: { height: '100%', borderRadius: 3 },
   redeemBanner: { marginTop: 14, padding: 12, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
   redeemBannerText: { color: 'rgba(255,255,255,0.75)', fontSize: 11.5, fontWeight: '600', lineHeight: 16 },
   section: { paddingHorizontal: 20, marginTop: 24 },

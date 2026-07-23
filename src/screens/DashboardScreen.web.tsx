@@ -134,7 +134,6 @@ export function DashboardScreen({ navigation }: any) {
     return unsub;
   }, [navigation]);
 
-  const progress = balance % 50 === 0 && balance > 0 ? 100 : (balance % 50) * 2;
   const nav = (screen: string, p?: any) => navigation.navigate(screen, p);
 
   return (
@@ -160,12 +159,6 @@ export function DashboardScreen({ navigation }: any) {
                   <Text style={[z.heroBalNum, isMobile && { fontSize: 32 }]}>{balance.toLocaleString()}</Text>
                   <Text style={z.heroBalLabel}>KarmaCoins XP</Text>
                 </View>
-              </View>
-              <View style={[z.heroProgressWrap, isMobile && { maxWidth: '100%' }]}>
-                <View style={z.heroProgressTrack}>
-                  <LinearGradient colors={['#4ade80', '#22d3ee']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={[z.heroProgressFill, { width: `${progress}%` as any }]} />
-                </View>
-                <Text style={z.heroProgressText}>{progress}% to next reward</Text>
               </View>
               <View style={[z.redeemBanner, { flexDirection: 'row', alignItems: 'center', gap: 8 }, isMobile && { maxWidth: '100%' }]}>
                 <KarmaCoin size={18} />
@@ -453,10 +446,6 @@ const z = StyleSheet.create({
   heroCoinGlow: { alignItems: 'center', justifyContent: 'center' },
   heroBalNum: { fontSize: 38, fontWeight: '900', color: 'white', letterSpacing: -2 },
   heroBalLabel: { fontSize: 12, color: 'rgba(255,255,255,0.4)', fontWeight: '600', marginTop: 1 },
-  heroProgressWrap: { maxWidth: 320 },
-  heroProgressTrack: { height: 5, backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 3, overflow: 'hidden', marginBottom: 6 },
-  heroProgressFill: { height: 5, borderRadius: 3 },
-  heroProgressText: { color: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: '600' },
   redeemBanner: { marginTop: 14, maxWidth: 320, padding: 12, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.08)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
   redeemBannerText: { color: 'rgba(255,255,255,0.75)', fontSize: 11.5, fontWeight: '600', lineHeight: 16 },
 
