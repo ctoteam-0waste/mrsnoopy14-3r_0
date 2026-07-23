@@ -23,17 +23,19 @@ const CARD_WIDTH = (Math.min(width, 900) - 40 - (CARD_MARGIN * 2 * COLS)) / COLS
 // Waste catalogue — 10 categories. category/subCategory strings are sent to the
 // backend exactly as written here and are matched there by exact string
 // (booking.service.js), so renaming anything here breaks booking + verify.
+// name is what the user sees; backendName is the enum value the booking API
+// accepts (renaming those requires a backend change first).
 const CATEGORIES = [
-  { id: '5', name: 'Appliances & TV', color: '#8b5cf6', icon: Tv },
-  { id: '1', name: 'E-Waste (Phones & Computers)', color: '#0ea5e9', icon: Smartphone },
-  { id: '2', name: 'Mixed E-Waste', color: '#14b8a6', icon: Cable },
-  { id: '9', name: 'Plastic', color: '#3b82f6', icon: Droplets },
-  { id: '4', name: 'Paper', color: '#84cc16', icon: FileText },
-  { id: '8', name: 'Metal', color: '#64748b', icon: Magnet },
-  { id: '3', name: 'Glass', color: '#10b981', icon: Wine },
-  { id: '6', name: 'Batteries', color: '#ef4444', icon: Battery },
-  { id: '7', name: 'Shoes', color: '#f59e0b', icon: ShoppingBag },
-  { id: '10', name: 'Textile Waste', color: '#ec4899', icon: Shirt },
+  { id: '5', name: 'Appliances & TV', backendName: 'Home Appliances & Electronics', color: '#8b5cf6', icon: Tv },
+  { id: '1', name: 'E-Waste (Phones & Computers)', backendName: 'Phones & Computers', color: '#0ea5e9', icon: Smartphone },
+  { id: '2', name: 'Mixed E-Waste', backendName: 'Mixed E-Waste', color: '#14b8a6', icon: Cable },
+  { id: '9', name: 'Plastic', backendName: 'Plastic', color: '#3b82f6', icon: Droplets },
+  { id: '4', name: 'Paper', backendName: 'Paper', color: '#84cc16', icon: FileText },
+  { id: '8', name: 'Metal', backendName: 'Metals', color: '#64748b', icon: Magnet },
+  { id: '3', name: 'Glass', backendName: 'Glass', color: '#10b981', icon: Wine },
+  { id: '6', name: 'Batteries', backendName: 'Batteries', color: '#ef4444', icon: Battery },
+  { id: '7', name: 'Shoes', backendName: 'Footwear', color: '#f59e0b', icon: ShoppingBag },
+  { id: '10', name: 'Textile Waste', backendName: 'Textile Waste', color: '#ec4899', icon: Shirt },
 ];
 
 const ADDRESS_LABEL_ICONS: Record<string, any> = { Home: HomeIcon, Office: Briefcase, Friend: Users, Other: MapPin };
@@ -380,7 +382,7 @@ export function SchedulePickupScreen({ navigation }: any) {
         if (!item) return;
         const categoryObj = CATEGORIES.find(c => c.id === item.catId);
         if (!categoryObj) return;
-        const entry: any = { category: categoryObj.name, subCategory: item.subCategory };
+        const entry: any = { category: categoryObj.backendName, subCategory: item.subCategory };
         if (item.hasCondition && condition) entry.condition = condition;
         payloadCategories.push(entry);
       });
