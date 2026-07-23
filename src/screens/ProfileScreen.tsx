@@ -172,14 +172,6 @@ export function ProfileScreen({ navigation }: any) {
   const [mgrAddresses, setMgrAddresses] = useState<SavedAddress[]>([]);
   const [mgrLoading, setMgrLoading] = useState(false);
   const [showAddressSearch, setShowAddressSearch] = useState(false);
-  // Picked on the map, waiting for details + a label before saving
-  const [mgrPending, setMgrPending] = useState<{ fullAddress: string; coords: [number, number] } | null>(null);
-  const [mgrLabel, setMgrLabel] = useState<AddressLabel>('Home');
-  const [mgrHouseNo, setMgrHouseNo] = useState('');
-  const [mgrApartment, setMgrApartment] = useState('');
-  const [mgrLandmark, setMgrLandmark] = useState('');
-  const [mgrReceiverName, setMgrReceiverName] = useState('');
-  const [mgrReceiverPhone, setMgrReceiverPhone] = useState('');
   const [mgrBusy, setMgrBusy] = useState(false);
 
   const openAddrMgr = () => {
@@ -191,56 +183,25 @@ export function ProfileScreen({ navigation }: any) {
       .finally(() => setMgrLoading(false));
   };
 
-  const handleAddressSelected = (address: string, coords: [number, number], _details?: AddressDetails) => {
+  // AddressSearch's own "Add address details" step collects and validates every
+  // field — save directly from its result, no second form.
+  const handleAddressSelected = async (_address: string, _coords: [number, number], details?: AddressDetails) => {
     setShowAddressSearch(false);
-    setMgrPending({ fullAddress: address, coords });
-    setMgrLabel('Home');
-    setMgrHouseNo('');
-    setMgrApartment('');
-    setMgrLandmark('');
-    // Prefill the receiver from the profile when available
-    setMgrReceiverName(userProfile?.name || '');
-    setMgrReceiverPhone(cleanPhone(userProfile?.phone || ''));
-  };
-
-  const resetMgrPending = () => {
-    setMgrPending(null);
-    setMgrHouseNo('');
-    setMgrApartment('');
-    setMgrLandmark('');
-    setMgrReceiverName('');
-    setMgrReceiverPhone('');
-  };
-
-  const saveMgrPending = async () => {
-    if (!mgrPending || mgrBusy) return;
-    if (!mgrHouseNo.trim()) {
-      showAlert('Missing details', 'Please enter your house / flat / block number.');
-      return;
-    }
-    if (!mgrReceiverName.trim()) {
-      showAlert('Missing details', "Please enter the receiver's name.");
-      return;
-    }
-    if (!/^[6-9]\d{9}$/.test(mgrReceiverPhone.trim())) {
-      showAlert('Invalid phone', "Please enter a valid 10-digit mobile number for the receiver.");
-      return;
-    }
+    if (!details || mgrBusy) return;
     setMgrBusy(true);
     try {
       const list = await addressService.add({
-        label: mgrLabel,
-        fullAddress: mgrPending.fullAddress,
-        houseNo: mgrHouseNo.trim(),
-        apartment: mgrApartment.trim() || undefined,
-        landmark: mgrLandmark.trim() || undefined,
-        receiverName: mgrReceiverName.trim(),
-        receiverPhone: mgrReceiverPhone.trim(),
-        longitude: mgrPending.coords[0],
-        latitude: mgrPending.coords[1],
+        label: (details.label as AddressLabel) || 'Home',
+        fullAddress: details.area,
+        houseNo: details.houseNo,
+        apartment: details.building,
+        landmark: details.landmark,
+        receiverName: details.receiverName || '',
+        receiverPhone: details.receiverPhone || '',
+        longitude: details.coordinates[0],
+        latitude: details.coordinates[1],
       });
       setMgrAddresses(list);
-      resetMgrPending();
     } catch (e: any) {
       showAlert('Could not save address', e?.response?.data?.message || 'Please try again.');
     } finally {
@@ -1151,7 +1112,7 @@ export function ProfileScreen({ navigation }: any) {
             <ScrollView style={{ maxHeight: 380 }} showsVerticalScrollIndicator={false}>
               {mgrLoading ? (
                 <ActivityIndicator color="#16a34a" style={{ marginVertical: 28 }} />
-              ) : mgrAddresses.length === 0 && !mgrPending ? (
+              ) : mgrAddresses.length === 0 ? (
                 <Text style={styles.addrMgrEmpty}>No addresses yet — add your first address.</Text>
               ) : (
                 mgrAddresses.map(addr => (
@@ -1181,75 +1142,18 @@ export function ProfileScreen({ navigation }: any) {
                 ))
               )}
 
-              {mgrPending && (
-                <View style={styles.addrMgrPendingCard}>
-                  <Text style={styles.addrMgrText} numberOfLines={2}>{mgrPending.fullAddress}</Text>
-                  <TextInput
-                    style={styles.addrMgrInput}
-                    placeholder="House / flat / block no. *"
-                    placeholderTextColor="#9ca3af"
-                    value={mgrHouseNo}
-                    onChangeText={setMgrHouseNo}
-                  />
-                  <TextInput
-                    style={styles.addrMgrInput}
-                    placeholder="Apartment / building / society (optional)"
-                    placeholderTextColor="#9ca3af"
-                    value={mgrApartment}
-                    onChangeText={setMgrApartment}
-                  />
-                  <TextInput
-                    style={styles.addrMgrInput}
-                    placeholder="Landmark (optional)"
-                    placeholderTextColor="#9ca3af"
-                    value={mgrLandmark}
-                    onChangeText={setMgrLandmark}
-                  />
-                  <View style={{ flexDirection: 'row', gap: 8 }}>
-                    <TextInput
-                      style={[styles.addrMgrInput, { flex: 1 }]}
-                      placeholder="Receiver's name *"
-                      placeholderTextColor="#9ca3af"
-                      value={mgrReceiverName}
-                      onChangeText={setMgrReceiverName}
-                    />
-                    <TextInput
-                      style={[styles.addrMgrInput, { flex: 1 }]}
-                      placeholder="Receiver's phone *"
-                      placeholderTextColor="#9ca3af"
-                      keyboardType="number-pad"
-                      maxLength={10}
-                      value={mgrReceiverPhone}
-                      onChangeText={(t) => setMgrReceiverPhone(t.replace(/\D/g, '').slice(0, 10))}
-                    />
-                  </View>
-                  <View style={styles.addrMgrChipRow}>
-                    {(['Home', 'Work', 'Other'] as AddressLabel[]).map(l => (
-                      <TouchableOpacity
-                        key={l}
-                        style={[styles.addrMgrChip, mgrLabel === l && styles.addrMgrChipOn]}
-                        onPress={() => setMgrLabel(l)}
-                      >
-                        <Text style={[styles.addrMgrChipText, mgrLabel === l && styles.addrMgrChipTextOn]}>{l}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: 10 }}>
-                    <TouchableOpacity style={styles.addrMgrSaveBtn} disabled={mgrBusy} onPress={saveMgrPending}>
-                      {mgrBusy ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.addrMgrSaveText}>Save address</Text>}
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.addrMgrCancelBtn} onPress={resetMgrPending}>
-                      <Text style={styles.addrMgrCancelText}>Cancel</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
             </ScrollView>
 
-            {!mgrPending && !mgrLoading && (
-              <TouchableOpacity style={styles.addrMgrAddBtn} onPress={() => setShowAddressSearch(true)} activeOpacity={0.8}>
-                <Text style={styles.addrMgrAddText}>+ Add new address</Text>
-              </TouchableOpacity>
+            {!mgrLoading && (
+              mgrBusy ? (
+                <View style={styles.addrMgrAddBtn}>
+                  <ActivityIndicator size="small" color="#16a34a" />
+                </View>
+              ) : (
+                <TouchableOpacity style={styles.addrMgrAddBtn} onPress={() => setShowAddressSearch(true)} activeOpacity={0.8}>
+                  <Text style={styles.addrMgrAddText}>+ Add new address</Text>
+                </TouchableOpacity>
+              )
             )}
           </View>
         </View>
@@ -1409,18 +1313,7 @@ const styles = StyleSheet.create({
   addrMgrMakeDef: { fontSize: 11.5, fontWeight: '700', color: '#0284c7' },
   addrMgrText: { fontSize: 12.5, color: '#64748b', fontWeight: '500', lineHeight: 18 },
   addrMgrReceiver: { fontSize: 11.5, color: '#94a3b8', fontWeight: '600', marginTop: 3 },
-  addrMgrInput: { backgroundColor: '#f8fafc', borderRadius: 10, borderWidth: 1, borderColor: '#e2e8f0', paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: '#0f172a', marginTop: 8 },
   addrMgrDel: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-  addrMgrPendingCard: { backgroundColor: '#f8fafc', borderRadius: 16, padding: 14, borderWidth: 1.5, borderColor: '#bbf7d0', marginTop: 12 },
-  addrMgrChipRow: { flexDirection: 'row', gap: 8, marginTop: 10, marginBottom: 14, flexWrap: 'wrap' },
-  addrMgrChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 100, borderWidth: 1.5, borderColor: '#e2e8f0', backgroundColor: 'white' },
-  addrMgrChipOn: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  addrMgrChipText: { fontSize: 12.5, fontWeight: '700', color: '#64748b' },
-  addrMgrChipTextOn: { color: '#15803d' },
-  addrMgrSaveBtn: { flex: 1, backgroundColor: '#15803d', paddingVertical: 12, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  addrMgrSaveText: { color: 'white', fontSize: 14, fontWeight: '800' },
-  addrMgrCancelBtn: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, borderWidth: 1.5, borderColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center' },
-  addrMgrCancelText: { color: '#64748b', fontSize: 14, fontWeight: '700' },
   addrMgrAddBtn: { marginTop: 14, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: '#f0fdf4', paddingVertical: 12, borderRadius: 14, alignItems: 'center' },
   addrMgrAddText: { color: '#15803d', fontSize: 14, fontWeight: '800' },
 });

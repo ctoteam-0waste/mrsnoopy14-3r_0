@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
-import { AddressSearch } from '../components/shared/AddressSearch';
+import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { ChevronLeft, MapPin, CheckCircle2, PackageOpen, Plus, FileText, Magnet, Droplets, Wine, Smartphone } from 'lucide-react-native';
@@ -39,7 +39,6 @@ const CATEGORIES = [
 ];
 
 const ADDRESS_LABEL_ICONS: Record<string, any> = { Home: HomeIcon, Work: Briefcase, Other: MapPin };
-const ADDRESS_LABELS: AddressLabel[] = ['Home', 'Work', 'Other'];
 
 const CONDITIONS = ['Working', 'Not Working'] as const;
 type Condition = typeof CONDITIONS[number];
@@ -252,14 +251,6 @@ export function SchedulePickupScreen({ navigation }: any) {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   // Address picked on the map but not yet saved — waiting for a label choice.
-  const [pendingAddress, setPendingAddress] = useState<{ fullAddress: string; coords: [number, number] } | null>(null);
-  const [pendingLabel, setPendingLabel] = useState<AddressLabel>('Home');
-  // "Add address details" form (backend-required fields)
-  const [pendingHouseNo, setPendingHouseNo] = useState('');
-  const [pendingApartment, setPendingApartment] = useState('');
-  const [pendingLandmark, setPendingLandmark] = useState('');
-  const [pendingReceiverName, setPendingReceiverName] = useState('');
-  const [pendingReceiverPhone, setPendingReceiverPhone] = useState('');
   const [isSavingAddress, setIsSavingAddress] = useState(false);
 
   // Priority 1: Get real GPS coordinates from device
@@ -293,47 +284,27 @@ export function SchedulePickupScreen({ navigation }: any) {
     }, [])
   );
 
-  const resetPendingForm = () => {
-    setPendingAddress(null);
-    setPendingHouseNo('');
-    setPendingApartment('');
-    setPendingLandmark('');
-    setPendingReceiverName('');
-    setPendingReceiverPhone('');
-  };
-
-  const handleSavePendingAddress = async () => {
-    if (!pendingAddress || isSavingAddress) return;
-    if (!pendingHouseNo.trim()) {
-      showAlert('Missing details', 'Please enter your house / flat / block number.');
-      return;
-    }
-    if (!pendingReceiverName.trim()) {
-      showAlert('Missing details', "Please enter the receiver's name.");
-      return;
-    }
-    if (!/^[6-9]\d{9}$/.test(pendingReceiverPhone.trim())) {
-      showAlert('Invalid phone', "Please enter a valid 10-digit mobile number for the receiver.");
-      return;
-    }
+  // AddressSearch's own "Add address details" step collects and validates every
+  // field — save directly from its result, no second form.
+  const handleAddressPicked = async (details: AddressDetails) => {
+    if (isSavingAddress) return;
     setIsSavingAddress(true);
     try {
       const list = await addressService.add({
-        label: pendingLabel,
-        fullAddress: pendingAddress.fullAddress,
-        houseNo: pendingHouseNo.trim(),
-        apartment: pendingApartment.trim() || undefined,
-        landmark: pendingLandmark.trim() || undefined,
-        receiverName: pendingReceiverName.trim(),
-        receiverPhone: pendingReceiverPhone.trim(),
-        longitude: pendingAddress.coords[0],
-        latitude: pendingAddress.coords[1],
+        label: (details.label as AddressLabel) || 'Home',
+        fullAddress: details.area,
+        houseNo: details.houseNo,
+        apartment: details.building,
+        landmark: details.landmark,
+        receiverName: details.receiverName || '',
+        receiverPhone: details.receiverPhone || '',
+        longitude: details.coordinates[0],
+        latitude: details.coordinates[1],
       });
       setSavedAddresses(list);
       // Select the address we just added (the API returns the whole array)
-      const added = [...list].reverse().find(a => a.fullAddress === pendingAddress.fullAddress) || list[list.length - 1];
+      const added = [...list].reverse().find(a => a.fullAddress === details.area) || list[list.length - 1];
       if (added) setSelectedAddressId(added._id);
-      resetPendingForm();
     } catch (error: any) {
       showAlert('Could not save address', error?.response?.data?.message || 'Please try again.');
     } finally {
@@ -657,74 +628,14 @@ export function SchedulePickupScreen({ navigation }: any) {
         );
       })}
 
-      {savedAddresses.length === 0 && !pendingAddress && (
+      {savedAddresses.length === 0 && !isSavingAddress && (
         <Text style={styles.addrEmpty}>No saved addresses yet — add your first one below.</Text>
       )}
 
-      {pendingAddress ? (
-        <View style={styles.addrSaveCard}>
-          <Text style={styles.addrSaveTitle} numberOfLines={2}>{pendingAddress.fullAddress}</Text>
-
-          <TextInput
-            style={styles.addrInput}
-            placeholder="House / flat / block no. *"
-            placeholderTextColor="#9ca3af"
-            value={pendingHouseNo}
-            onChangeText={setPendingHouseNo}
-          />
-          <TextInput
-            style={styles.addrInput}
-            placeholder="Apartment / building / society (optional)"
-            placeholderTextColor="#9ca3af"
-            value={pendingApartment}
-            onChangeText={setPendingApartment}
-          />
-          <TextInput
-            style={styles.addrInput}
-            placeholder="Landmark (optional)"
-            placeholderTextColor="#9ca3af"
-            value={pendingLandmark}
-            onChangeText={setPendingLandmark}
-          />
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <TextInput
-              style={[styles.addrInput, { flex: 1 }]}
-              placeholder="Receiver's name *"
-              placeholderTextColor="#9ca3af"
-              value={pendingReceiverName}
-              onChangeText={setPendingReceiverName}
-            />
-            <TextInput
-              style={[styles.addrInput, { flex: 1 }]}
-              placeholder="Receiver's phone *"
-              placeholderTextColor="#9ca3af"
-              keyboardType="number-pad"
-              maxLength={10}
-              value={pendingReceiverPhone}
-              onChangeText={(t) => setPendingReceiverPhone(t.replace(/\D/g, '').slice(0, 10))}
-            />
-          </View>
-
-          <Text style={styles.addrSaveAs}>Save address as</Text>
-          <View style={styles.addrChipRow}>
-            {ADDRESS_LABELS.map(l => (
-              <TouchableOpacity
-                key={l}
-                style={[styles.addrChip, pendingLabel === l && styles.addrChipOn]}
-                onPress={() => setPendingLabel(l)}
-              >
-                <Text style={[styles.addrChipText, pendingLabel === l && styles.addrChipTextOn]}>{l}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <TouchableOpacity style={styles.addrSaveBtn} disabled={isSavingAddress} onPress={handleSavePendingAddress} activeOpacity={0.8}>
-              {isSavingAddress ? <ActivityIndicator color="white" size="small" /> : <Text style={styles.addrSaveBtnText}>Save address</Text>}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.addrCancelBtn} onPress={resetPendingForm} activeOpacity={0.8}>
-              <Text style={styles.addrCancelBtnText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
+      {isSavingAddress ? (
+        <View style={styles.addrAddBtn}>
+          <ActivityIndicator size="small" color="#15803d" />
+          <Text style={styles.addrAddText}>Saving address...</Text>
         </View>
       ) : (
         <TouchableOpacity style={styles.addrAddBtn} onPress={() => setIsAddingAddress(true)} activeOpacity={0.8}>
@@ -736,13 +647,9 @@ export function SchedulePickupScreen({ navigation }: any) {
       <AddressSearch
         visible={isAddingAddress}
         userCoords={userCoordinates}
-        onSelect={(address, coords) => {
+        onSelect={(_address, _coords, details) => {
           setIsAddingAddress(false);
-          setPendingAddress({ fullAddress: address, coords });
-          setPendingLabel('Home');
-          setPendingHouseNo('');
-          setPendingApartment('');
-          setPendingLandmark('');
+          if (details) handleAddressPicked(details);
         }}
         onCancel={() => setIsAddingAddress(false)}
       />
@@ -906,22 +813,9 @@ const styles = StyleSheet.create({
   addrDefaultTagText: { fontSize: 9, fontWeight: '800', color: '#15803d', letterSpacing: 0.4 },
   addrText: { fontSize: 12.5, color: '#64748b', fontWeight: '500', lineHeight: 18 },
   addrReceiver: { fontSize: 11.5, color: '#94a3b8', fontWeight: '600', marginTop: 3 },
-  addrInput: { backgroundColor: '#f8fafc', borderRadius: 12, borderWidth: 1, borderColor: '#e2e8f0', paddingHorizontal: 12, paddingVertical: 10, fontSize: 13.5, color: '#0f172a', marginBottom: 10 },
   addrEmpty: { fontSize: 13, color: '#94a3b8', fontWeight: '500', marginBottom: 10, marginLeft: 4 },
   addrAddBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: '#f0fdf4', paddingVertical: 12, borderRadius: 16, marginBottom: 24 },
   addrAddText: { color: '#15803d', fontSize: 14, fontWeight: '800' },
-  addrSaveCard: { backgroundColor: 'white', borderRadius: 16, padding: 14, borderWidth: 1.5, borderColor: '#bbf7d0', marginBottom: 24 },
-  addrSaveTitle: { fontSize: 13, color: '#334155', fontWeight: '600', lineHeight: 19, marginBottom: 10 },
-  addrSaveAs: { fontSize: 11, color: '#94a3b8', fontWeight: '800', letterSpacing: 0.6, marginBottom: 8, textTransform: 'uppercase' },
-  addrChipRow: { flexDirection: 'row', gap: 8, marginBottom: 14, flexWrap: 'wrap' },
-  addrChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 100, borderWidth: 1.5, borderColor: '#e2e8f0', backgroundColor: 'white' },
-  addrChipOn: { borderColor: '#16a34a', backgroundColor: '#f0fdf4' },
-  addrChipText: { fontSize: 12.5, fontWeight: '700', color: '#64748b' },
-  addrChipTextOn: { color: '#15803d' },
-  addrSaveBtn: { flex: 1, backgroundColor: '#15803d', paddingVertical: 12, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  addrSaveBtnText: { color: 'white', fontSize: 14, fontWeight: '800' },
-  addrCancelBtn: { paddingHorizontal: 18, paddingVertical: 12, borderRadius: 12, borderWidth: 1.5, borderColor: '#e2e8f0', alignItems: 'center', justifyContent: 'center' },
-  addrCancelBtnText: { color: '#64748b', fontSize: 14, fontWeight: '700' },
 
   estimatesBox: { backgroundColor: '#fffbeb', borderRadius: 16, padding: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#fde68a' },
   estimateLabel: { fontSize: 12, color: '#b45309', fontWeight: '700', marginBottom: 8 },
