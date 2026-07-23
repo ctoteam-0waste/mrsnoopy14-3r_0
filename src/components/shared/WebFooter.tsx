@@ -28,7 +28,7 @@ export function WebFooter() {
           {/* About */}
           <View style={[s.col, isMobile && { flex: undefined }]}>
             <View style={s.logoRow}>
-              <Image source={require('../../../assets/logo-nav.png')} style={{ height: 44, width: 216, resizeMode: 'contain' }} />
+              <Image source={require('../../../assets/logo-nav.png')} style={{ height: 52, width: 110, resizeMode: 'contain' }} />
             </View>
             <Text style={s.aboutText}>
               India's rewarding recycling platform. Turn your waste into KarmaCoins XP — schedule free doorstep pickups and earn rewards for every kg recycled.

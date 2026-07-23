@@ -94,8 +94,9 @@ function TopNavbar({ state, navigation }: any) {
           accessibilityRole="link"
           accessibilityLabel="KarmaVerse home"
         >
-          {/* logo-nav.png: coin emblem + KarmaVer$e wordmark, aspect ~4.9:1 */}
-          <Image source={require('../../assets/logo-nav.png')} style={{ height: 38, width: 187, resizeMode: 'contain' }} />
+          {/* logo-nav.png is the padding-trimmed variant (aspect ~2.12:1) — logo.png
+              has ~35% transparent padding baked in, which shrank the mark to ~31px. */}
+          <Image source={require('../../assets/logo-nav.png')} style={{ height: 44, width: 94, resizeMode: 'contain' }} />
         </Pressable>
 
         <View style={s.navTabs}>

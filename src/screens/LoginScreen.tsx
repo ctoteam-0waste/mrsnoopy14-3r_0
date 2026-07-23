@@ -1404,7 +1404,7 @@ const styles = StyleSheet.create({
   headerCircle: { position: 'absolute', borderRadius: 999, backgroundColor: 'white' },
   headerTitle: { color: '#ffffff', fontSize: 22, fontWeight: '900', marginTop: 12, letterSpacing: 0.5 },
   logoCard: { alignItems: 'center', justifyContent: 'center' },
-  logoImg: { width: 265, height: 54 },
+  logoImg: { width: 170, height: 80 },
   termsRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginTop: 4 },
   checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: '#cbd5e1', alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   checkboxOn: { backgroundColor: '#16a34a', borderColor: '#16a34a' },
