@@ -16,8 +16,8 @@ const MAX = 1200;
 const FEATURE_DETAILS = [
   {
     id: 'pickup', title: 'Schedule a pickup', emoji: '🚛',
-    desc: 'Book a doorstep pickup for your recyclable waste in just 3 taps. We collect plastic, metal, paper, e-waste & more.',
-    steps: ['Select waste type', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
+    desc: 'Give your old items a second life — book a doorstep pickup in 3 taps and earn KarmaCoins for going green.',
+    steps: ['Pick what you want to recycle', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
     benefit: 'Earn coins on every pickup',
     gradient: ['#052e16', '#15803d'] as [string, string],
     accent: '#4ade80',
@@ -39,10 +39,10 @@ const FEATURE_DETAILS = [
     accent: '#22d3ee',
   },
   {
-    id: 'waste', title: '10 waste categories', emoji: '♻️',
-    desc: 'We accept 8 types of waste — plastic, paper, metal, glass, e-waste, textile, organic, and hazardous. Proper segregation earns more coins.',
-    steps: ['Plastic & PET bottles', 'Paper & cardboard', 'Metal & aluminium', 'E-waste, textile, glass & more'],
-    benefit: 'More types = more coins',
+    id: 'waste', title: 'Recycle almost anything', emoji: '♻️',
+    desc: 'From old gadgets to glass bottles — we give 10 categories of household items a responsible second life, away from landfills.',
+    steps: ['Phones, laptops & appliances', 'Plastic, paper & metal', 'Glass, shoes & textiles', 'Every item earns KarmaCoins'],
+    benefit: 'Nothing goes to waste',
     gradient: ['#78350f', '#d97706'] as [string, string],
     accent: '#fbbf24',
   },
