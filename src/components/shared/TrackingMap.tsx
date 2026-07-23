@@ -1,35 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import MapplsGL from 'mappls-map-react-native';
-import { mapService } from '../../services/mapService';
 
 interface TrackingMapProps {
   userCoordinate: [number, number];
   agentLocation?: { lat: number; lng: number } | null;
 }
 
+// Mappls native SDK v2 is licensed via the bundled OLF file — there is no
+// runtime key API (the old setMapSDKKey/setRestAPIKey calls don't exist on
+// the module and would throw, leaving the map stuck on "Initializing").
 export function TrackingMap({ userCoordinate, agentLocation }: TrackingMapProps) {
-  const [mapReady, setMapReady] = useState(false);
-
-  useEffect(() => {
-    mapService.getMapConfig()
-      .then(key => {
-        MapplsGL.setMapSDKKey(key);
-        MapplsGL.setRestAPIKey(key);
-        setMapReady(true);
-      })
-      .catch(() => {});
-  }, []);
-
-  if (!mapReady) {
-    return (
-      <View style={styles.mapComingSoon}>
-        <ActivityIndicator size="small" color="#16a34a" />
-        <Text style={styles.mapComingSoonTitle}>Initializing map...</Text>
-      </View>
-    );
-  }
-
   return (
     <MapplsGL.MapView style={{ flex: 1 }} logoEnabled={false} compassEnabled={false}>
       <MapplsGL.Camera
@@ -57,8 +38,6 @@ export function TrackingMap({ userCoordinate, agentLocation }: TrackingMapProps)
 }
 
 const styles = StyleSheet.create({
-  mapComingSoon: { flex: 1, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', padding: 20 },
-  mapComingSoonTitle: { fontSize: 14, fontWeight: '700', color: '#15803d', marginTop: 8, textAlign: 'center' },
   pinWrap: { alignItems: 'center' },
   userPin: { width: 42, height: 42, borderRadius: 21, backgroundColor: '#16a34a', borderWidth: 3, borderColor: '#fff', alignItems: 'center', justifyContent: 'center', elevation: 5, shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 6, shadowOffset: { width: 0, height: 3 } },
   userPinStem: { width: 0, height: 0, borderLeftWidth: 7, borderRightWidth: 7, borderTopWidth: 11, borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: '#fff', marginTop: -3 },
