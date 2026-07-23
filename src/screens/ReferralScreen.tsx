@@ -56,6 +56,10 @@ export function ReferralScreen({ navigation }: any) {
     } catch (_) {}
   };
 
+  // Backend sends "Unknown" when the referred user's name isn't set yet
+  const displayName = (name?: string) =>
+    !name || name.toLowerCase() === 'unknown' ? 'New user' : name;
+
   const formatDate = (iso: string) =>
     new Date(iso).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -156,11 +160,11 @@ export function ReferralScreen({ navigation }: any) {
               referrals.map((ref: any, i: number) => (
                 <View key={i} style={styles.referralCard}>
                   <View style={styles.referralAvatar}>
-                    <Text style={styles.referralAvatarText}>{ref.referredUserName?.charAt(0)?.toUpperCase() || '?'}</Text>
+                    <Text style={styles.referralAvatarText}>{displayName(ref.referredUserName).charAt(0).toUpperCase()}</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <Text style={styles.referralName}>{ref.referredUserName}</Text>
+                      <Text style={styles.referralName}>{displayName(ref.referredUserName)}</Text>
                       {ref.referralNumber && (
                         <View style={styles.referralNumBadge}>
                           <Text style={styles.referralNumText}>#{ref.referralNumber}</Text>
@@ -189,7 +193,7 @@ export function ReferralScreen({ navigation }: any) {
 
 const styles = StyleSheet.create({
   rootContainer: { flex: 1, backgroundColor: '#7e22ce' },
-  scrollBg: { flex: 1, backgroundColor: '#7e22ce' },
+  scrollBg: { flex: 1, backgroundColor: '#f8fafc' },
   topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#7e22ce' },
   container: { flex: 1, maxWidth: 900, width: '100%', alignSelf: 'center' },
 
