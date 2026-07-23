@@ -7,8 +7,8 @@ import { ChevronLeft, Target, Eye, Recycle, Users, Truck, Coins, Sparkles } from
 const STATS = [
   { value: '1.85L+', label: 'Citizens reached' },
   { value: '100%', label: 'Free doorstep pickup' },
-  { value: '8', label: 'Waste categories accepted' },
-  { value: '2024', label: 'Founded in Haryana' },
+  { value: '10', label: 'Waste categories accepted' },
+  { value: '2020', label: 'Founded in Haryana' },
 ];
 
 const INITIATIVES = [

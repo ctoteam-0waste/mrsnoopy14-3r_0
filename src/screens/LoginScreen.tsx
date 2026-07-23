@@ -739,13 +739,7 @@ export function LoginScreen({ navigation }: any) {
           </PrimaryButton>
 
           {/* Social login */}
-          <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              {Platform.OS === 'web' ? (
+          {Platform.OS === 'web' ? (
                 googleBtnError ? (
                   <TouchableOpacity
                     style={[styles.googleFullBtn, { borderColor: '#fca5a5' }]}

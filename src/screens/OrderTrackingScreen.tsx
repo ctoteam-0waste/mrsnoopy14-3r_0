@@ -30,7 +30,6 @@ const BASE_STEPS = [
   { key: 'ORDER_PLACED',   label: 'Order placed',       sublabel: 'Your pickup request is confirmed' },
   { key: 'AGENT_ASSIGNED', label: 'Agent assigned',     sublabel: 'Agent accepted and is on the way' },
   { key: 'AGENT_REACHED',  label: 'Agent reached',      sublabel: 'Agent has reached your location' },
-  { key: 'VERIFICATION',   label: 'Verification & coins', sublabel: 'Waste weighed, KarmaCoins credited' },
   { key: 'COMPLETED',      label: 'Completed',           sublabel: 'Reached warehouse and completed' },
 ];
 
@@ -232,11 +231,14 @@ export function OrderTrackingScreen({ route, navigation }: any) {
 
   // Compute which steps are done/active from currentStatus
   const currentIndex = STATUS_ORDER.indexOf(currentStatus);
-  const steps = BASE_STEPS.map((step, i) => ({
-    ...step,
-    done: i < currentIndex,
-    active: i === currentIndex,
-  }));
+  const steps = BASE_STEPS.map((step) => {
+    const stepIndex = STATUS_ORDER.indexOf(step.key);
+    return {
+      ...step,
+      done: stepIndex < currentIndex,
+      active: stepIndex === currentIndex,
+    };
+  });
 
 
 
