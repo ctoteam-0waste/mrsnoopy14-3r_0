@@ -346,17 +346,11 @@ export function LoginScreen({ navigation }: any) {
           log_level: 'debug',
         });
         node.innerHTML = '';
-        // Defer measuring until after layout settles (the ref callback can fire before
-        // the container has a real width, e.g. mid-mount at width 0) — a double rAF
-        // guarantees at least one paint has happened first.
+        // Defer rendering until after layout settles (the ref callback can fire before
+        // the container has a real size) — a double rAF guarantees at least one paint.
         requestAnimationFrame(() => requestAnimationFrame(() => {
-          // GIS's button takes a fixed pixel width (no responsive/percentage option,
-          // and 400 is its own max) — measure the container so it still reads full-width.
-          const rawWidth = node.getBoundingClientRect?.().width || node.offsetWidth;
-          const width = Number.isFinite(rawWidth) && rawWidth > 0
-            ? Math.min(400, Math.max(220, Math.round(rawWidth)))
-            : 320; // safe fallback if measurement ever comes back 0/NaN/undefined
-          google.accounts.id.renderButton(node, { type: 'standard', text: 'continue_with', shape: 'rectangular', theme: 'outline', size: 'large', width });
+          // Icon-only circular Google button layered transparently over our own icon.
+          google.accounts.id.renderButton(node, { type: 'icon', shape: 'circle', theme: 'outline', size: 'large' });
           // GIS fails silently (logs to console, doesn't throw) when the origin isn't
           // authorized for this client ID — detect the empty result and surface it.
           setTimeout(() => {
@@ -738,49 +732,43 @@ export function LoginScreen({ navigation }: any) {
             <ArrowRight size={18} color="#fff" />
           </PrimaryButton>
 
-          {/* Social login */}
-          {Platform.OS === 'web' ? (
+          {/* Social login — brand icon buttons only */}
+          <View style={styles.socialRow}>
+              {Platform.OS === 'web' ? (
                 googleBtnError ? (
                   <TouchableOpacity
-                    style={[styles.googleFullBtn, { borderColor: '#fca5a5' }]}
+                    style={[styles.socialIconBtn, { borderColor: '#fca5a5' }]}
                     activeOpacity={0.8}
                     onPress={() => showAlert('Google sign-in unavailable', googleBtnError)}
                   >
-                    <Info size={20} color="#dc2626" />
-                    <Text style={[styles.googleFullBtnText, { color: '#dc2626' }]}>Google sign-in unavailable</Text>
+                    <Info size={22} color="#dc2626" />
                   </TouchableOpacity>
                 ) : (
-                  <View style={styles.googleFullBtnWrap}>
-                    <View style={styles.googleFullBtn} pointerEvents="none">
-                      <Svg width="20" height="20" viewBox="0 0 48 48">
+                  <View style={styles.socialIconWrap}>
+                    <View style={styles.socialIconBtn} pointerEvents="none">
+                      <Svg width="26" height="26" viewBox="0 0 48 48">
                         <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
                         <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
                         <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
                         <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
                       </Svg>
-                      <Text style={styles.googleFullBtnText}>Continue with Google</Text>
                     </View>
                     <View ref={mountGoogleButton} style={styles.googleOverlayMount} />
                   </View>
                 )
               ) : (
-                <TouchableOpacity
-                  style={styles.googleFullBtn}
-                  activeOpacity={0.8}
-                  onPress={handleGoogleSignInNative}
-                >
-                  <Svg width="20" height="20" viewBox="0 0 48 48">
+                <TouchableOpacity style={styles.socialIconBtn} activeOpacity={0.8} onPress={handleGoogleSignInNative}>
+                  <Svg width="26" height="26" viewBox="0 0 48 48">
                     <Path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z" />
                     <Path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
                     <Path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
                     <Path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
                   </Svg>
-                  <Text style={styles.googleFullBtnText}>Continue with Google</Text>
                 </TouchableOpacity>
               )}
 
               <TouchableOpacity
-                style={[styles.facebookFullBtn, isLoading && styles.facebookFullBtnDisabled]}
+                style={[styles.socialIconBtnFb, isLoading && styles.facebookFullBtnDisabled]}
                 activeOpacity={0.8}
                 disabled={isLoading}
                 onPress={Platform.OS === 'web' ? handleFacebookSignInWeb : handleFacebookSignInNative}
@@ -788,28 +776,24 @@ export function LoginScreen({ navigation }: any) {
                 {isLoading ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <>
-                    <Svg width="20" height="20" viewBox="0 0 24 24">
-                      <Path fill="#fff" d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z" />
-                    </Svg>
-                    <Text style={styles.facebookFullBtnText}>Continue with Facebook</Text>
-                  </>
+                  <Svg width="26" height="26" viewBox="0 0 24 24">
+                    <Path fill="#fff" d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94z" />
+                  </Svg>
                 )}
               </TouchableOpacity>
 
-              <View style={styles.socialRow}>
-                {Platform.OS === 'ios' && (
-                  <TouchableOpacity
-                    style={styles.socialIconBtnZomato}
-                    activeOpacity={0.8}
-                    onPress={() => showAlert('Coming soon', 'Apple login coming soon!')}
-                  >
-                    <Svg width="30" height="30" viewBox="0 0 384 512">
-                      <Path fill="#000" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
-                    </Svg>
-                  </TouchableOpacity>
-                )}
-              </View>
+              {Platform.OS === 'ios' && (
+                <TouchableOpacity
+                  style={styles.socialIconBtn}
+                  activeOpacity={0.8}
+                  onPress={() => showAlert('Coming soon', 'Apple login coming soon!')}
+                >
+                  <Svg width="26" height="26" viewBox="0 0 384 512">
+                    <Path fill="#000" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+                  </Svg>
+                </TouchableOpacity>
+              )}
+          </View>
         </ScrollView>
       );
     }
@@ -1482,6 +1466,21 @@ const styles = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
 
+  // Icon-only brand buttons (Google / Facebook / Apple) under "or continue with"
+  socialIconWrap: { width: 60, height: 60, position: 'relative' },
+  socialIconBtn: {
+    width: 60, height: 60, borderRadius: 30,
+    backgroundColor: 'white', borderWidth: 1.5, borderColor: '#e2e8f0',
+    alignItems: 'center', justifyContent: 'center',
+    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6,
+  },
+  socialIconBtnFb: {
+    width: 60, height: 60, borderRadius: 30,
+    backgroundColor: '#1877F2',
+    alignItems: 'center', justifyContent: 'center',
+    elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6,
+  },
+
   // Full-width "Continue with Facebook" button — native uses react-native-fbsdk-next,
   // web uses the Facebook JS SDK (both routed through handleFacebookSignIn{Native,Web}).
   facebookFullBtn: {
@@ -1503,8 +1502,7 @@ const styles = StyleSheet.create({
   facebookFullBtnDisabled: { opacity: 0.7 },
   facebookFullBtnText: { color: 'white', fontWeight: '700', fontSize: 15 },
 
-  // Zomato Style Circular Social Login Buttons
-  socialRow: { flexDirection: 'row', gap: 20, justifyContent: 'center' },
+  socialRow: { flexDirection: 'row', gap: 20, justifyContent: 'center', marginTop: 4 },
   socialIconBtnZomato: {
     width: 60,
     height: 60,
