@@ -376,43 +376,43 @@ export function SchedulePickupScreen({ navigation }: any) {
     }
 
     setIsLoading(true);
+    // Structure the categories array — send category/subCategory exactly as in the
+    // catalogue, and condition only for Working/Not Working items (never null).
+    const payloadCategories: any[] = [];
+    Object.keys(cart).forEach((key) => {
+      const { id, condition } = parseCartKey(key);
+      const item = ALL_ITEMS.find(i => i.id === id);
+      if (!item) return;
+      const categoryObj = CATEGORIES.find(c => c.id === item.catId);
+      if (!categoryObj) return;
+      const entry: any = { category: categoryObj.backendName, subCategory: item.subCategory };
+      if (item.hasCondition && condition) entry.condition = condition;
+      payloadCategories.push(entry);
+    });
+
+    const payload: any = {
+      categories: payloadCategories,
+      pickupDate: selectedDate,
+      timeSlot: selectedTime,
+      // Booking takes the full ad-hoc address object (not addressId)
+      address: {
+        fullAddress: selectedAddress.fullAddress,
+        houseNo: selectedAddress.houseNo,
+        apartment: selectedAddress.apartment,
+        landmark: selectedAddress.landmark,
+        receiverName: selectedAddress.receiverName,
+        receiverPhone: selectedAddress.receiverPhone,
+        location: {
+          type: 'Point' as const,
+          coordinates: coords
+        }
+      },
+    };
+    if (instructions.trim()) {
+      payload.specialInstruction = instructions.trim();
+    }
+
     try {
-      // Structure the categories array — send category/subCategory exactly as in the
-      // catalogue, and condition only for Working/Not Working items (never null).
-      const payloadCategories: any[] = [];
-      Object.keys(cart).forEach((key) => {
-        const { id, condition } = parseCartKey(key);
-        const item = ALL_ITEMS.find(i => i.id === id);
-        if (!item) return;
-        const categoryObj = CATEGORIES.find(c => c.id === item.catId);
-        if (!categoryObj) return;
-        const entry: any = { category: categoryObj.backendName, subCategory: item.subCategory };
-        if (item.hasCondition && condition) entry.condition = condition;
-        payloadCategories.push(entry);
-      });
-
-      const payload: any = {
-        categories: payloadCategories,
-        pickupDate: selectedDate,
-        timeSlot: selectedTime,
-        // Booking takes the full ad-hoc address object (not addressId)
-        address: {
-          fullAddress: selectedAddress.fullAddress,
-          houseNo: selectedAddress.houseNo,
-          apartment: selectedAddress.apartment,
-          landmark: selectedAddress.landmark,
-          receiverName: selectedAddress.receiverName,
-          receiverPhone: selectedAddress.receiverPhone,
-          location: {
-            type: 'Point' as const,
-            coordinates: coords
-          }
-        },
-      };
-      if (instructions.trim()) {
-        payload.specialInstruction = instructions.trim();
-      }
-
       const res = await bookingService.createBooking(payload);
       const createdBooking = res?.data || res;
       console.log('[Confirm Pickup] Created booking:', createdBooking);
@@ -422,10 +422,19 @@ export function SchedulePickupScreen({ navigation }: any) {
       showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
       setTimeout(() => navigation.replace('OrderTracking', { booking: createdBooking, estimatedCoins: cartCalculations.totalCoins }), 2500);
     } catch (error: any) {
-      showAlert(
-        "Scheduling failed",
-        error?.response?.data?.message || "Failed to schedule pickup. Please try again."
-      );
+      // Surface the real reason so scheduling failures aren't a dead end.
+      const data = error?.response?.data;
+      const validationMsg = Array.isArray(data?.errors)
+        ? data.errors.map((e: any) => e?.message || e?.msg).filter(Boolean).join('\n')
+        : '';
+      const detail =
+        data?.message ||
+        validationMsg ||
+        (error?.response
+          ? `Server error (${error.response.status}).`
+          : 'Could not reach the server. Please check your connection.');
+      console.error('[Confirm Pickup] Failed:', error?.response?.status, JSON.stringify(data), JSON.stringify(payload));
+      showAlert('Scheduling failed', detail);
     } finally {
       setIsLoading(false);
     }
