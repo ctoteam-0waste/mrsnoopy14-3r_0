@@ -2,7 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView, Platform } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ShoppingBag, Sparkles, Leaf, ArrowRight } from 'lucide-react-native';
+import { ShoppingBag, Gift, ArrowRight } from 'lucide-react-native';
+import { KarmaCoin } from '../components/shared/KarmaCoin';
 
 export function StoreScreen({ navigation }: any) {
   return (
@@ -23,10 +24,10 @@ export function StoreScreen({ navigation }: any) {
 
         <View style={styles.content}>
 
-          <View style={styles.iconCircle}>
-            <Sparkles size={48} color="#15803d" />
-            <View style={styles.floatingLeaf}>
-              <Leaf size={24} color="#84cc16" />
+          <View style={styles.coinWrap}>
+            <KarmaCoin size={110} glow animated />
+            <View style={styles.giftBadge}>
+              <Gift size={20} color="#15803d" />
             </View>
           </View>
 
@@ -65,8 +66,8 @@ const styles = StyleSheet.create({
   headerIconBox: { width: 52, height: 52, borderRadius: 26, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   
   content: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingBottom: 60, maxWidth: 600, width: '100%', alignSelf: 'center' },
-  iconCircle: { width: 120, height: 120, borderRadius: 60, backgroundColor: '#dcfce7', alignItems: 'center', justifyContent: 'center', marginBottom: 32, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 10 },
-  floatingLeaf: { position: 'absolute', top: -10, right: -10, backgroundColor: 'white', padding: 8, borderRadius: 20, elevation: 5 },
+  coinWrap: { marginBottom: 32, alignItems: 'center', justifyContent: 'center' },
+  giftBadge: { position: 'absolute', top: -6, right: -14, backgroundColor: 'white', padding: 8, borderRadius: 20, elevation: 5, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 6 },
   comingSoonText: { fontSize: 32, fontWeight: '900', color: '#0f172a', marginBottom: 16 },
   descText: { fontSize: 15, color: '#64748b', textAlign: 'center', fontWeight: '500', lineHeight: 24, marginBottom: 40 },
   
