@@ -420,7 +420,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       setIsSubmitted(true);
       const token = await AsyncStorage.getItem('userToken');
       showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
-      setTimeout(() => navigation.replace('OrderTracking', { booking: createdBooking }), 2500);
+      setTimeout(() => navigation.replace('OrderTracking', { booking: createdBooking, estimatedCoins: cartCalculations.totalCoins }), 2500);
     } catch (error: any) {
       showAlert(
         "Scheduling failed",

@@ -62,9 +62,9 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   const rawBookingId = passedBooking?._id || passedBooking?.id || mockBooking.id;
 
   // Coins come from the backend, which computes them at verify time from the
-  // live rate card. Never estimate them client-side — a local rate table goes
-  // stale the moment the catalogue changes and shows the user a wrong number.
-  const estimatedCoins = passedBooking?.totalKarmaCoins || 0;
+  // live rate card. Until then, fall back to the schedule screen's estimate
+  // passed via navigation (route.params.estimatedCoins).
+  const estimatedCoins = passedBooking?.totalKarmaCoins || route?.params?.estimatedCoins || 0;
 
   const bookingData = {
     id: rawBookingId.length > 10 ? `#${rawBookingId.substring(0, 8).toUpperCase()}` : rawBookingId,
@@ -401,8 +401,8 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{bookingData.estimatedCoins} KC</Text>
-            <Text style={styles.statLabel}>Est. Coins</Text>
+            <Text style={styles.statValue}>{earnedCoins ?? bookingData.estimatedCoins} KC</Text>
+            <Text style={styles.statLabel}>{earnedCoins !== null ? 'Coins earned' : 'Est. coins'}</Text>
           </View>
         </View>
 
