@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image } from 'react-native';
-import { Mail, MapPin } from 'lucide-react-native';
+import { Mail, MapPin, Phone } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const MAX = 1200;
@@ -50,11 +50,15 @@ export function WebFooter() {
                 <Text style={s.colTitle}>Contact us</Text>
                 <View style={s.contactRow}>
                   <Mail size={13} color="#94a3b8" />
-                  <Text style={[s.contactText, { fontSize: 12 }]}>cto.team@0waste.co.in</Text>
+                  <Text style={[s.contactText, { fontSize: 12 }]}>info@0waste.co.in</Text>
+                </View>
+                <View style={s.contactRow}>
+                  <Phone size={13} color="#94a3b8" />
+                  <Text style={[s.contactText, { fontSize: 12 }]}>+91 70931 98828</Text>
                 </View>
                 <View style={s.contactRow}>
                   <MapPin size={13} color="#94a3b8" />
-                  <Text style={s.contactText}>PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503</Text>
+                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122051</Text>
                 </View>
               </View>
             </View>
@@ -72,11 +76,15 @@ export function WebFooter() {
                 <Text style={s.colTitle}>Contact us</Text>
                 <View style={s.contactRow}>
                   <Mail size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>cto.team@0waste.co.in</Text>
+                  <Text style={s.contactText}>info@0waste.co.in</Text>
+                </View>
+                <View style={s.contactRow}>
+                  <Phone size={14} color="#94a3b8" />
+                  <Text style={s.contactText}>+91 70931 98828</Text>
                 </View>
                 <View style={s.contactRow}>
                   <MapPin size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>PLOT 62, Sector 8 Rd, Imt Manesar, Gurugram, Haryana 122503</Text>
+                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122051</Text>
                 </View>
               </View>
             </>
