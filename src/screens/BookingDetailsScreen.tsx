@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LiveMap } from '../components/shared/LiveMap';
+import { KarmaCoin } from '../components/shared/KarmaCoin';
 import {
   ArrowLeft, MoreHorizontal, MapPin,
   Phone, Star, Navigation, FileText

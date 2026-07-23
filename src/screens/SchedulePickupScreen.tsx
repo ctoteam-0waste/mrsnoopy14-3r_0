@@ -24,15 +24,15 @@ const CARD_WIDTH = (Math.min(width, 900) - 40 - (CARD_MARGIN * 2 * COLS)) / COLS
 // backend exactly as written here and are matched there by exact string
 // (booking.service.js), so renaming anything here breaks booking + verify.
 const CATEGORIES = [
-  { id: '1', name: 'Phones & Computers', color: '#0ea5e9', icon: Smartphone },
+  { id: '5', name: 'Appliances & TV', color: '#8b5cf6', icon: Tv },
+  { id: '1', name: 'E-Waste (Phones & Computers)', color: '#0ea5e9', icon: Smartphone },
   { id: '2', name: 'Mixed E-Waste', color: '#14b8a6', icon: Cable },
-  { id: '3', name: 'Glass', color: '#10b981', icon: Wine },
-  { id: '4', name: 'Paper', color: '#84cc16', icon: FileText },
-  { id: '5', name: 'Home Appliances & Electronics', color: '#8b5cf6', icon: Tv },
-  { id: '6', name: 'Batteries', color: '#ef4444', icon: Battery },
-  { id: '7', name: 'Footwear', color: '#f59e0b', icon: ShoppingBag },
-  { id: '8', name: 'Metals', color: '#64748b', icon: Magnet },
   { id: '9', name: 'Plastic', color: '#3b82f6', icon: Droplets },
+  { id: '4', name: 'Paper', color: '#84cc16', icon: FileText },
+  { id: '8', name: 'Metal', color: '#64748b', icon: Magnet },
+  { id: '3', name: 'Glass', color: '#10b981', icon: Wine },
+  { id: '6', name: 'Batteries', color: '#ef4444', icon: Battery },
+  { id: '7', name: 'Shoes', color: '#f59e0b', icon: ShoppingBag },
   { id: '10', name: 'Textile Waste', color: '#ec4899', icon: Shirt },
 ];
 
