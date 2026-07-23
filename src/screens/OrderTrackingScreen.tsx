@@ -6,7 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   ArrowLeft, Phone, HelpCircle, Star,
-  CheckCircle2, Circle, Loader2, XCircle
+  CheckCircle2, Circle, XCircle
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
 import { showAlert } from '../utils/alert';
@@ -337,10 +337,10 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       ) : (
         <View style={[styles.agentCard, { backgroundColor: '#f0fdf4', borderColor: '#86efac', borderWidth: 1 }]}>
           <View style={[styles.agentAvatar, { backgroundColor: '#dcfce7' }]}>
-            <Loader2 size={20} color="#15803d" />
+            <ActivityIndicator size="small" color="#15803d" />
           </View>
           <View style={styles.agentInfo}>
-            <Text style={[styles.agentName, { color: '#166534', fontWeight: '700' }]}>Finding Agent...</Text>
+            <Text style={[styles.agentName, { color: '#166534', fontWeight: '700' }]}>Finding agent...</Text>
             <Text style={styles.agentDistance}>Searching for nearest active recycling partner</Text>
           </View>
         </View>
