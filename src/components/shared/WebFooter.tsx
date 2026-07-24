@@ -58,7 +58,7 @@ export function WebFooter() {
                 </View>
                 <View style={s.contactRow}>
                   <MapPin size={13} color="#94a3b8" />
-                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122051</Text>
+                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122503</Text>
                 </View>
               </View>
             </View>
@@ -84,7 +84,7 @@ export function WebFooter() {
                 </View>
                 <View style={s.contactRow}>
                   <MapPin size={14} color="#94a3b8" />
-                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122051</Text>
+                  <Text style={s.contactText}>PLOT 62, Sector 8, Imt Manesar, Gurugram, Haryana 122503</Text>
                 </View>
               </View>
             </>

@@ -179,7 +179,7 @@ export const TERMS: LegalDoc = {
       body: ['For any questions or complaints about these terms or the service:'],
       bullets: [
         'Email: info@0waste.co.in',
-        'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
+        'Address: 3R Zero Waste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
         'In-app: use the “Need help?” option',
       ],
     },
@@ -318,7 +318,7 @@ export const PRIVACY: LegalDoc = {
       body: ['For any privacy questions or requests:'],
       bullets: [
         'Email: info@0waste.co.in',
-        'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
+        'Address: 3R Zero Waste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
       ],
     },
   ],
@@ -363,7 +363,7 @@ export const DATA_DELETION: LegalDoc = {
       body: ['For questions about this process:'],
       bullets: [
         'Email: info@0waste.co.in',
-        'Address: 3R Zero Waste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503',
+        'Address: 3R Zero Waste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503',
       ],
     },
   ],

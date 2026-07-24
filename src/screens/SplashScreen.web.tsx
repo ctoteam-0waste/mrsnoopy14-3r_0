@@ -461,7 +461,7 @@ export function SplashScreen({ navigation, route }: any) {
                 </TouchableOpacity>
                 <View style={s.footerContactRow}>
                   <MapPin size={14} color="#4ade80" style={{ marginTop: 2 }} />
-                  <Text style={[s.footerLink, { flex: 1 }]}>Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503</Text>
+                  <Text style={[s.footerLink, { flex: 1 }]}>Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122503</Text>
                 </View>
               </View>
             </View>
