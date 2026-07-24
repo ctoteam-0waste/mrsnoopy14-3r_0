@@ -205,7 +205,7 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={s.navTabText}>Home</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollToSection('howItWorks')}>
-                <Text style={s.navTabText}>How it works</Text>
+                <Text style={s.navTabText}>Flow</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollToSection('rewards')}>
                 <Text style={s.navTabText}>Rewards</Text>
@@ -321,7 +321,7 @@ export function SplashScreen({ navigation, route }: any) {
         {/* ── HOW IT WORKS ── */}
         <View style={s.section} onLayout={(e) => { sectionY.current.howItWorks = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
-            <Text style={s.sectionLabel}>HOW IT WORKS</Text>
+            <Text style={s.sectionLabel}>FLOW</Text>
             <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Simple actions. Meaningful rewards.</Text>
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
@@ -430,7 +430,7 @@ export function SplashScreen({ navigation, route }: any) {
               <View style={s.footerLinks}>
                 <Text style={s.footerLinkTitle}>Product</Text>
                 <TouchableOpacity onPress={() => scrollToSection('howItWorks')}>
-                  <Text style={s.footerLink}>How it works</Text>
+                  <Text style={s.footerLink}>Flow</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => scrollToSection('rewards')}>
                   <Text style={s.footerLink}>Rewards</Text>
