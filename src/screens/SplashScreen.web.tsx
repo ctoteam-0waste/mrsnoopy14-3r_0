@@ -245,7 +245,7 @@ export function SplashScreen({ navigation, route }: any) {
             </Text>
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
               Every sustainable action deserves recognition. KarmaVer$e transforms your everyday
-              eco-friendly choices into KarmaCoins that unlock real rewards — while creating
+              eco-friendly choices into KarmaCoins that unlock real rewards 🎁 while creating
               measurable environmental impact.
             </Text>
 
