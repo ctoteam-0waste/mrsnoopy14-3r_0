@@ -29,11 +29,17 @@ try {
   });
 } catch (_) {}
 
-// Extract referral code from deep link URL
-// Handles: karmacoin://r/KARMA-XXXXXX  and  https://karmacoin.app/r/KARMA-XXXXXX
+// Extract a referral code from a deep link URL.
+// Path style:  karmacoin://r/CODE,  https://karmaverse.earth/r/CODE
+// Query style: https://karmaverse.earth/login?ref=CODE  (what the share sheet builds)
+// Codes look like NAME-KARMA-XXXX — letters, digits and hyphens, not just KARMA-*.
 function extractReferralCode(url: string): string | null {
-  const match = url.match(/\/r\/(KARMA-[A-Z0-9]+)/i);
-  return match ? match[1].toUpperCase() : null;
+  if (!url) return null;
+  const q = url.match(/[?&]ref=([A-Za-z0-9-]+)/);
+  if (q) return q[1].toUpperCase();
+  const p = url.match(/\/r\/([A-Za-z0-9-]+)/);
+  if (p) return p[1].toUpperCase();
+  return null;
 }
 
 export default function App() {

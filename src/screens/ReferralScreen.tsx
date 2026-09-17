@@ -16,14 +16,16 @@ export function ReferralScreen({ navigation }: any) {
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
 
-  // Link straight to the frontend register page with ?ref= prefilled. (The backend
-  // /r/:code redirect route isn't live yet — "Cannot GET" — so we skip it; the
-  // register screen reads ?ref= and validates on load anyway.) Origin-aware so the
-  // testing site shares its own URL, production shares karmaverse.earth.
+  // Link straight to the login/signup page with ?ref= prefilled. Must point at a real
+  // route: /login is in the router, /register is NOT (it resolved to NotFound, so the
+  // code never reached the signup form). The Login screen reads ?ref= and validates on
+  // load, and deepLink.capturePendingDeepLink() also stashes the code before the router
+  // rewrites the URL. Origin-aware so the testing site shares its own URL, production
+  // shares karmaverse.earth.
   const frontendOrigin = (Platform.OS === 'web' && typeof window !== 'undefined' && window.location?.origin)
     ? window.location.origin
     : 'https://karmaverse.earth';
-  const shareUrl = referralCode ? `${frontendOrigin}/register?ref=${referralCode}` : `${frontendOrigin}/`;
+  const shareUrl = referralCode ? `${frontendOrigin}/login?ref=${referralCode}` : `${frontendOrigin}/`;
   const shareMsg = `Join KarmaVer$e and we both earn 1,000 KarmaCoins XP! 🌱 Use my referral code ${referralCode}`;
 
   const copyLink = () => {

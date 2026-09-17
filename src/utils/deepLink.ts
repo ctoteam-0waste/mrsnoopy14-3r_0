@@ -1,9 +1,15 @@
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Remembers a protected URL the user landed on while logged out (e.g. the email
 // "Track pickup" link -> /OrderTracking?bookingId=...), so that after they log in
 // we can send them straight to it instead of dropping them on the dashboard.
 let pendingUrl: string | null = null;
+
+// True when the app was opened via a referral link (?ref=CODE). Used to send a
+// logged-out visitor to Login (the signup form) even when the link's path has no
+// matching route and would otherwise resolve to NotFound.
+let pendingReferral = false;
 
 // Authenticated routes worth returning to after login. Path is matched
 // case-insensitively against window.location.pathname.
@@ -24,10 +30,28 @@ const PROTECTED = [
 // the current URL is a protected route on web.
 export function capturePendingDeepLink(): void {
   if (Platform.OS !== 'web' || typeof window === 'undefined') return;
+
+  // Referral link opened while logged out. The share link is /login?ref=CODE (older
+  // links used /register?ref=CODE, which has no route and lands on NotFound). Grab the
+  // code here, before the router rewrites the URL and drops the query string, and store
+  // it under the same key the signup form reads. Also flag it so onReady can send the
+  // user to Login regardless of the path they arrived on.
+  try {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (ref && ref.trim()) {
+      pendingReferral = true;
+      AsyncStorage.setItem('pendingReferralCode', ref.trim().toUpperCase()).catch(() => {});
+    }
+  } catch (_) { /* URL not parseable */ }
+
   const path = (window.location.pathname || '').replace(/\/+$/, '').toLowerCase();
   if (PROTECTED.some((p) => path === p || path.startsWith(p + '/'))) {
     pendingUrl = window.location.pathname + window.location.search;
   }
+}
+
+export function hasPendingReferral(): boolean {
+  return pendingReferral;
 }
 
 export function clearPendingDeepLink(): void {

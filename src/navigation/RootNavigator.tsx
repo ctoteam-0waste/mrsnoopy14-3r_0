@@ -26,7 +26,7 @@ import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { TabNavigator } from './TabNavigator';
 import { navigationRef } from './navRef';
-import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink } from '../utils/deepLink';
+import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
 
 // Runs at import, before the NavigationContainer resolves the URL — remembers a
 // protected deep link (e.g. an email "Track pickup" link) opened while logged out,
@@ -160,10 +160,12 @@ export function RootNavigator() {
       linking={linking}
       documentTitle={{ enabled: false }}
       onReady={() => {
-        // A logged-out user who opened a protected email/share link resolves to
-        // NotFound (that path isn't in the logged-out link map). Send them to
-        // Login instead — after login, consumePendingDeepLink returns them to it.
-        if (!isLoggedIn && hasPendingDeepLink()) {
+        // A logged-out user who opened a protected email/share link, or a referral
+        // link (?ref=), resolves to NotFound (those paths aren't in the logged-out
+        // link map). Send them to Login instead — after login, consumePendingDeepLink
+        // returns them to a protected link, and the signup form reads the captured
+        // referral code.
+        if (!isLoggedIn && (hasPendingDeepLink() || hasPendingReferral())) {
           navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
         }
         routeNameRef.current = navRef.current?.getCurrentRoute()?.name;
