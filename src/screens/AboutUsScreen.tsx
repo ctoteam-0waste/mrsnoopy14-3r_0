@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Target, Eye, Recycle, Users, Truck, Coins, Sparkles } from 'lucide-react-native';
 import { useTheme, makeStyles } from '../theme';
-import { ThemeToggle } from '../components/shared/ThemeToggle';
 
 const STATS = [
   { value: '1.85L+', label: 'Citizens reached' },
@@ -93,14 +92,6 @@ export function AboutUsScreen({ navigation }: any) {
             </View>
           </View>
         ))}
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Appearance</Text>
-          <Text style={[styles.cardText, { marginTop: 6, marginBottom: 14 }]}>
-            Choose how the app looks. System follows your device setting.
-          </Text>
-          <ThemeToggle />
-        </View>
 
         <TouchableOpacity style={styles.companyLink} onPress={() => Linking.openURL('https://0waste.co.in/')}>
           <Text style={styles.companyLinkText}>Learn more about 3RZeroWaste at 0waste.co.in ↗</Text>

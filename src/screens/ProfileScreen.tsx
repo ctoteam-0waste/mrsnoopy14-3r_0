@@ -8,6 +8,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
 import { UserAvatar } from '../components/shared/UserAvatar';
 import { Avatar } from '../components/shared/Avatar';
+import { ThemeToggle } from '../components/shared/ThemeToggle';
 import { AvatarPickerModal } from '../components/shared/AvatarPickerModal';
 import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
 import { addressService, SavedAddress, AddressLabel } from '../services/address';
@@ -737,6 +738,12 @@ export function ProfileScreen({ navigation }: any) {
                 />
                 <View style={styles.divider} />
                 <OptionRow icon={<Users size={18} color="#16a34a" />} bg="#f0fdf4" title="My network" sub="Referrals & downstream impact" onPress={() => navigation.navigate('Referral')} />
+              </View>
+
+              {/* Appearance */}
+              <Text style={styles.sectionTitle}>Appearance</Text>
+              <View style={{ marginBottom: 20 }}>
+                <ThemeToggle />
               </View>
 
               {/* General Options */}
