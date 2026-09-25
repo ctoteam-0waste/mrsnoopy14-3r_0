@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -7,8 +7,11 @@ import { Package, Truck, CheckCircle2, ChevronRight, Clock, Star } from 'lucide-
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { RatingModal } from '../components/shared/RatingModal';
 import { bookingService } from '../services/booking';
+import { useTheme, makeStyles } from '../theme';
 
 export function OrdersScreen({ navigation, route }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState<'Active' | 'History'>(route?.params?.tab === 'History' ? 'History' : 'Active');
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -132,12 +135,12 @@ export function OrdersScreen({ navigation, route }: any) {
 
           {isLoading ? (
              <View style={{ marginTop: 40, alignItems: 'center' }}>
-               <ActivityIndicator size="large" color="#16a34a" />
-               <Text style={{ marginTop: 12, color: '#64748b' }}>Loading your pickups...</Text>
+               <ActivityIndicator size="large" color={colors.primary} />
+               <Text style={{ marginTop: 12, color: colors.textMuted }}>Loading your pickups...</Text>
              </View>
           ) : filteredOrders.length === 0 ? (
             <View style={styles.emptyState}>
-              <Package size={56} color="#cbd5e1" />
+              <Package size={56} color={colors.textFaint} />
               <Text style={styles.emptyText}>No {activeTab.toLowerCase()} pickups found.</Text>
               {activeTab === 'Active' && (
                 <TouchableOpacity style={styles.scheduleBtn} onPress={() => navigation.navigate('SchedulePickup')}>
@@ -172,7 +175,7 @@ export function OrdersScreen({ navigation, route }: any) {
 
                   <View style={styles.cardBody}>
                     <View style={styles.iconBox}>
-                      <Package size={24} color="#16a34a" />
+                      <Package size={24} color={colors.primary} />
                     </View>
                     <View style={styles.infoBox}>
                       <Text style={styles.orderType}>{order.type}</Text>
@@ -188,7 +191,7 @@ export function OrdersScreen({ navigation, route }: any) {
                         <Text style={styles.creditsValue}>+{order.credits}</Text>
                       </View>
                     </View>
-                    <ChevronRight size={20} color="#cbd5e1" />
+                    <ChevronRight size={20} color={colors.textFaint} />
                   </View>
 
                   {/* Rate agent button — only on completed unrated orders in History tab */}
@@ -243,9 +246,9 @@ export function OrdersScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  rootContainer: { flex: 1, backgroundColor: '#f0fdf6' },
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  rootContainer: { flex: 1, backgroundColor: c.bg },
+  container: { flex: 1, backgroundColor: c.bg },
   header: {
     paddingTop: 60,
     paddingHorizontal: 20,
@@ -274,31 +277,31 @@ const styles = StyleSheet.create({
   tabTextActive: { color: '#064e3b', fontWeight: '900' },
 
   scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 100, gap: 16, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  
+
   emptyState: { alignItems: 'center', justifyContent: 'center', marginTop: 80 },
-  emptyText: { color: '#94a3b8', marginTop: 16, fontSize: 16, fontWeight: '600' },
-  scheduleBtn: { marginTop: 24, backgroundColor: '#15803d', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 100, shadowColor: '#16a34a', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
-  scheduleBtnText: { color: 'white', fontWeight: '800', fontSize: 15 },
-  
-  orderCard: { backgroundColor: 'white', borderRadius: 24, padding: 18, elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 20, borderWidth: 1, borderColor: '#f1f5f9' },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottomWidth: 1, borderBottomColor: '#f1f5f9', paddingBottom: 14 },
-  orderId: { fontSize: 14, color: '#64748b', fontWeight: '800', letterSpacing: 0.5 },
+  emptyText: { color: c.textFaint, marginTop: 16, fontSize: 16, fontWeight: '600' },
+  scheduleBtn: { marginTop: 24, backgroundColor: c.primary, paddingHorizontal: 24, paddingVertical: 14, borderRadius: 100, shadowColor: c.primary, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 },
+  scheduleBtnText: { color: c.onPrimary, fontWeight: '800', fontSize: 15 },
+
+  orderCard: { backgroundColor: c.surface, borderRadius: 24, padding: 18, elevation: 6, shadowColor: c.shadow, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.08, shadowRadius: 20, borderWidth: 1, borderColor: c.border },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, borderBottomWidth: 1, borderBottomColor: c.border, paddingBottom: 14 },
+  orderId: { fontSize: 14, color: c.textMuted, fontWeight: '800', letterSpacing: 0.5 },
   statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 10, paddingVertical: 6, borderRadius: 100, gap: 6 },
   statusText: { fontSize: 12, fontWeight: '800' },
-  
+
   cardBody: { flexDirection: 'row', alignItems: 'center', marginBottom: 16, gap: 16 },
-  iconBox: { width: 52, height: 52, backgroundColor: '#f0fdf4', borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  iconBox: { width: 52, height: 52, backgroundColor: c.primarySoft, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   infoBox: { flex: 1 },
-  orderType: { fontSize: 16, fontWeight: '800', color: '#0f172a', marginBottom: 6 },
-  orderDate: { fontSize: 13, color: '#64748b', fontWeight: '600' },
-  
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f8fafc', padding: 14, borderRadius: 16 },
+  orderType: { fontSize: 16, fontWeight: '800', color: c.text, marginBottom: 6 },
+  orderDate: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
+
+  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: c.surfaceAlt, padding: 14, borderRadius: 16 },
   creditsBox: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  creditsLabel: { fontSize: 13, color: '#64748b', fontWeight: '700' },
+  creditsLabel: { fontSize: 13, color: c.textMuted, fontWeight: '700' },
   creditsRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  creditsValue: { fontSize: 16, fontWeight: '900', color: '#16a34a' },
+  creditsValue: { fontSize: 16, fontWeight: '900', color: c.primary },
   rateBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 12, backgroundColor: '#fffbeb', borderWidth: 1.5, borderColor: '#fcd34d', borderRadius: 12, paddingVertical: 10 },
   rateBtnText: { fontSize: 13, fontWeight: '800', color: '#d97706' },
-  ratedBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 12, backgroundColor: '#f0fdf4', borderRadius: 12, paddingVertical: 8 },
-  ratedBadgeText: { fontSize: 12, fontWeight: '700', color: '#16a34a' },
-});
+  ratedBadge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 12, backgroundColor: c.primarySoft, borderRadius: 12, paddingVertical: 8 },
+  ratedBadgeText: { fontSize: 12, fontWeight: '700', color: c.primary },
+}));

@@ -4,9 +4,9 @@
     "slug": "KarmaCredits-RN",
     "version": "1.0.0",
     "scheme": "karmacoin",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -19,7 +19,7 @@
     },
     "android": {
       "package": "com.karmacredits.app",
-      "versionCode": 6,
+      "versionCode": 7,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

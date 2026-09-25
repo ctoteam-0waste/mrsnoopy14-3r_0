@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Modal, Animated, Dimensions, Platform, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Animated, Dimensions, Platform, Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles } from 'lucide-react-native';
+import { useTheme, makeStyles } from '../theme';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
@@ -107,6 +108,7 @@ const FEATURES = [
 ];
 
 function FeatureCard({ feature, onPress }: { feature: typeof FEATURES[0], onPress: () => void }) {
+  const styles = useStyles();
   return (
     <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
       <LinearGradient colors={feature.bg} style={[styles.featureCard, { width: CARD_WIDTH }]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
@@ -142,6 +144,8 @@ function getGreeting(): string {
 }
 
 export function DashboardScreen({ navigation, route }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [userName, setUserName] = useState('Loading...');
   const [userGender, setUserGender] = useState<string | null>(null);
   const [avatarId, setAvatarId] = useState<string | null>(null);
@@ -368,7 +372,7 @@ export function DashboardScreen({ navigation, route }: any) {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f0fdf6' }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
 
     {/* Offline banner */}
     {isOffline && (
@@ -608,13 +612,13 @@ export function DashboardScreen({ navigation, route }: any) {
           <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Recent orders</Text>
           <TouchableOpacity style={styles.seeAllBtn} onPress={() => navigation.navigate('Orders')}>
             <Text style={styles.seeAllText}>See all</Text>
-            <ChevronRight size={14} color="#16a34a" />
+            <ChevronRight size={14} color={colors.primary} />
           </TouchableOpacity>
         </View>
         <View style={styles.ordersList}>
           {recentOrders.length === 0 ? (
             <View style={{ padding: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#9ca3af' }}>No recent orders.</Text>
+              <Text style={{ color: colors.textFaint }}>No recent orders.</Text>
             </View>
           ) : recentOrders.map((order) => {
             const sc = STATUS_COLOR[order.status] || STATUS_COLOR['Completed'];
@@ -622,7 +626,7 @@ export function DashboardScreen({ navigation, route }: any) {
               <TouchableOpacity key={order.id} style={styles.orderCard} activeOpacity={0.7}
                 onPress={() => navigation.navigate('Orders')}>
                 <View style={styles.orderIconBg}>
-                  <Package size={18} color="#16a34a" />
+                  <Package size={18} color={colors.primary} />
                 </View>
                 <View style={styles.orderContent}>
                   <View style={styles.orderRowJustify}>
@@ -652,7 +656,7 @@ export function DashboardScreen({ navigation, route }: any) {
           <Text style={[styles.sectionTitle, { marginBottom: 0 }]}>Knowledge hub</Text>
           <TouchableOpacity style={styles.seeAllBtn} onPress={() => navigation.navigate('KnowledgeHub')}>
             <Text style={styles.seeAllText}>More articles</Text>
-            <ChevronRight size={14} color="#16a34a" />
+            <ChevronRight size={14} color={colors.primary} />
           </TouchableOpacity>
         </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 16 }}>
@@ -683,7 +687,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   <Text style={styles.modalTitle}>{selectedFeature.title}</Text>
                 </View>
                 <TouchableOpacity onPress={() => setSelectedFeature(null)} style={styles.closeBtn}>
-                  <X size={20} color="#6b7280" />
+                  <X size={20} color={colors.textMuted} />
                 </TouchableOpacity>
               </View>
 
@@ -742,8 +746,8 @@ export function DashboardScreen({ navigation, route }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
   offlineBanner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: '#ef4444', paddingVertical: 10, paddingHorizontal: 16, zIndex: 99 },
   offlineText: { flex: 1, textAlign: 'center', fontSize: 13, fontWeight: '700', color: 'white' },
   header: { paddingHorizontal: 20, paddingTop: 60, paddingBottom: 24, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
@@ -770,10 +774,10 @@ const styles = StyleSheet.create({
   statTileLabel: { flex: 1, fontSize: 10, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
   statTileVal: { fontSize: 20, fontWeight: '900' },
   section: { paddingHorizontal: 20, marginTop: 24 },
-  sectionTitle: { fontSize: 16, fontWeight: '700', color: '#111827', marginBottom: 12 },
+  sectionTitle: { fontSize: 16, fontWeight: '700', color: c.text, marginBottom: 12 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   seeAllBtn: { flexDirection: 'row', alignItems: 'center' },
-  seeAllText: { fontSize: 12, color: '#16a34a', fontWeight: '600' },
+  seeAllText: { fontSize: 12, color: c.primary, fontWeight: '600' },
   actionsGrid: { flexDirection: 'row', gap: 12, justifyContent: 'space-between' },
   actionBtn: { flex: 1, padding: 12, borderRadius: 16, alignItems: 'center', gap: 8, position: 'relative' },
   actionIconBg: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
@@ -788,15 +792,15 @@ const styles = StyleSheet.create({
   impactLabel: { fontSize: 12, fontWeight: '600', color: '#374151' },
   impactSub: { fontSize: 10, fontWeight: '500', color: '#9ca3af', marginTop: 2 },
   ordersList: { gap: 12 },
-  orderCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: 'white', borderRadius: 16, elevation: 2 },
-  orderIconBg: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center' },
+  orderCard: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, backgroundColor: c.surface, borderRadius: 16, elevation: 2, borderWidth: 1, borderColor: c.border },
+  orderIconBg: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
   orderContent: { flex: 1 },
   orderRowJustify: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 },
-  orderTitle: { fontSize: 14, fontWeight: '700', color: '#111827' },
+  orderTitle: { fontSize: 14, fontWeight: '700', color: c.text },
   orderStatusBadge: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12 },
   orderStatusDot: { width: 6, height: 6, borderRadius: 3 },
   orderStatusText: { fontSize: 11, fontWeight: '600' },
-  orderSub: { fontSize: 12, color: '#9ca3af', fontWeight: '500' },
+  orderSub: { fontSize: 12, color: c.textFaint, fontWeight: '500' },
   orderCreditsBadge: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   orderCreditsText: { fontSize: 13, color: '#d97706', fontWeight: '700' },
   quizCard: { borderRadius: 24, padding: 20, overflow: 'hidden', elevation: 6, shadowColor: '#6d28d9', shadowOffset: {width: 0, height: 6}, shadowOpacity: 0.35, shadowRadius: 12, borderWidth: 1, borderColor: '#a855f7' },
@@ -818,11 +822,11 @@ const styles = StyleSheet.create({
   quizStreakCount: { fontSize: 18, fontWeight: '900', color: 'white' },
   quizStreakLabel: { fontSize: 13, fontWeight: '600', color: 'rgba(255,255,255,0.8)' },
   quizStreakTap: { fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.7)' },
-  articleCard: { width: 220, backgroundColor: 'white', borderRadius: 16, overflow: 'hidden', elevation: 2 },
+  articleCard: { width: 220, backgroundColor: c.surface, borderRadius: 16, overflow: 'hidden', elevation: 2, borderWidth: 1, borderColor: c.border },
   articleImgPlaceholder: { height: 120, width: '100%', alignItems: 'center', justifyContent: 'center' },
-  articleTitle: { padding: 12, fontSize: 14, fontWeight: '700', color: '#111827', paddingBottom: 4 },
-  articleSource: { paddingHorizontal: 12, paddingBottom: 12, fontSize: 11, color: '#6b7280', fontWeight: '500' },
-  discoverSub: { fontSize: 12, color: '#9ca3af', fontWeight: '600', flexShrink: 1, marginLeft: 8, textAlign: 'right' },
+  articleTitle: { padding: 12, fontSize: 14, fontWeight: '700', color: c.text, paddingBottom: 4 },
+  articleSource: { paddingHorizontal: 12, paddingBottom: 12, fontSize: 11, color: c.textMuted, fontWeight: '500' },
+  discoverSub: { fontSize: 12, color: c.textFaint, fontWeight: '600', flexShrink: 1, marginLeft: 8, textAlign: 'right' },
 
   // Feature Discovery Card Styles
   featureCard: { borderRadius: 24, padding: 20, height: 198, justifyContent: 'space-between', elevation: 6, shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.2, shadowRadius: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' },
@@ -839,17 +843,17 @@ const styles = StyleSheet.create({
   featureActionText: { fontSize: 11, fontWeight: '800' },
   
   // Modal Styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(15, 23, 42, 0.6)', justifyContent: 'flex-end' },
-  modalContent: { backgroundColor: 'white', borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40 },
+  modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: 'flex-end' },
+  modalContent: { backgroundColor: c.surface, borderTopLeftRadius: 32, borderTopRightRadius: 32, padding: 24, paddingBottom: 40 },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 },
   modalEmoji: { fontSize: 40, marginBottom: 8 },
-  modalTitle: { fontSize: 24, fontWeight: '900', color: '#111827', letterSpacing: -0.5 },
-  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#f3f4f6', alignItems: 'center', justifyContent: 'center' },
-  modalDesc: { fontSize: 15, color: '#4b5563', lineHeight: 24, marginBottom: 24 },
+  modalTitle: { fontSize: 24, fontWeight: '900', color: c.text, letterSpacing: -0.5 },
+  closeBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  modalDesc: { fontSize: 15, color: c.textMuted, lineHeight: 24, marginBottom: 24 },
   modalStepsContainer: { gap: 16, marginBottom: 32 },
   modalStepRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   stepCircle: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  modalStepText: { fontSize: 15, fontWeight: '600', color: '#374151', flex: 1 },
+  modalStepText: { fontSize: 15, fontWeight: '600', color: c.text, flex: 1 },
   modalBenefit: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 16, borderRadius: 16, borderWidth: 1 },
   modalBenefitText: { fontSize: 15, fontWeight: '800' },
   modalCta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 16, paddingVertical: 14, borderRadius: 100 },
@@ -865,4 +869,4 @@ const styles = StyleSheet.create({
   rewardCardEmoji: { fontSize: 26, marginBottom: 8 },
   rewardCardBrand: { color: 'white', fontSize: 12, fontWeight: '900', marginBottom: 2 },
   rewardCardLabel: { color: 'rgba(255,255,255,0.75)', fontSize: 10, fontWeight: '600', lineHeight: 13 },
-});
+}));

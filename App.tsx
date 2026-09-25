@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider } from './src/theme';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { UserSocketProvider } from './src/context/UserSocketContext';
 import { NotificationProvider } from './src/context/NotificationContext';
@@ -78,12 +79,14 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <NotificationProvider>
-        <UserSocketProvider>
-          <RootNavigator />
-          <AlertHost />
-        </UserSocketProvider>
-      </NotificationProvider>
+      <ThemeProvider>
+        <NotificationProvider>
+          <UserSocketProvider>
+            <RootNavigator />
+            <AlertHost />
+          </UserSocketProvider>
+        </NotificationProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

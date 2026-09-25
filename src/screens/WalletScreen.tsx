@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, StatusBar, ActivityIndicator, Platform, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform, Modal } from 'react-native';
+import { useTheme, makeStyles } from '../theme';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Flame, Snowflake, Recycle, Gift, Award, X, ChevronRight } from 'lucide-react-native';
@@ -25,6 +26,8 @@ function txSourceIcon(source?: string, isCredit?: boolean) {
 }
 
 export function WalletScreen({ navigation }: any) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   const [pickupCoins, setPickupCoins] = useState(0);
   const [rewardCoins, setRewardCoins] = useState(0);
   // lifetime = totalCoinsEarned — never decreases on redeem
@@ -119,7 +122,7 @@ export function WalletScreen({ navigation }: any) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#f0fdf6' }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar barStyle="light-content" />
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
@@ -238,31 +241,31 @@ export function WalletScreen({ navigation }: any) {
 
           {isLoading ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <ActivityIndicator size="large" color="#16a34a" />
-              <Text style={{ color: '#64748b', marginTop: 12 }}>Loading transactions...</Text>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={{ color: colors.textMuted, marginTop: 12 }}>Loading transactions...</Text>
             </View>
           ) : transactions.length === 0 ? (
             <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-              <History size={48} color="#cbd5e1" />
-              <Text style={{ color: '#94a3b8', marginTop: 12, fontWeight: '600' }}>No transactions yet.</Text>
-              <Text style={{ color: '#cbd5e1', fontSize: 12, marginTop: 4 }}>Complete a pickup to earn KarmaCoins XP!</Text>
+              <History size={48} color={colors.textFaint} />
+              <Text style={{ color: colors.textFaint, marginTop: 12, fontWeight: '600' }}>No transactions yet.</Text>
+              <Text style={{ color: colors.textFaint, fontSize: 12, marginTop: 4 }}>Complete a pickup to earn KarmaCoins XP!</Text>
             </View>
           ) : (
             <View style={styles.txList}>
               {transactions.map(formatTx).map((tx) => (
                 <View key={tx.id} style={styles.txCard}>
-                  <View style={[styles.txIconBg, { backgroundColor: tx.isCredit ? '#f0fdf4' : '#fef2f2' }]}>
+                  <View style={[styles.txIconBg, { backgroundColor: tx.isCredit ? colors.primarySoft : colors.dangerSoft }]}>
                     {txSourceIcon(tx.source, tx.isCredit)}
                   </View>
                   <View style={styles.txContent}>
                     <Text style={styles.txType}>{tx.type}</Text>
                     <View style={styles.txTimeRow}>
-                      <Clock size={12} color="#9ca3af" />
+                      <Clock size={12} color={colors.textFaint} />
                       <Text style={styles.txDate}>{tx.date}</Text>
                     </View>
                   </View>
                   <View style={styles.txAmountContainer}>
-                    <Text style={[styles.txAmount, { color: tx.isCredit ? '#16a34a' : '#e11d48' }]}>
+                    <Text style={[styles.txAmount, { color: tx.isCredit ? colors.primary : colors.danger }]}>
                       {tx.isCredit ? '+' : '-'}{tx.amount}
                     </Text>
                     <KarmaCoin size={14} />
@@ -284,21 +287,21 @@ export function WalletScreen({ navigation }: any) {
             <Text style={styles.sheetTitle}>Which coins to redeem?</Text>
 
             <TouchableOpacity style={styles.ledgerOption} onPress={() => goRedeem('pickup')} activeOpacity={0.85} disabled={pickupCoins < 10}>
-              <View style={[styles.ledgerIcon, { backgroundColor: '#f0fdf4' }]}><Recycle size={22} color="#16a34a" /></View>
+              <View style={[styles.ledgerIcon, { backgroundColor: colors.primarySoft }]}><Recycle size={22} color={colors.primary} /></View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.ledgerName}>Pickup coins</Text>
                 <Text style={styles.ledgerMeta}>{pickupCoins.toLocaleString()} · fixed {PICKUP_RATE}:1 · {formatRupees(rupeesFor(pickupCoins, PICKUP_RATE))}</Text>
               </View>
-              <ChevronRight size={20} color="#94a3b8" />
+              <ChevronRight size={20} color={colors.textFaint} />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.ledgerOption} onPress={() => goRedeem('reward')} activeOpacity={0.85} disabled={rewardCoins < 10}>
-              <View style={[styles.ledgerIcon, { backgroundColor: '#fffbeb' }]}><Gift size={22} color="#d97706" /></View>
+              <View style={[styles.ledgerIcon, { backgroundColor: colors.surfaceAlt }]}><Gift size={22} color="#d97706" /></View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.ledgerName}>Reward coins</Text>
                 <Text style={styles.ledgerMeta}>{rewardCoins.toLocaleString()} · {tierMeta.name} {rewardRate}:1 · {formatRupees(rupeesFor(rewardCoins, rewardRate))}</Text>
               </View>
-              <ChevronRight size={20} color="#94a3b8" />
+              <ChevronRight size={20} color={colors.textFaint} />
             </TouchableOpacity>
 
             <Text style={styles.sheetHint}>Pickup coins always redeem at the best rate. Reward coins improve as your streak grows.</Text>
@@ -312,7 +315,7 @@ export function WalletScreen({ navigation }: any) {
           <TouchableOpacity style={styles.sheet} activeOpacity={1}>
             <View style={styles.sheetTitleRow}>
               <Text style={styles.sheetTitle}>Streak rewards</Text>
-              <TouchableOpacity onPress={() => setTierModalVisible(false)}><X size={22} color="#64748b" /></TouchableOpacity>
+              <TouchableOpacity onPress={() => setTierModalVisible(false)}><X size={22} color={colors.textMuted} /></TouchableOpacity>
             </View>
             <Text style={styles.sheetHint}>
               Do a pickup, quiz, or referral any day to keep your streak. The longer it runs, the more your
@@ -343,8 +346,8 @@ export function WalletScreen({ navigation }: any) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f0fdf6' },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg },
 
   header: {
     paddingHorizontal: 20,
@@ -403,50 +406,50 @@ const styles = StyleSheet.create({
   freezeBtnText: { color: 'white', fontWeight: '800', fontSize: 13 },
 
   actionRow: { flexDirection: 'row', paddingHorizontal: 16, gap: 10, marginTop: 20, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 100, borderWidth: 1.5, backgroundColor: 'white' },
+  actionBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 100, borderWidth: 1.5, backgroundColor: c.surface },
   actionBtnGreen: { borderColor: '#86efac' },
   actionBtnAmber: { borderColor: '#fcd34d' },
   actionBtnRed: { borderColor: '#fda4af' },
   actionLabel: { fontWeight: '800', fontSize: 13 },
 
   historySection: { paddingHorizontal: 16, marginTop: 28, marginBottom: 32, maxWidth: 800, width: '100%', alignSelf: 'center' },
-  sectionTitle: { fontSize: 18, fontWeight: '800', color: '#0f172a', marginBottom: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: '800', color: c.text, marginBottom: 16 },
 
   txList: { gap: 10 },
-  txCard: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: 'white', borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
+  txCard: { flexDirection: 'row', alignItems: 'center', padding: 14, backgroundColor: c.surface, borderRadius: 16, borderWidth: 1, borderColor: c.border, elevation: 2, shadowColor: c.shadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 8 },
   txIconBg: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   txContent: { flex: 1, marginLeft: 12 },
-  txType: { fontSize: 14, fontWeight: '800', color: '#0f172a', marginBottom: 3 },
+  txType: { fontSize: 14, fontWeight: '800', color: c.text, marginBottom: 3 },
   txTimeRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  txDate: { fontSize: 11, color: '#64748b', fontWeight: '500' },
+  txDate: { fontSize: 11, color: c.textMuted, fontWeight: '500' },
   txAmountContainer: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   txAmount: { fontSize: 15, fontWeight: '900' },
 
   // Modals (ledger picker + tier ladder)
   // Web: centered dialog. Mobile: bottom sheet.
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(15,23,42,0.55)', justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
+  modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 20 : 0 },
   sheet: {
-    backgroundColor: 'white',
+    backgroundColor: c.surface,
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
     borderBottomLeftRadius: Platform.OS === 'web' ? 24 : 0,
     borderBottomRightRadius: Platform.OS === 'web' ? 24 : 0,
     padding: 22, paddingBottom: Platform.OS === 'web' ? 22 : 34,
     maxWidth: 560, width: '100%', alignSelf: 'center',
   },
-  sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: '#e2e8f0', alignSelf: 'center', marginBottom: 16 },
+  sheetHandle: { width: 44, height: 5, borderRadius: 3, backgroundColor: c.border, alignSelf: 'center', marginBottom: 16 },
   sheetTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  sheetTitle: { fontSize: 18, fontWeight: '900', color: '#0f172a', marginBottom: 4 },
-  sheetHint: { fontSize: 12.5, color: '#64748b', fontWeight: '600', lineHeight: 18, marginTop: 6 },
+  sheetTitle: { fontSize: 18, fontWeight: '900', color: c.text, marginBottom: 4 },
+  sheetHint: { fontSize: 12.5, color: c.textMuted, fontWeight: '600', lineHeight: 18, marginTop: 6 },
 
-  ledgerOption: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: '#f1f5f9', backgroundColor: '#fbfdff', marginTop: 12 },
+  ledgerOption: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: c.border, backgroundColor: c.surfaceAlt, marginTop: 12 },
   ledgerIcon: { width: 46, height: 46, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  ledgerName: { fontSize: 15, fontWeight: '800', color: '#0f172a', marginBottom: 2 },
-  ledgerMeta: { fontSize: 12, color: '#64748b', fontWeight: '600' },
+  ledgerName: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 2 },
+  ledgerMeta: { fontSize: 12, color: c.textMuted, fontWeight: '600' },
 
   tierRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1, borderColor: 'transparent', gap: 10 },
   tierDot: { width: 9, height: 9, borderRadius: 5 },
-  tierName: { fontSize: 14, fontWeight: '800', color: '#0f172a', width: 78 },
-  tierDays: { fontSize: 12, color: '#94a3b8', fontWeight: '600', flex: 1 },
-  tierRate: { fontSize: 14, fontWeight: '900', color: '#334155' },
-  tierFooter: { fontSize: 12.5, color: '#15803d', fontWeight: '700', marginTop: 14, textAlign: 'center' },
-});
+  tierName: { fontSize: 14, fontWeight: '800', color: c.text, width: 78 },
+  tierDays: { fontSize: 12, color: c.textFaint, fontWeight: '600', flex: 1 },
+  tierRate: { fontSize: 14, fontWeight: '900', color: c.text },
+  tierFooter: { fontSize: 12.5, color: c.primary, fontWeight: '700', marginTop: 14, textAlign: 'center' },
+}));
