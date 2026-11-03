@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
-import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera } from 'lucide-react-native';
+import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera, UserX, SlidersHorizontal } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
 import { UserAvatar } from '../components/shared/UserAvatar';
@@ -16,6 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { StateCityFields } from '../components/shared/StateCityFields';
 import { profileService } from '../services/profile';
+import { accountService } from '../services/account';
 import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { authService } from '../services/auth';
@@ -64,11 +65,6 @@ function SelectionPills({ options, selected, onSelect }: { options: string[], se
 
 // Social logins (Facebook/Google) provide no phone, so the backend stores a dummy
 // number. Anything that isn't a real Indian mobile counts as "not added yet".
-// Hidden until the backend ships DELETE /api/v1/users/account (it returns 404 today,
-// so the button could only ever fail). Flip to true once it's live — Apple requires
-// in-app account deletion before the iOS app can pass review.
-const ACCOUNT_DELETION_LIVE = false;
-
 const cleanPhone = (p?: string) => String(p || '').replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
 const isRealPhone = (p?: string) => /^[6-9]\d{9}$/.test(cleanPhone(p));
 
@@ -81,7 +77,15 @@ export function ProfileScreen({ navigation }: any) {
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [avatarId, setAvatarId] = useState<string | null>(null);
   const [avatarPickerVisible, setAvatarPickerVisible] = useState(false);
-  const [deletingAccount, setDeletingAccount] = useState(false);
+  // These rows show only once the backend serves them: /account/status 404s until
+  // the lifecycle flag is on, and older backends have no notification preferences.
+  const [accountLifecycleLive, setAccountLifecycleLive] = useState(false);
+  const [notificationPrefsLive, setNotificationPrefsLive] = useState(false);
+
+  useEffect(() => {
+    accountService.getStatus().then(() => setAccountLifecycleLive(true)).catch(() => {});
+    accountService.getNotificationPrefs().then(() => setNotificationPrefsLive(true)).catch(() => {});
+  }, []);
 
   // Fetch Profile on Mount
   // Refetch on every focus (not just mount) so a phone verified elsewhere — e.g.
@@ -152,33 +156,6 @@ export function ProfileScreen({ navigation }: any) {
     setAvatarId(id);
     setStoredAvatarId(id);
     profileService.updateAvatar(id).catch(() => {});
-  };
-
-  // Permanently delete the account (Apple + DPDP requirement). Two-step confirm so
-  // it can never be triggered by an accidental tap, then sign out to Login.
-  const confirmDeleteAccount = () => {
-    showAlert(
-      'Delete account?',
-      'This permanently deletes your account, KarmaCoins XP balance, streak, and pickup history. This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: runDeleteAccount },
-      ]
-    );
-  };
-
-  const runDeleteAccount = async () => {
-    if (deletingAccount) return;
-    setDeletingAccount(true);
-    try {
-      await profileService.deleteAccount();
-      await authService.logout();
-      navigation.replace('Login');
-      showAlert('Account deleted', 'Your account and data have been removed.');
-    } catch (error: any) {
-      setDeletingAccount(false);
-      showAlert('Could not delete account', error?.response?.data?.message || 'Please try again, or contact support.');
-    }
   };
 
   // Modal State
@@ -777,6 +754,12 @@ export function ProfileScreen({ navigation }: any) {
                 />
                 <View style={styles.divider} />
                 <OptionRow icon={<Users size={18} color="#16a34a" />} bg="#f0fdf4" title="My network" sub="Referrals & downstream impact" onPress={() => navigation.navigate('Referral')} />
+                {accountLifecycleLive && (
+                  <>
+                    <View style={styles.divider} />
+                    <OptionRow icon={<UserX size={18} color="#dc2626" />} bg="#fef2f2" title="Deactivate or delete account" sub="Take a break, or delete your account" onPress={() => navigation.navigate('ManageAccount')} />
+                  </>
+                )}
               </View>
 
               {/* Appearance */}
@@ -800,13 +783,25 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={styles.divider} />
                   </>
                 )}
+                {notificationPrefsLive && (
+                  <>
+                    <OptionRow
+                      icon={<SlidersHorizontal size={18} color="#0284c7" />}
+                      bg="#f0f9ff"
+                      title="Notification preferences"
+                      sub="Offers and updates by push, email and SMS"
+                      onPress={() => navigation.navigate('NotificationSettings')}
+                    />
+                    <View style={styles.divider} />
+                  </>
+                )}
                 <OptionRow
                   icon={<HeartHandshake size={18} color={colors.textMuted} />}
                   bg={colors.surfaceAlt}
                   title="Help & support"
                   onPress={() => showAlert(
                     'Help & support',
-                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'
+                    'Reach out to us anytime:\n\nEmail: info@0waste.co.in\nAddress: Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'
                   )}
                 />
                 <View style={styles.divider} />
@@ -825,25 +820,6 @@ export function ProfileScreen({ navigation }: any) {
                 <LogOut size={18} color="#ef4444" />
                 <Text style={styles.logoutText}>Log out</Text>
               </TouchableOpacity>
-
-              {/* Delete account — permanent, required by Apple / DPDP */}
-              {ACCOUNT_DELETION_LIVE && (
-                <TouchableOpacity
-                  style={styles.deleteAccountBtn}
-                  onPress={confirmDeleteAccount}
-                  disabled={deletingAccount}
-                  activeOpacity={0.7}
-                >
-                  {deletingAccount ? (
-                    <ActivityIndicator size="small" color={colors.textFaint} />
-                  ) : (
-                    <>
-                      <Trash2 size={16} color={colors.textFaint} />
-                      <Text style={styles.deleteAccountText}>Delete account</Text>
-                    </>
-                  )}
-                </TouchableOpacity>
-              )}
             </>
           )}
         </View>
@@ -1452,8 +1428,6 @@ const useStyles = makeStyles((c) => ({
   /* Logout */
   logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, backgroundColor: c.surface, paddingVertical: 16, borderRadius: 20, borderWidth: 1, borderColor: '#fecaca', marginBottom: 12 },
   logoutText: { color: '#ef4444', fontSize: 15, fontWeight: '800' },
-  deleteAccountBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingVertical: 12, marginBottom: 20 },
-  deleteAccountText: { color: c.textFaint, fontSize: 13.5, fontWeight: '700' },
 
   /* Modal Styles (Zomato/Swiggy Style) */
   modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: Platform.OS === 'web' ? 'center' : 'flex-end', alignItems: 'center', padding: Platform.OS === 'web' ? 16 : 0 },

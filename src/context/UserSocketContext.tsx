@@ -4,6 +4,7 @@ import { getToken } from '../utils/tokenStore';
 import { useNotifications } from './NotificationContext';
 import { BACKEND_BASE } from '../services/api';
 import { trackPickupCompleted } from '../utils/analytics';
+import { FORCE_LOGOUT_CODES, forceLogout } from '../utils/forceLogout';
 
 const SOCKET_URL = BACKEND_BASE;
 
@@ -81,9 +82,17 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
       setIsConnected(false);
     });
 
-    socket.on('connect_error', (err) => {
+    socket.on('connect_error', (err: any) => {
       console.log('[UserSocket] Error:', err.message);
       setIsConnected(false);
+      // The backend drops live sockets when the account is deactivated or deleted
+      // elsewhere; the reconnect then fails with one of these codes. Stop retrying
+      // with the dead token and sign out.
+      const code = err?.data?.code;
+      if (FORCE_LOGOUT_CODES.has(code)) {
+        socket.disconnect();
+        forceLogout(code);
+      }
     });
 
     socket.on('BOOKING_ACCEPTED', (data: any) => {

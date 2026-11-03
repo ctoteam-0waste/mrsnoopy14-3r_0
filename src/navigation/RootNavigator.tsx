@@ -70,6 +70,8 @@ const RedeemScreen = lazyScreen(() => import('../screens/RedeemScreen'), (m) => 
 const RedeemHistoryScreen = lazyScreen(() => import('../screens/RedeemHistoryScreen'), (m) => m.RedeemHistoryScreen);
 const DonationScreen = lazyScreen(() => import('../screens/DonationScreen'), (m) => m.DonationScreen);
 const TransferScreen = lazyScreen(() => import('../screens/TransferScreen'), (m) => m.TransferScreen);
+const ManageAccountScreen = lazyScreen(() => import('../screens/ManageAccountScreen'), (m) => m.ManageAccountScreen);
+const NotificationSettingsScreen = lazyScreen(() => import('../screens/NotificationSettingsScreen'), (m) => m.NotificationSettingsScreen);
 
 export function RootNavigator() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -165,6 +167,10 @@ export function RootNavigator() {
             RedeemHistory: 'RedeemHistory',
             Donation: 'Donation',
             Transfer: 'Transfer',
+            // Public "delete my account" URL for the Play Store listing:
+            // /ManageAccount?mode=delete (logged-out visitors sign in first).
+            ManageAccount: 'ManageAccount',
+            NotificationSettings: 'NotificationSettings',
             AboutUs: 'AboutUs',
             Feedback: 'feedback',
             Unsubscribe: 'unsubscribe',
@@ -231,6 +237,8 @@ export function RootNavigator() {
         <Stack.Screen name="RedeemHistory" component={RedeemHistoryScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
         <Stack.Screen name="Transfer" component={TransferScreen} />
+        <Stack.Screen name="ManageAccount" component={ManageAccountScreen} />
+        <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
         <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />

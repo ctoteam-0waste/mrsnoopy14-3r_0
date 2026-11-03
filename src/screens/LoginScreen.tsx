@@ -19,6 +19,17 @@ import { LaunchConfetti } from '../components/shared/LaunchConfetti';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
+import { ScheduledDeletionModal } from '../components/shared/ScheduledDeletionModal';
+
+// Why the user was signed out (forceLogout passes the backend code as `reason`).
+const SIGNED_OUT_REASONS: Record<string, [string, string]> = {
+  ACCOUNT_DEACTIVATED: ['Account deactivated', 'Your account is deactivated. Sign in to turn it back on.'],
+  ACCOUNT_PENDING_DELETION: ['Account scheduled for deletion', 'Your account is scheduled for deletion. Sign in to restore it.'],
+  ACCOUNT_BEING_DELETED: ['Account deleted', 'This account has been deleted.'],
+  ACCOUNT_DELETED: ['Account deleted', 'This account has been deleted.'],
+  SESSION_REVOKED: ['Signed out', "You've been logged out. Please sign in again."],
+  ACCOUNT_NOT_ACTIVE: ['Signed out', "You've been logged out. Please sign in again."],
+};
 let GoogleSignin: any = null;
 let isErrorWithCode: any = null;
 let statusCodes: any = {};
@@ -271,13 +282,42 @@ function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
   );
 }
 
-export function LoginScreen({ navigation }: any) {
+export function LoginScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
   const insets = useSafeAreaInsets(); // bottom inset so "Skip for now" clears the Android gesture pill
   const { reconnect } = useUserSocket();
   const [step, setStep] = useState<Step>('entry');
   const [checkingSlow, setCheckingSlow] = useState(false);
+  const [pendingDeletion, setPendingDeletion] = useState<{ at?: string; token?: string } | null>(null);
+
+  const signedOutReason = route?.params?.reason;
+  useEffect(() => {
+    const msg = signedOutReason && SIGNED_OUT_REASONS[signedOutReason];
+    if (!msg) return;
+    showAlert(msg[0], msg[1]);
+    navigation.setParams({ reason: undefined });
+  }, [signedOutReason]);
+
+  // Every login method answers a deactivated or deleted account the same way.
+  // Returns true when the error was one of those and has been handled.
+  const handleAccountStateError = (error: any) => {
+    const body = error?.response?.data;
+    if (body?.code === 'ACCOUNT_PENDING_DELETION') {
+      setPendingDeletion({ at: body.data?.deletionScheduledAt, token: body.data?.restoreToken });
+      return true;
+    }
+    if (body?.code === 'ACCOUNT_BEING_DELETED') {
+      showAlert('Account being deleted', 'Your account is being deleted and can no longer be restored.');
+      return true;
+    }
+    return false;
+  };
+
+  // Signing in to a deactivated account turns it back on.
+  const welcomeBackIfReactivated = (res: any) => {
+    if ((res?.data ?? res)?.reactivated) showAlert('Welcome back!', 'Your account is active again.');
+  };
 
   // Backend runs on a free-tier host that cold-starts after inactivity — if the
   // account check takes a while, let the user know it's not stuck.
@@ -445,14 +485,16 @@ export function LoginScreen({ navigation }: any) {
   const finishGoogleLogin = async (idToken: string) => {
     setGoogleLoading(true);
     try {
-      await authService.googleLogin(idToken);
+      const res = await authService.googleLogin(idToken);
       trackEvent('login', { method: 'google' });
       reconnect();
       navigation.replace('App');
       // If they arrived from a protected email/share link while logged out, send
       // them on to it now (e.g. the specific booking's tracking page).
       consumePendingDeepLink(navigation);
+      welcomeBackIfReactivated(res);
     } catch (error: any) {
+      if (handleAccountStateError(error)) return;
       showAlert('Google sign-in failed', error?.response?.data?.message || 'Please try again.');
     } finally {
       setGoogleLoading(false);
@@ -466,11 +508,13 @@ export function LoginScreen({ navigation }: any) {
   ) => {
     setAppleLoading(true);
     try {
-      await authService.appleLogin(identityToken, authorizationCode, fullName);
+      const res = await authService.appleLogin(identityToken, authorizationCode, fullName);
       reconnect();
       navigation.replace('App');
       consumePendingDeepLink(navigation);
+      welcomeBackIfReactivated(res);
     } catch (error: any) {
+      if (handleAccountStateError(error)) return;
       showAlert('Apple sign-in failed', error?.response?.data?.message || 'Please try again.');
     } finally {
       setAppleLoading(false);
@@ -608,14 +652,16 @@ export function LoginScreen({ navigation }: any) {
     if (__DEV__) console.log('[Facebook Login] accessToken:', accessToken);
     setFacebookLoading(true);
     try {
-      await authService.facebookLogin(accessToken);
+      const res = await authService.facebookLogin(accessToken);
       trackEvent('login', { method: 'facebook' });
       reconnect();
       navigation.replace('App');
       // If they arrived from a protected email/share link while logged out, send
       // them on to it now (e.g. the specific booking's tracking page).
       consumePendingDeepLink(navigation);
+      welcomeBackIfReactivated(res);
     } catch (error: any) {
+      if (handleAccountStateError(error)) return;
       const isNetworkError = !error?.response;
       showAlert(
         isNetworkError ? 'No internet connection' : 'Facebook sign-in failed',
@@ -881,14 +927,16 @@ export function LoginScreen({ navigation }: any) {
     if (!password) return;
     setIsLoading(true);
     try {
-      await authService.login(identifier, password);
+      const res = await authService.login(identifier, password);
       trackEvent('login', { method: 'password' });
       reconnect();
       navigation.replace('App');
       // If they arrived from a protected email/share link while logged out, send
       // them on to it now (e.g. the specific booking's tracking page).
       consumePendingDeepLink(navigation);
+      welcomeBackIfReactivated(res);
     } catch (error: any) {
+      if (handleAccountStateError(error)) return;
       const status = error?.response?.status;
       const isNetworkError = !error?.response;
       if (status === 429) {
@@ -1780,6 +1828,20 @@ export function LoginScreen({ navigation }: any) {
           {renderStep()}
         </View>
       </SafeAreaView>
+
+      <ScheduledDeletionModal
+        visible={!!pendingDeletion}
+        deletionScheduledAt={pendingDeletion?.at}
+        restoreToken={pendingDeletion?.token}
+        onClose={() => setPendingDeletion(null)}
+        onRestored={() => {
+          setPendingDeletion(null);
+          reconnect();
+          navigation.replace('App');
+          consumePendingDeepLink(navigation);
+          showAlert('Account restored', 'Your account has been restored.');
+        }}
+      />
     </KeyboardAvoidingView>
   );
 }

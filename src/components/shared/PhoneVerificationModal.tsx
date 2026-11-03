@@ -15,11 +15,13 @@ export function PhoneVerificationModal({
   onClose,
   onVerified,
   initialPhone = '',
+  reason = 'Please verify a phone number to continue booking your pickup.',
 }: {
   visible: boolean;
   onClose: () => void;
   onVerified: () => void;
   initialPhone?: string;
+  reason?: string;
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -81,7 +83,12 @@ export function PhoneVerificationModal({
       onVerified();
     } catch (error: any) {
       if (dismissedRef.current) return; // closed mid-flight — don't pop a stray alert
-      showAlert('Verification failed', error?.response?.data?.message || error?.message || 'Please try again.');
+      const msg = error?.response?.data?.message || error?.message || '';
+      if (/already in use/i.test(msg)) {
+        showAlert('Number already in use', 'This number is linked to another account. Please contact support at info@0waste.co.in.');
+        return;
+      }
+      showAlert('Verification failed', msg || 'Please try again.');
     } finally {
       setLoading(false);
     }
@@ -101,9 +108,7 @@ export function PhoneVerificationModal({
             </View>
             <Text style={styles.title}>Verify your phone number</Text>
             <Text style={styles.sub}>
-              {step === 'phone'
-                ? 'Please verify a phone number to continue booking your pickup.'
-                : `Enter the 6-digit code sent to +91 ${phone}.`}
+              {step === 'phone' ? reason : `Enter the 6-digit code sent to +91 ${phone}.`}
             </Text>
 
             {step === 'phone' ? (

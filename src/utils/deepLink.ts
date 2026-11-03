@@ -28,6 +28,8 @@ const PROTECTED = [
   '/knowledgehub',
   '/donation',
   '/transfer',
+  '/manageaccount',
+  '/notificationsettings',
 ];
 
 // Screens inside the tab navigator, which a navigate from the root stack must name

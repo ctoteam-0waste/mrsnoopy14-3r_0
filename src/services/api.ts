@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { getToken, removeToken } from '../utils/tokenStore';
-import { navigationRef } from '../navigation/navRef';
+import { getToken } from '../utils/tokenStore';
+import { FORCE_LOGOUT_CODES, forceLogout } from '../utils/forceLogout';
 
 // Backend base URL — the AWS backend at api.karmaverse.earth. Can still be
 // overridden per build via the EXPO_PUBLIC_API_URL env (eas.json / CI input).
@@ -30,7 +30,10 @@ const isAuthEndpoint = (url?: string) => {
     '/auth/verify-otp',
     '/auth/google-login',
     '/auth/facebook-login',
+    '/auth/apple-login',
     '/auth/reset-password',
+    // Carries a restore token in the body instead of a session.
+    '/account/restore',
   ].some((e) => url.includes(e));
 };
 
@@ -54,17 +57,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401 && !isAuthEndpoint(error.config?.url)) {
-      // Token expired or invalid on a protected route — clear it and send the
-      // user back to Login so they re-authenticate (e.g. a stale token from a
-      // previous backend). Without this the app sits in a broken logged-in state.
-      await removeToken();
-      try {
-        const current = navigationRef.current?.getCurrentRoute?.()?.name;
-        if (navigationRef.current && current && !['Login', 'Splash'].includes(current)) {
-          navigationRef.current.reset({ index: 0, routes: [{ name: 'Login' }] });
-        }
-      } catch (_) { /* navigator not ready */ }
+    const status = error.response?.status;
+    const code = error.response?.data?.code;
+    // Token expired or invalid on a protected route, or the account was
+    // deactivated/deleted on another device — clear it and send the user back to
+    // Login so they re-authenticate. Without this the app sits in a broken
+    // logged-in state. The code tells Login which message to show.
+    if (
+      (status === 401 || (status === 403 && code === 'ACCOUNT_NOT_ACTIVE')) &&
+      !isAuthEndpoint(error.config?.url)
+    ) {
+      await forceLogout(FORCE_LOGOUT_CODES.has(code) || code === 'ACCOUNT_NOT_ACTIVE' ? code : undefined);
     }
     return Promise.reject(error);
   }

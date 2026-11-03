@@ -176,6 +176,28 @@ export const authService = {
     return response.data;
   },
 
+  // Restore an account scheduled for deletion. The restore token comes from the
+  // login 403 (ACCOUNT_PENDING_DELETION); the response is a normal login response.
+  restoreAccount: async (restoreToken: string) => {
+    const response = await api.post('/api/v1/account/restore', { restoreToken });
+    const token = extractToken(response.data);
+    if (!token) throw new Error('No token received');
+    await setToken(token);
+
+    registerForPushNotifications().then(fcmToken => {
+      if (fcmToken) sendTokenToBackend(fcmToken);
+    }).catch(() => {});
+
+    return response.data;
+  },
+
+  // Local-only sign out, for when the backend has already revoked the session
+  // (after deactivate/delete). Calling /auth/logout then would only 401.
+  endSession: async () => {
+    await removeToken();
+    await clearSocialSessions();
+  },
+
   // Logout
   logout: async () => {
     try {
