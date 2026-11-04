@@ -11,6 +11,7 @@ import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { LegalScreen } from '../screens/LegalScreen';
 import { AboutUsScreen } from '../screens/AboutUsScreen';
+import { NewsScreen } from '../screens/NewsScreen';
 import { FeedbackScreen } from '../screens/FeedbackScreen';
 import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
 import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
@@ -172,13 +173,14 @@ export function RootNavigator() {
             ManageAccount: 'ManageAccount',
             NotificationSettings: 'NotificationSettings',
             AboutUs: 'AboutUs',
+            News: 'news',
             Feedback: 'feedback',
             Unsubscribe: 'unsubscribe',
             EmailPreferences: 'preferences',
             NotFound: '*',
           }
         : {
-            Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs',
+            Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs', News: 'news',
             // Public, token-based mailer destinations — openable while logged out.
             Feedback: 'feedback', Unsubscribe: 'unsubscribe', EmailPreferences: 'preferences',
             NotFound: '*',
@@ -240,6 +242,7 @@ export function RootNavigator() {
         <Stack.Screen name="ManageAccount" component={ManageAccountScreen} />
         <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
+        <Stack.Screen name="News" component={NewsScreen} />
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
         <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />
         <Stack.Screen name="EmailPreferences" component={EmailPreferencesScreen} />

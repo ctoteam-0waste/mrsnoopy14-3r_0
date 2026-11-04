@@ -16,6 +16,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { MascotPopupBanner } from '../components/shared/MascotPopupBanner';
 import { LaunchDayBanner } from '../components/shared/LaunchDayBanner';
+import { GooglePlayLogo } from '../components/shared/StoreLogos';
+import { NewsCard } from '../components/shared/NewsCard';
+import { NEWSLETTERS } from '../data/newsletters';
+import { NewsletterStrip } from '../components/shared/NewsletterCard';
+import { NEWS } from '../data/news';
 import { LaunchConfetti } from '../components/shared/LaunchConfetti';
 import { CoinShower } from '../components/shared/CoinShower';
 import { EarlyBirdPopup } from '../components/shared/EarlyBirdPopup';
@@ -281,6 +286,9 @@ export function SplashScreen({ navigation, route }: any) {
               <TouchableOpacity onPress={() => scrollToSection('learning')}>
                 <Text style={s.navTabText}>Learn</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('News')}>
+                <Text style={s.navTabText}>News</Text>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}>
                 <Text style={s.navTabText}>Contact</Text>
               </TouchableOpacity>
@@ -355,12 +363,15 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={s.ctaSecondaryText}>Explore rewards</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ alignItems: 'flex-start', justifyContent: 'center', backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
                 onPress={() => { const u = 'https://play.google.com/store/apps/details?id=com.karmacredits.app'; if (typeof window !== 'undefined') window.open(u, '_blank', 'noopener'); else Linking.openURL(u); }}
                 activeOpacity={0.85}
               >
-                <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>GET IT ON</Text>
-                <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>Google Play</Text>
+                <GooglePlayLogo size={24} />
+                <View>
+                  <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>GET IT ON</Text>
+                  <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>Google Play</Text>
+                </View>
               </TouchableOpacity>
             </View>
 
@@ -510,6 +521,32 @@ export function SplashScreen({ navigation, route }: any) {
           </View>
         </View>
 
+        {/* ── LATEST NEWS ── */}
+        {NEWS.length > 0 && (
+          <View style={s.section}>
+            <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
+              <View style={[s.newsHeadRow, isMobile && { flexDirection: 'column', alignItems: 'flex-start', gap: 16 }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.sectionLabel}>LATEST NEWS</Text>
+                  <Text style={[s.sectionTitle, { marginBottom: 0 }, isMobile && { fontSize: 28 }]}>KarmaVer$e in the news</Text>
+                </View>
+                <TouchableOpacity style={s.newsAllBtn} onPress={() => navigation.navigate('News')} activeOpacity={0.85}>
+                  <Text style={s.newsAllText}>View all news</Text>
+                  <ArrowRight size={16} color="#16a34a" />
+                </TouchableOpacity>
+              </View>
+              <View style={[s.featGrid, { marginTop: 32 }, isMobile && { flexDirection: 'column' }]}>
+                {NEWS.slice(0, 3).map((item, i) => (
+                  <Card key={item.id} delay={i * 70} style={isMobile ? { width: '100%' } : { flex: 1 }}>
+                    <NewsCard item={item} style={{ flex: 1 }} />
+                  </Card>
+                ))}
+              </View>
+              {NEWSLETTERS.length > 0 && <NewsletterStrip item={NEWSLETTERS[0]} />}
+            </View>
+          </View>
+        )}
+
         {/* ── FOOTER ── */}
         <View style={s.footer}>
           <View style={[s.container, s.footerContent, isMobile && { flexDirection: 'column', gap: 28, paddingHorizontal: 20 }]}>
@@ -556,6 +593,9 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={s.footerLinkTitle}>Company</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('AboutUs')}>
                   <Text style={s.footerLink}>About us</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('News')}>
+                  <Text style={s.footerLink}>News</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>
                   <Text style={s.footerLink}>Privacy policy</Text>
@@ -701,6 +741,11 @@ const s = StyleSheet.create({
   // Ecosystem chips (icon + label only)
   ecoCard: { backgroundColor: 'white', borderRadius: 16, padding: 22, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'flex-start', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
   ecoLabel: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
+
+  // Latest news
+  newsHeadRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24 },
+  newsAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: '#bbf7d0', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 11 },
+  newsAllText: { color: '#16a34a', fontSize: 14, fontWeight: '800' },
 
   // Rewards
   rewardsVisualRow: { flexDirection: 'row', alignItems: 'center', gap: 24, marginBottom: 8 },
