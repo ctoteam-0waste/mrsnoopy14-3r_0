@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Clock } from 'lucide-react-native';
-import { ARTICLES } from '../data/articles';
+import { ARTICLES, articleThumb } from '../data/articles';
 import { useTheme, makeStyles } from '../theme';
 
 export function KnowledgeHubScreen({ navigation }: any) {
@@ -57,7 +57,7 @@ export function KnowledgeHubScreen({ navigation }: any) {
               activeOpacity={0.85}
               onPress={() => navigation.navigate('ArticleDetail', { id: article.id })}
             >
-              <Image source={{ uri: article.image }} style={styles.articleThumbnail} resizeMode="cover" />
+              <Image source={{ uri: articleThumb(article.image) }} style={styles.articleThumbnail} resizeMode="cover" />
               <View style={styles.articleInfo}>
                 <Text style={[styles.categoryLabel, { color: article.categoryColor }]}>{article.category}</Text>
                 <Text style={styles.articleTitle} numberOfLines={2}>{article.title}</Text>
