@@ -27,8 +27,10 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
   const mapRef = useRef<any>(null);
   const lastInternalCenter = useRef<[number, number] | null>(null);
   const onChangeRef = useRef(onCenterChange);
+  const latestCenter = useRef(center);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
   onChangeRef.current = onCenterChange;
+  latestCenter.current = center;
 
   useEffect(() => {
     let cancelled = false;
@@ -61,6 +63,12 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
                 onChangeRef.current(coords);
               }
             });
+            // A recenter (GPS / search) that came in while the SDK was still
+            // loading was skipped by the effect below; apply it now.
+            const latest = latestCenter.current;
+            if (Math.abs(latest[0] - initialCenter[0]) > EPS || Math.abs(latest[1] - initialCenter[1]) > EPS) {
+              try { map.setCenter([latest[0], latest[1]]); } catch {}
+            }
           });
         } catch (e) {
           console.error('[MapPicker.web] Map() failed:', e);
