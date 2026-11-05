@@ -550,7 +550,7 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
 
 const useStyles = makeStyles((c) => ({
   container: { flex: 1, backgroundColor: c.bg },
-  header: { paddingBottom: 20 },
+  header: { paddingBottom: 20, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10, maxWidth: 800, width: '100%', alignSelf: 'center' },
   backBtn: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   headerTitle: { flex: 1, fontSize: 19, fontWeight: '900', color: 'white', textAlign: 'center' },
