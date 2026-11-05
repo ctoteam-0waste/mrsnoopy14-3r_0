@@ -19,9 +19,13 @@ import * as Location from 'expo-location';
 import { SCREEN_WIDTH as width } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
+import { WebFooter } from '../components/shared/WebFooter';
+
+const IS_WEB = Platform.OS === 'web';
+const FOOTER_BG = '#0f172a';
 
 const CARD_MARGIN = 8;
-const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
+const COLS = IS_WEB && width > 768 ? 4 : 2;
 const CARD_WIDTH = (Math.min(width, 900) - 40 - (CARD_MARGIN * 2 * COLS)) / COLS;
 
 // Waste catalogue — 10 categories. category/subCategory strings are sent to the
@@ -600,7 +604,10 @@ export function SchedulePickupScreen({ navigation }: any) {
         </ScrollView>
       </View>
 
-      <ScrollView contentContainerStyle={[styles.gridContent, cartCalculations.totalItems > 0 && { paddingBottom: insets.bottom + 170 }]}>
+      <ScrollView contentContainerStyle={IS_WEB ? undefined : [styles.gridContent, cartCalculations.totalItems > 0 && { paddingBottom: insets.bottom + 170 }]}>
+        {/* On web the footer must span the full width, so the grid's width cap
+            moves from the scroll container onto this wrapper. */}
+        <View style={IS_WEB ? [styles.gridContent, { paddingBottom: 40 }] : undefined}>
         {activeCategory === '3' && (
           <View style={styles.glassNote}>
             <Text style={styles.glassNoteText}>Please note: broken or shattered glass is not accepted for safety reasons. Only intact bottles and jars.</Text>
@@ -671,6 +678,13 @@ export function SchedulePickupScreen({ navigation }: any) {
             );
           })}
         </View>
+        </View>
+        {IS_WEB && (
+          // Room under the footer so the floating cart never covers it.
+          <View style={{ backgroundColor: FOOTER_BG, paddingBottom: cartCalculations.totalItems > 0 ? insets.bottom + 130 : 0 }}>
+            <WebFooter />
+          </View>
+        )}
       </ScrollView>
 
       {/* Floating Cart Summary directly over the view */}
@@ -703,7 +717,8 @@ export function SchedulePickupScreen({ navigation }: any) {
   // --- Render Step 2: Date & Details ---
   const renderDetailsStep = () => (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-    <ScrollView contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 90 }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={IS_WEB ? undefined : [styles.scrollContent, { paddingBottom: insets.bottom + 90 }]} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <View style={IS_WEB ? [styles.scrollContent, { paddingBottom: 48 }] : undefined}>
       {/* Date */}
       <View style={styles.sectionHeader}>
         <View style={styles.sectionNum}><Text style={styles.sectionNumText}>2</Text></View>
@@ -842,6 +857,8 @@ export function SchedulePickupScreen({ navigation }: any) {
         {isLoading ? <CheckCircle2 size={20} color="transparent" /> : <CheckCircle2 size={20} color="white" />}
         <Text style={styles.submitBtnText}>{isLoading ? 'Scheduling...' : 'Confirm pickup'}</Text>
       </TouchableOpacity>
+      </View>
+      {IS_WEB && <WebFooter />}
     </ScrollView>
     </KeyboardAvoidingView>
   );

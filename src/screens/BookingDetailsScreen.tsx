@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView, StatusBar, Linking
+  View, Text, TouchableOpacity, ScrollView, StatusBar, Linking, Platform
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebFooter } from '../components/shared/WebFooter';
 import { LiveMap } from '../components/shared/LiveMap';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import {
@@ -90,7 +91,8 @@ export function BookingDetailsScreen({ navigation, route }: any) {
         </View>
       </SafeAreaView>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.scrollContent}>
         {/* Booking ID */}
         <View style={styles.card}>
           <View style={styles.bookingTopRow}>
@@ -232,6 +234,8 @@ export function BookingDetailsScreen({ navigation, route }: any) {
         )}
 
         <View style={{ height: 32 }} />
+        </View>
+        {Platform.OS === 'web' && <WebFooter />}
       </ScrollView>
     </View>
   );

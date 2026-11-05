@@ -17,6 +17,7 @@ import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
 import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { navigationRef } from './navRef';
+import { withWebAppShell } from '../components/shared/WebAppShell';
 import { capturePendingAppLink, capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
 import { routeNotification } from '../utils/notificationRoute';
 import { initAnalytics, trackPageView } from '../utils/analytics';
@@ -60,13 +61,13 @@ function lazyScreen<T extends React.ComponentType<any>>(
 
 const TabNavigator = lazyScreen(() => import('./TabNavigator'), (m) => m.TabNavigator);
 const ProfileScreen = lazyScreen(() => import('../screens/ProfileScreen'), (m) => m.ProfileScreen);
-const SchedulePickupScreen = lazyScreen(() => import('../screens/SchedulePickupScreen'), (m) => m.SchedulePickupScreen);
+const SchedulePickupScreen = withWebAppShell(lazyScreen(() => import('../screens/SchedulePickupScreen'), (m) => m.SchedulePickupScreen), 'Dashboard');
 const KnowledgeHubScreen = lazyScreen(() => import('../screens/KnowledgeHubScreen'), (m) => m.KnowledgeHubScreen);
 const ArticleDetailScreen = lazyScreen(() => import('../screens/ArticleDetailScreen'), (m) => m.ArticleDetailScreen);
 const QuizScreen = lazyScreen(() => import('../screens/QuizScreen'), (m) => m.QuizScreen);
 const ReferralScreen = lazyScreen(() => import('../screens/ReferralScreen'), (m) => m.ReferralScreen);
-const OrderTrackingScreen = lazyScreen(() => import('../screens/OrderTrackingScreen'), (m) => m.OrderTrackingScreen);
-const BookingDetailsScreen = lazyScreen(() => import('../screens/BookingDetailsScreen'), (m) => m.BookingDetailsScreen);
+const OrderTrackingScreen = withWebAppShell(lazyScreen(() => import('../screens/OrderTrackingScreen'), (m) => m.OrderTrackingScreen), 'Orders');
+const BookingDetailsScreen = withWebAppShell(lazyScreen(() => import('../screens/BookingDetailsScreen'), (m) => m.BookingDetailsScreen), 'Orders');
 const RedeemScreen = lazyScreen(() => import('../screens/RedeemScreen'), (m) => m.RedeemScreen);
 const RedeemHistoryScreen = lazyScreen(() => import('../screens/RedeemHistoryScreen'), (m) => m.RedeemHistoryScreen);
 const DonationScreen = lazyScreen(() => import('../screens/DonationScreen'), (m) => m.DonationScreen);

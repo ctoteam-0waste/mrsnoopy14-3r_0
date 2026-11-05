@@ -13,6 +13,7 @@ import { showAlert } from '../utils/alert';
 import { useUserSocket } from '../context/UserSocketContext';
 import { trackPickupCompleted } from '../utils/analytics';
 import { RatingModal } from '../components/shared/RatingModal';
+import { WebFooter } from '../components/shared/WebFooter';
 import { TrackingMap } from '../components/shared/TrackingMap';
 import { useTheme, makeStyles } from '../theme';
 
@@ -320,6 +321,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
               doesn't render as a stray circle like the styled help button would. */}
           <View style={{ width: 36 }} />
         </SafeAreaView>
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, backgroundColor: colors.bg }}>
           <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: colors.dangerSoft, alignItems: 'center', justifyContent: 'center', marginBottom: 24 }}>
             <XCircle size={44} color="#dc2626" />
@@ -342,6 +344,8 @@ export function OrderTrackingScreen({ route, navigation }: any) {
             <Text style={{ color: colors.textMuted, fontSize: 15, fontWeight: '700' }}>View All Orders</Text>
           </TouchableOpacity>
         </View>
+        {Platform.OS === 'web' && <WebFooter />}
+        </ScrollView>
       </View>
     );
   }
@@ -361,7 +365,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         </TouchableOpacity>
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
       {/* â"€â"€ Booking Badge â"€â"€ */}
       <View style={[styles.bookingBadge, { maxWidth: 900, width: '100%', alignSelf: 'center' }]}>
         <View style={styles.bookingBadgeLeft}>
@@ -563,6 +567,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
 
         <View style={{ height: 32 }} />
       </View>
+      {Platform.OS === 'web' && <WebFooter />}
       </ScrollView>
 
       {/* â"€â"€ Rating Modal — appears after pickup COMPLETED â"€â"€ */}
