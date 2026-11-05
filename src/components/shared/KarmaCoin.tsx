@@ -81,7 +81,7 @@ export function KarmaCoin({ size = 48, glow = false, animated = false }: { size?
 
       {/* Approved KarmaVerse gold K-coin */}
       <Image
-        source={require('../../../assets/coin.png')}
+        source={require('../../../assets/coin.webp')}
         resizeMode="contain"
         style={{ width: size, height: size, position: 'absolute' }}
       />

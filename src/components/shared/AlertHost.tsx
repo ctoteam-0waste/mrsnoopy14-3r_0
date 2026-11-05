@@ -30,6 +30,9 @@ export function AlertHost() {
   if (!payload) return null;
 
   const buttons = payload.buttons && payload.buttons.length ? payload.buttons : [{ text: 'OK' }];
+  // Three pills don't fit side by side on a phone, so they stack; two share the row.
+  const stacked = buttons.length > 2;
+  const paired = buttons.length === 2;
 
   const card = (
     <View style={s.card}>
@@ -40,14 +43,14 @@ export function AlertHost() {
         </TouchableOpacity>
       </View>
       {!!payload.message && <Text style={s.message}>{payload.message}</Text>}
-      <View style={s.btnRow}>
+      <View style={[s.btnRow, stacked && s.btnColumn]}>
         {buttons.map((b, i) => {
           const danger = b.style === 'destructive';
           const cancel = b.style === 'cancel';
           return (
             <TouchableOpacity
               key={i}
-              style={[s.btn, cancel && s.btnCancel, danger && s.btnDanger]}
+              style={[s.btn, paired && s.btnHalf, stacked && s.btnFull, cancel && s.btnCancel, danger && s.btnDanger]}
               onPress={() => { close(); b.onPress?.(); }}
               activeOpacity={0.85}
             >
@@ -85,8 +88,11 @@ const useStyles = makeStyles((c) => ({
   title: { flex: 1, fontSize: 17, fontWeight: '800', color: c.text },
   message: { fontSize: 14, color: c.textMuted, fontWeight: '500', lineHeight: 21, marginBottom: 18 },
   btnRow: { flexDirection: 'row', justifyContent: 'center', gap: 12, marginTop: 8 },
-  // Auto-width pills, centred in the row.
+  btnColumn: { flexDirection: 'column', alignItems: 'stretch', gap: 10 },
+  // A single button is an auto-width pill, centred in the row.
   btn: { backgroundColor: '#16a34a', borderRadius: 14, paddingHorizontal: 40, paddingVertical: 12, alignItems: 'center', justifyContent: 'center' },
+  btnHalf: { flex: 1, paddingHorizontal: 12 },
+  btnFull: { paddingHorizontal: 12 },
   btnCancel: { backgroundColor: c.surfaceAlt },
   btnDanger: { backgroundColor: '#dc2626' },
   btnText: { color: 'white', fontSize: 14, fontWeight: '800' },

@@ -18,6 +18,7 @@ import { bookingService } from '../services/booking';
 import * as Location from 'expo-location';
 import { SCREEN_WIDTH as width } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
@@ -83,7 +84,7 @@ const ALL_ITEMS: CatalogueItem[] = [
   // Smartwatch / wearables disabled until backend seeds them (not in live catalogue yet).
 
   // 2. Mixed E-Waste (kg)
-  { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 200, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
+  { id: 'me1', catId: '2', subCategory: 'Mixed E-waste', unit: 'kg', coins: 300, itemIcon: Cable, image: { uri: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Keyboards_and_mice_in_pile_of_ewaste.jpg/500px-Keyboards_and_mice_in_pile_of_ewaste.jpg' } },
 
   // 3. Glass (kg) — Broken Glass is not accepted, so it is omitted
   { id: 'gl1', catId: '3', subCategory: 'Beer Bottles', unit: 'kg', coins: 20, itemIcon: Wine, image: require('../../assets/catalogue/beer-bottles.jpg') },
@@ -268,6 +269,13 @@ export function SchedulePickupScreen({ navigation }: any) {
   const [selectedTime, setSelectedTime] = useState('');
   const [instructions, setInstructions] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  // isLoading disables the button only after a re-render; a fast double click on web
+  // lands before that, so a ref blocks a second request synchronously.
+  const submittingRef = useRef(false);
+  // A retry of the same booking must reuse the same key so the backend can return the
+  // booking it already created instead of placing a second one. Any change to the
+  // cart, date, slot or address makes it a new booking with a new key.
+  const idempotencyRef = useRef<{ payload: string; key: string } | null>(null);
   // Shown when booking creation is blocked because the (OAuth) user hasn't verified
   // a phone number yet — backend returns 403 on POST /bookings in that case.
   const [showPhoneVerify, setShowPhoneVerify] = useState(false);
@@ -335,7 +343,7 @@ export function SchedulePickupScreen({ navigation }: any) {
       if (added) setSelectedAddressId(added._id);
     } catch (error: any) {
       if (error?.response?.status === 400) {
-        // Authoritative rejection (e.g. outside the 25km Gurugram service area) —
+        // Authoritative rejection (e.g. outside the 50km Gurugram service area) —
         // don't fall back locally, that would let the user book anyway.
         showAlert('Address not saved', error.response.data?.message || 'This address could not be saved.');
         return;
@@ -434,7 +442,10 @@ export function SchedulePickupScreen({ navigation }: any) {
       return;
     }
 
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setIsLoading(true);
+    const attemptStartedAt = Date.now();
     // Structure the categories array — send category/subCategory exactly as in the
     // catalogue, and condition only for Working/Not Working items (never null).
     const payloadCategories: any[] = [];
@@ -471,10 +482,18 @@ export function SchedulePickupScreen({ navigation }: any) {
       payload.specialInstruction = instructions.trim();
     }
 
-    try {
-      const res = await bookingService.createBooking(payload);
-      const createdBooking = res?.data || res;
+    const payloadSignature = JSON.stringify(payload);
+    if (idempotencyRef.current?.payload !== payloadSignature) {
+      idempotencyRef.current = {
+        payload: payloadSignature,
+        key: `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`,
+      };
+    }
+    const idempotencyKey = idempotencyRef.current.key;
+
+    const onBookingCreated = async (createdBooking: any) => {
       console.log('[Confirm Pickup] Created booking:', createdBooking);
+      idempotencyRef.current = null;
       // Counts only — never the address, date, instructions or booking ID.
       trackEvent('schedule_pickup', {
         category_count: new Set(payloadCategories.map((c) => c.category)).size,
@@ -488,6 +507,27 @@ export function SchedulePickupScreen({ navigation }: any) {
         booking: createdBooking,
         estimatedCoins: createdBooking?.estimatedKarmaCoins ?? cartCalculations.totalCoins,
       }), 2500);
+    };
+
+    // With no response (timeout, dropped connection) the booking may still have been
+    // created on the server. Look for it before reporting a failure, so the user
+    // doesn't retry and place the same pickup twice.
+    const findJustPlacedBooking = async () => {
+      try {
+        const bookings = await bookingService.getMyBookings();
+        return bookings.find((b: any) =>
+          b?.timeSlot === selectedTime &&
+          b?.status !== 'CANCELLED' &&
+          new Date(b?.createdAt).getTime() >= attemptStartedAt - 2 * 60 * 1000
+        ) || null;
+      } catch {
+        return null;
+      }
+    };
+
+    try {
+      const res = await bookingService.createBooking(payload, idempotencyKey);
+      await onBookingCreated(res?.data || res);
     } catch (error: any) {
       // OAuth users with no verified phone are blocked with a 403 before any other
       // validation. Route them to phone verification instead of a dead-end error;
@@ -496,6 +536,13 @@ export function SchedulePickupScreen({ navigation }: any) {
         setShowPhoneVerify(true);
         setIsLoading(false);
         return;
+      }
+      if (!error?.response) {
+        const placed = await findJustPlacedBooking();
+        if (placed) {
+          await onBookingCreated(placed);
+          return;
+        }
       }
       // Surface the real reason so scheduling failures aren't a dead end.
       const data = error?.response?.data;
@@ -507,10 +554,11 @@ export function SchedulePickupScreen({ navigation }: any) {
         validationMsg ||
         (error?.response
           ? `Server error (${error.response.status}).`
-          : 'Could not reach the server. Please check your connection.');
+          : 'Could not reach the server. Please check your connection, and check Orders before trying again.');
       console.error('[Confirm Pickup] Failed:', error?.response?.status, JSON.stringify(data), JSON.stringify(payload));
       showAlert('Scheduling failed', detail);
     } finally {
+      submittingRef.current = false;
       setIsLoading(false);
     }
   };
@@ -593,7 +641,7 @@ export function SchedulePickupScreen({ navigation }: any) {
 
                   <View style={styles.coinPill}>
                     <KarmaCoin size={12} />
-                    <Text style={styles.coinValue}>+{rateFor(item, activeCond)}</Text>
+                    <Text style={styles.coinValue}>+{rateFor(item, activeCond).toLocaleString('en-IN')}</Text>
                   </View>
 
                   {qty === 0 ? (
@@ -631,12 +679,12 @@ export function SchedulePickupScreen({ navigation }: any) {
           <View style={styles.cartInfo}>
             <Text style={styles.cartItemText}>{cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'} added</Text>
             <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-              <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins}</Text>
+              <Text style={styles.cartRewardText}>Est. Reward: +{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
               <KarmaCoin size={12} />
             </View>
             {cartCalculations.totalCoins < MIN_ORDER_VALUE && (
               <Text style={styles.minOrderHint}>
-                Add {MIN_ORDER_VALUE - cartCalculations.totalCoins} more KC worth of items to schedule pickup
+                Add {(MIN_ORDER_VALUE - cartCalculations.totalCoins).toLocaleString('en-IN')} more KC worth of items to schedule pickup
               </Text>
             )}
           </View>
@@ -769,7 +817,7 @@ export function SchedulePickupScreen({ navigation }: any) {
           <Text style={styles.estimateLabel}>Estimated earnings</Text>
           <View style={styles.estimateValueRow}>
             <KarmaCoin size={24} />
-            <Text style={styles.estimateValue}>+{cartCalculations.totalCoins}</Text>
+            <Text style={styles.estimateValue}>+{cartCalculations.totalCoins.toLocaleString('en-IN')}</Text>
           </View>
           <Text style={styles.estimateNote}>For {cartCalculations.totalItems} {cartCalculations.totalItems === 1 ? 'item' : 'items'}. Final value credited after verification.</Text>
         </View>
@@ -801,7 +849,7 @@ export function SchedulePickupScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <View style={styles.topNotchFiller} />
+      <StatusBarFiller color="#064e3b" />
       
       {/* Dark Green Header Section */}
       <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
@@ -842,7 +890,6 @@ export function SchedulePickupScreen({ navigation }: any) {
 
 const useStyles = makeStyles((c) => ({
   container: { flex: 1, backgroundColor: c.bg },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   header: { paddingBottom: 16, borderBottomLeftRadius: 32, borderBottomRightRadius: 32, elevation: 8, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 10, zIndex: 10 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingTop: 10 },
   backBtnInner: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },

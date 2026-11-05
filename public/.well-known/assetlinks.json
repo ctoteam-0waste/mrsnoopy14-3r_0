@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.karmacredits.app",
+      "sha256_cert_fingerprints": [
+        "81:F3:72:6C:13:9A:F7:63:A7:A7:8E:59:24:48:5F:5F:5E:45:91:99:53:BC:AD:5F:1F:C4:40:B9:74:1F:5D:9E",
+        "C6:86:37:93:7F:DC:6B:CE:29:8C:52:C9:CD:BD:C1:17:9A:0A:05:2B:41:3D:B1:5A:67:24:DE:4D:B9:4C:8A:71"
+      ]
+    }
+  }
+]

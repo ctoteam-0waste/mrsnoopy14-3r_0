@@ -210,19 +210,19 @@ export function MascotPopupBanner({ suppressed = false }: Props) {
         <TouchableOpacity onPress={visitWebsite} activeOpacity={0.85}>
           <View style={s.mascotCircle}>
             <Animated.View style={{ transform: [{ translateY: bounce }, { rotate }] }}>
-              <Image source={require('../../../assets/mascot-mouth-closed-transparent.png')} style={s.mascotImg} resizeMode="contain" />
+              <Image source={require('../../../assets/mascot-mouth-closed-transparent.webp')} style={s.mascotImg} resizeMode="contain" />
               <Animated.Image
-                source={require('../../../assets/mascot-earth-buddy-transparent.png')}
+                source={require('../../../assets/mascot-earth-buddy-transparent.webp')}
                 style={[s.mascotImg, s.mascotImgOverlay, { opacity: mouthOpen }]}
                 resizeMode="contain"
               />
               <Animated.Image
-                source={require('../../../assets/mascot-blink-transparent.png')}
+                source={require('../../../assets/mascot-blink-transparent.webp')}
                 style={[s.mascotImg, s.mascotImgOverlay, { opacity: blink }]}
                 resizeMode="contain"
               />
               <Animated.View style={[s.armOverlayWrap, { transform: [{ rotate: armRotate }] }]}>
-                <Image source={require('../../../assets/mascot-arm-raised-transparent.png')} style={s.armOverlayImg} resizeMode="contain" />
+                <Image source={require('../../../assets/mascot-arm-raised-transparent.webp')} style={s.armOverlayImg} resizeMode="contain" />
               </Animated.View>
             </Animated.View>
           </View>

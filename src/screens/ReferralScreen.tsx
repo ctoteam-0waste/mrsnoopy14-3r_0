@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { referralService } from '../services/referral';
 import { useTheme, makeStyles } from '../theme';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 export function ReferralScreen({ navigation }: any) {
   const styles = useStyles();
@@ -119,7 +120,7 @@ export function ReferralScreen({ navigation }: any) {
   return (
     <View style={styles.rootContainer}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.topNotchFiller} />
+      <StatusBarFiller color="#7e22ce" />
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollBg} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 60 }}>
 
@@ -280,7 +281,6 @@ const useStyles = makeStyles((c) => ({
 
   rootContainer: { flex: 1, backgroundColor: '#7e22ce' },
   scrollBg: { flex: 1, backgroundColor: c.bg },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#7e22ce' },
   container: { flex: 1, maxWidth: 900, width: '100%', alignSelf: 'center' },
 
   heroSection: { borderBottomLeftRadius: 40, borderBottomRightRadius: 40, paddingTop: 10, paddingBottom: 40 },

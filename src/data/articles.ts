@@ -20,6 +20,11 @@ export interface Article {
   sections: ArticleSection[];
 }
 
+// Wikimedia serves thumbnails only at its standard widths (330, 500, 960, ...);
+// any other width returns 400. Small list thumbnails use the 330px rendition
+// (~40 KB) instead of the 960px hero (~300 KB), which made the list slow.
+export const articleThumb = (url: string) => url.replace('/960px-', '/330px-');
+
 export const ARTICLES: Article[] = [
   {
     id: 'segregation-at-home',
@@ -281,7 +286,7 @@ export const ARTICLES: Article[] = [
     readTime: '5 min read',
     date: '6 Aug 2026',
     image:
-      'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Recycling_symbol.svg/512px-Recycling_symbol.svg.png',
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Volunteers_carry_trees_to_planting_sites_%2837287300136%29.jpg/960px-Volunteers_carry_trees_to_planting_sites_%2837287300136%29.jpg',
     intro:
       'From a Kenyan biologist who planted 50 million trees to a teenager who moved world leaders, these voices turned environmental science into a global movement.',
     sections: [

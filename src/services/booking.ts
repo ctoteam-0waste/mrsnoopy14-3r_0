@@ -14,9 +14,13 @@ export const bookingService = {
       };
     };
     specialInstruction?: string;
-  }) => {
+  }, idempotencyKey?: string) => {
     try {
-      const response = await api.post('/api/v1/bookings', data);
+      const response = await api.post(
+        '/api/v1/bookings',
+        data,
+        idempotencyKey ? { headers: { 'Idempotency-Key': idempotencyKey } } : undefined,
+      );
       return response.data;
     } catch (error) {
       console.error('Create Booking Error:', error);

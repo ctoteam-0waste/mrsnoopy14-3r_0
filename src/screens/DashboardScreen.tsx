@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Modal, Animated, Dimensions, Platform, Image } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Modal, Animated, Dimensions, Platform, Image, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,6 +17,9 @@ import { AnimatedPickupCta } from '../components/shared/AnimatedPickupCta';
 import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
 import { StreakModal } from '../components/shared/StreakModal';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
+import { CoachMarkTour, CoachMarkStep } from '../components/shared/CoachMarkTour';
+import { hasSeenTour, markTourSeen } from '../utils/coachMarks';
+import { tabBarHeight } from '../utils/layout';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
@@ -191,6 +195,96 @@ export function DashboardScreen({ navigation, route }: any) {
   const [showLaunchPopup, setShowLaunchPopup] = useState(false);
   const [showWelcomeBonusBanner, setShowWelcomeBonusBanner] = useState(false);
 
+  // First-visit tour. 'pending' waits for the launch-day popup to close; the
+  // notification primer and redeem-info popup are held until the tour is 'done'.
+  const [tourState, setTourState] = useState<'checking' | 'pending' | 'running' | 'done'>('checking');
+  const insets = useSafeAreaInsets();
+  const { width: windowW, height: windowH } = useWindowDimensions();
+  const scrollRef = useRef<ScrollView>(null);
+  const avatarRef = useRef<View>(null);
+  const bellRef = useRef<View>(null);
+  const balanceRef = useRef<View>(null);
+  const statsRef = useRef<View>(null);
+  const pickupRef = useRef<View>(null);
+  const discoverRef = useRef<View>(null);
+  const quizRef = useRef<View>(null);
+  const actionsRef = useRef<View>(null);
+  const sectionY = useRef({ pickup: 0, discover: 0, quiz: 0, actions: 0 });
+  type TourScroll = keyof typeof sectionY.current | 'top' | 'stay';
+  const tourSteps: (CoachMarkStep & { scroll: TourScroll })[] = [
+    {
+      targetRef: avatarRef,
+      scroll: 'top',
+      title: 'Your profile',
+      body: 'Tap your photo to update your details, manage saved pickup addresses and change app settings.',
+    },
+    {
+      targetRef: bellRef,
+      scroll: 'top',
+      title: 'Notifications',
+      body: 'Pickup updates, coins credited and new offers show up here. The red badge shows how many are unread.',
+    },
+    {
+      targetRef: balanceRef,
+      scroll: 'top',
+      title: 'Your KarmaCoins XP',
+      body: 'Every pickup and daily quiz adds coins here. Tap Wallet to see your history and redeem coins for cash (10 XP = ₹1).',
+    },
+    {
+      targetRef: statsRef,
+      scroll: 'top',
+      title: 'Streaks and impact',
+      body: 'Track your coins, day streak, quiz streak and completed pickups. Open the app daily to keep your streak going, and tap any tile for details.',
+    },
+    {
+      targetRef: pickupRef,
+      scroll: 'pickup',
+      title: 'Schedule a pickup',
+      body: 'Choose your recyclables and a time slot. A pickup partner collects them from your address, and you earn coins for every kg.',
+    },
+    {
+      targetRef: discoverRef,
+      scroll: 'discover',
+      title: 'Discover features',
+      body: 'Swipe through these cards to learn about rewards, your green impact and inviting friends.',
+    },
+    {
+      targetRef: quizRef,
+      scroll: 'quiz',
+      title: 'Daily eco-quiz',
+      body: 'Answer 3 quick questions each day to earn bonus coins and grow your quiz streak.',
+    },
+    {
+      targetRef: actionsRef,
+      scroll: 'actions',
+      title: 'Quick actions',
+      body: 'Shortcuts to the things you use most. They change with what you are doing, like tracking a live pickup.',
+    },
+    {
+      getRect: () => {
+        const h = tabBarHeight(insets.bottom);
+        return { x: 0, y: windowH - h, width: windowW, height: h };
+      },
+      scroll: 'stay',
+      title: 'Move around the app',
+      body: 'Use these tabs to switch between Home, Orders, Wallet and Store.',
+    },
+  ];
+  const scrollToTourStep = async (index: number) => {
+    const target = tourSteps[index].scroll;
+    if (target === 'stay') return;
+    const y = target === 'top' ? 0 : sectionY.current[target];
+    scrollRef.current?.scrollTo({ y: Math.max(0, y - 140), animated: true });
+    await new Promise((r) => setTimeout(r, 400));
+  };
+  const finishTour = async () => {
+    setTourState('done');
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+    await markTourSeen('dashboard');
+    const token = await getToken();
+    showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+  };
+
   // New signup arriving straight from the Welcome Celebration scratch card —
   // show the "coins added" banner once, then clear the param so it doesn't
   // reappear on the next tab focus.
@@ -200,7 +294,6 @@ export function DashboardScreen({ navigation, route }: any) {
       navigation.setParams({ justClaimedWelcomeBonus: undefined });
     }
   }, [route?.params?.justClaimedWelcomeBonus]);
-
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -314,7 +407,7 @@ export function DashboardScreen({ navigation, route }: any) {
 
     (async () => {
       const token = await getToken();
-      showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+      let launchPopup = false;
 
       if (isLaunchDay()) {
         const suffix = getStableUserSuffix(token);
@@ -322,9 +415,20 @@ export function DashboardScreen({ navigation, route }: any) {
         const key = `launchDayConfettiSeen_${suffix}`;
         const lastSeen = await AsyncStorage.getItem(key);
         if (lastSeen !== todayStr) {
+          launchPopup = true;
           setShowLaunchPopup(true);
           await AsyncStorage.setItem(key, todayStr);
         }
+      }
+
+      if (await hasSeenTour('dashboard')) {
+        setTourState('done');
+        showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+      } else if (launchPopup) {
+        setTourState('pending');
+      } else {
+        // Let the header and sections lay out before measuring the first target.
+        setTimeout(() => setTourState('running'), 900);
       }
     })();
 
@@ -389,13 +493,13 @@ export function DashboardScreen({ navigation, route }: any) {
       </Animated.View>
     )}
 
-    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
+    <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={{ paddingBottom: 100 }} showsVerticalScrollIndicator={false}>
       {/* Green Header */}
       <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
         {/* Top bar */}
         <View style={styles.topBar}>
           <View style={styles.userInfo}>
-            <TouchableOpacity style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
+            <TouchableOpacity ref={avatarRef} style={styles.avatar} onPress={() => navigation.navigate('Profile')}>
               {avatarId ? (
                 <Avatar avatarId={avatarId} size={40} ring />
               ) : (
@@ -408,7 +512,7 @@ export function DashboardScreen({ navigation, route }: any) {
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 12 }}>
-            <TouchableOpacity style={styles.bellButton} onPress={() => setShowNotifications(true)}>
+            <TouchableOpacity ref={bellRef} style={styles.bellButton} onPress={() => setShowNotifications(true)}>
               <Bell size={20} color="white" />
               {unreadCount > 0 && (
                 <View style={styles.bellBadge}>
@@ -420,7 +524,7 @@ export function DashboardScreen({ navigation, route }: any) {
         </View>
 
         {/* KarmaCoins XP card */}
-        <View style={styles.creditsCard}>
+        <View ref={balanceRef} collapsable={false} style={styles.creditsCard}>
           <View style={styles.creditsHeader}>
             <Text style={styles.creditsLabel}>KarmaCoins XP balance</Text>
             <TouchableOpacity style={styles.walletLink} onPress={() => navigation.navigate('Wallet')}>
@@ -440,13 +544,14 @@ export function DashboardScreen({ navigation, route }: any) {
           </View>
         </View>
 
-        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Sustainability Actions) */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
+        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Eco Actions).
+            "Sustainability Actions" didn't fit a phone-width tile and was cut off. */}
+        <View ref={statsRef} collapsable={false} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
           {[
             { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins', onPress: () => navigation.navigate('Wallet') },
             { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak', onPress: () => setShowStreak(true) },
             { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
-            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
+            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Eco Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
           ].map((st, i) => (
             <TouchableOpacity key={i} style={styles.statTile} activeOpacity={0.7} onPress={st.onPress}>
               <View style={styles.statTileTop}>
@@ -482,7 +587,12 @@ export function DashboardScreen({ navigation, route }: any) {
       )}
 
       {/* Schedule pickup CTA (Featured-rewards partner cards removed to match web) */}
-      <View style={styles.section}>
+      <View
+        ref={pickupRef}
+        collapsable={false}
+        style={styles.section}
+        onLayout={(e) => { sectionY.current.pickup = e.nativeEvent.layout.y; }}
+      >
         <AnimatedPickupCta
           label={recentOrders.length > 0 ? 'Schedule a Pickup' : 'Schedule Your First Pickup'}
           onPress={() => navigation.navigate('SchedulePickup')}
@@ -491,7 +601,12 @@ export function DashboardScreen({ navigation, route }: any) {
 
       {/* Impact Cards */}
       {/* Feature Discovery — Swipeable Cards */}
-      <View style={styles.section}>
+      <View
+        ref={discoverRef}
+        collapsable={false}
+        style={styles.section}
+        onLayout={(e) => { sectionY.current.discover = e.nativeEvent.layout.y; }}
+      >
         <View style={styles.sectionHeaderRow}>
           <Text numberOfLines={1} style={[styles.sectionTitle, { marginBottom: 0, flexShrink: 0 }]}>Discover the feature ✨</Text>
           <Text numberOfLines={1} style={styles.discoverSub}>Swipe to explore →</Text>
@@ -512,7 +627,12 @@ export function DashboardScreen({ navigation, route }: any) {
       </View>
 
       {/* Daily Eco-Quiz Banner */}
-      <View style={styles.section}>
+      <View
+        ref={quizRef}
+        collapsable={false}
+        style={styles.section}
+        onLayout={(e) => { sectionY.current.quiz = e.nativeEvent.layout.y; }}
+      >
         <LinearGradient colors={['#4c1d95', '#6d28d9', '#9333ea']} style={styles.quizCard} start={{x:0, y:0}} end={{x:1,y:1}}>
           {/* Decorative background — coin + twinkling sparkles */}
           <View pointerEvents="none" style={styles.quizDecor}>
@@ -585,7 +705,12 @@ export function DashboardScreen({ navigation, route }: any) {
         const actions = picked.slice(0, 4);
 
         return (
-          <View style={styles.section}>
+          <View
+            ref={actionsRef}
+            collapsable={false}
+            style={styles.section}
+            onLayout={(e) => { sectionY.current.actions = e.nativeEvent.layout.y; }}
+          >
             <Text style={styles.sectionTitle}>Quick actions</Text>
             <View style={styles.actionsGrid}>
               {actions.map((action) => (
@@ -729,7 +854,13 @@ export function DashboardScreen({ navigation, route }: any) {
 
     </ScrollView>
 
-    <NotificationPrimerModal />
+    <NotificationPrimerModal enabled={tourState === 'done'} />
+    <CoachMarkTour
+      visible={tourState === 'running'}
+      steps={tourSteps}
+      onBeforeStep={scrollToTourStep}
+      onFinish={finishTour}
+    />
 
     <NotificationPanel
       visible={showNotifications}
@@ -741,7 +872,14 @@ export function DashboardScreen({ navigation, route }: any) {
       onClearAll={clearAll}
     />
 
-    {showLaunchPopup && <LaunchDayPopup onClose={() => setShowLaunchPopup(false)} />}
+    {showLaunchPopup && (
+      <LaunchDayPopup
+        onClose={() => {
+          setShowLaunchPopup(false);
+          setTourState((s) => (s === 'pending' ? 'running' : s));
+        }}
+      />
+    )}
     </View>
   );
 }

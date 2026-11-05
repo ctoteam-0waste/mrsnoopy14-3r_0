@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { redeemService } from '../services/redeem';
 import { useTheme, makeStyles } from '../theme';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 export function RedeemHistoryScreen({ navigation }: any) {
   const styles = useStyles();
@@ -52,7 +53,7 @@ export function RedeemHistoryScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <View style={styles.topNotchFiller} />
+      <StatusBarFiller color="#064e3b" />
 
       <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
         <SafeAreaView>
@@ -124,7 +125,6 @@ export function RedeemHistoryScreen({ navigation }: any) {
 
 const useStyles = makeStyles((c) => ({
   container: { flex: 1, backgroundColor: c.bg },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   scroll: { flex: 1 },
 
   header: { paddingBottom: 20 },

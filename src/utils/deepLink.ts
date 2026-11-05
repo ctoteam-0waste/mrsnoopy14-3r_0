@@ -12,19 +12,34 @@ let pendingUrl: string | null = null;
 let pendingReferral = false;
 
 // Authenticated routes worth returning to after login. Path is matched
-// case-insensitively against window.location.pathname.
+// case-insensitively against the link's pathname.
 const PROTECTED = [
   '/ordertracking',
   '/bookingdetails',
   '/wallet',
   '/orders',
+  '/store',
   '/profile',
   '/redeem',
   '/redeemhistory',
   '/quiz',
   '/referral',
   '/schedulepickup',
+  '/knowledgehub',
+  '/donation',
+  '/transfer',
 ];
+
+// Screens inside the tab navigator, which a navigate from the root stack must name
+// through 'App'.
+const TAB_SCREENS = ['Dashboard', 'Orders', 'Wallet', 'Store'];
+
+function rememberIfProtected(pathname: string, search: string): void {
+  const path = (pathname || '').replace(/\/+$/, '').toLowerCase();
+  if (PROTECTED.some((p) => path === p || path.startsWith(p + '/'))) {
+    pendingUrl = pathname + search;
+  }
+}
 
 // Capture as early as possible (before the router rewrites the URL). No-op unless
 // the current URL is a protected route on web.
@@ -44,10 +59,16 @@ export function capturePendingDeepLink(): void {
     }
   } catch (_) { /* URL not parseable */ }
 
-  const path = (window.location.pathname || '').replace(/\/+$/, '').toLowerCase();
-  if (PROTECTED.some((p) => path === p || path.startsWith(p + '/'))) {
-    pendingUrl = window.location.pathname + window.location.search;
-  }
+  rememberIfProtected(window.location.pathname, window.location.search);
+}
+
+// Native: an App Link (https://karmaverse.earth/Wallet, an email "Track pickup" link)
+// opened while logged out. Returns true if it was a protected link and was remembered.
+export function capturePendingAppLink(url: string | null): boolean {
+  const m = url?.match(/^https:\/\/karmaverse\.earth(\/[^?#]*)(\?[^#]*)?/i);
+  if (!m) return false;
+  rememberIfProtected(m[1], m[2] || '');
+  return !!pendingUrl;
 }
 
 export function hasPendingReferral(): boolean {
@@ -81,7 +102,11 @@ export function consumePendingDeepLink(navigation: any): boolean {
         if (k) params[decodeURIComponent(k)] = decodeURIComponent(v || '');
       });
     }
-    navigation.navigate(routeName, params);
+    if (TAB_SCREENS.includes(routeName)) {
+      navigation.navigate('App', { screen: routeName, params });
+    } else {
+      navigation.navigate(routeName, params);
+    }
     return true;
   } catch (_) {
     return false;

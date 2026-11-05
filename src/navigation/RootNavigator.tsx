@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { View, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Platform, Linking } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { getToken } from '../utils/tokenStore';
@@ -11,12 +11,16 @@ import { SplashScreen } from '../screens/SplashScreen';
 import { LoginScreen } from '../screens/LoginScreen';
 import { LegalScreen } from '../screens/LegalScreen';
 import { AboutUsScreen } from '../screens/AboutUsScreen';
+import { NewsScreen } from '../screens/NewsScreen';
 import { FeedbackScreen } from '../screens/FeedbackScreen';
 import { UnsubscribeScreen } from '../screens/UnsubscribeScreen';
 import { EmailPreferencesScreen } from '../screens/EmailPreferencesScreen';
 import { NotFoundScreen } from '../screens/NotFoundScreen';
+// Public blog (posts are read live from 0waste.co.in's feed).
+import { BlogScreen } from '../screens/BlogScreen';
+import { BlogPostScreen } from '../screens/BlogPostScreen';
 import { navigationRef } from './navRef';
-import { capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
+import { capturePendingAppLink, capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
 import { routeNotification } from '../utils/notificationRoute';
 import { initAnalytics, trackPageView } from '../utils/analytics';
 
@@ -83,6 +87,9 @@ export function RootNavigator() {
         // Already logged in — the router resolves the deep link directly, so drop
         // any captured URL to avoid a stale redirect on a later in-session login.
         if (isValid) clearPendingDeepLink();
+        // Logged out and opened from an App Link: remember it so onReady sends them
+        // to Login and the login returns them to it (web does this at import).
+        else if (Platform.OS !== 'web') capturePendingAppLink(await Linking.getInitialURL());
         setIsLoggedIn(isValid);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -109,9 +116,22 @@ export function RootNavigator() {
     return () => sub.remove();
   }, []);
 
-  // Web-only URL routing for the public pages — gives them real, shareable, crawlable
-  // URLs. Deliberately excludes the `karmacoin://` scheme so the existing manual
-  // referral-code deep-link handling in App.tsx (native) is unaffected. The root path
+  // An App Link tapped while the app is open but logged out resolves to NotFound (its
+  // path isn't in the logged-out link map). Remember it and show Login instead.
+  useEffect(() => {
+    if (Platform.OS === 'web' || isLoggedIn !== false) return;
+    const sub = Linking.addEventListener('url', ({ url }) => {
+      if (capturePendingAppLink(url)) {
+        setTimeout(() => navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] }), 0);
+      }
+    });
+    return () => sub.remove();
+  }, [isLoggedIn]);
+
+  // URL routing: on web for real, shareable, crawlable URLs; on Android for App Links
+  // (https://karmaverse.earth/<Screen>, declared in app.json's intentFilters) from
+  // emails and shares. Deliberately excludes the `karmacoin://` scheme so the existing
+  // manual referral-code deep-link handling in App.tsx (native) is unaffected. The root path
   // ('') must map to whichever screen `initialRouteName` would otherwise pick, or a
   // logged-in user visiting '/' would get bounced to the Splash marketing screen.
   // Every authenticated screen needs an entry here or a cold load / refresh of its
@@ -120,7 +140,9 @@ export function RootNavigator() {
   // top-level stack routes. Paths match the route names so the URLs the nav already
   // generates (/Wallet, /Quiz, …) round-trip on refresh, bookmarks and shared links.
   const linking = useMemo(() => ({
-    prefixes: Platform.OS === 'web' && typeof window !== 'undefined' ? [window.location.origin] : [],
+    prefixes: Platform.OS === 'web'
+      ? (typeof window !== 'undefined' ? [window.location.origin] : [])
+      : ['https://karmaverse.earth'],
     config: {
       screens: isLoggedIn
         ? {
@@ -148,13 +170,17 @@ export function RootNavigator() {
             Donation: 'Donation',
             Transfer: 'Transfer',
             AboutUs: 'AboutUs',
+            News: 'news',
+            Blog: 'blog',
+            BlogPost: 'blog/:slug',
             Feedback: 'feedback',
             Unsubscribe: 'unsubscribe',
             EmailPreferences: 'preferences',
             NotFound: '*',
           }
         : {
-            Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs',
+            Splash: '', Login: 'login', Legal: 'legal/:type', AboutUs: 'AboutUs', News: 'news',
+            Blog: 'blog', BlogPost: 'blog/:slug',
             // Public, token-based mailer destinations — openable while logged out.
             Feedback: 'feedback', Unsubscribe: 'unsubscribe', EmailPreferences: 'preferences',
             NotFound: '*',
@@ -181,6 +207,11 @@ export function RootNavigator() {
           navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
         }
         trackPageView(navRef.current?.getCurrentRoute());
+        // Fade out the static landing hero from public/index.html once the first
+        // screen has painted (two frames) — it sits outside #root, so React won't.
+        if (Platform.OS === 'web' && typeof window !== 'undefined') {
+          requestAnimationFrame(() => requestAnimationFrame(() => (window as any).__kvHideStaticHero?.()));
+        }
       }}
       onStateChange={() => {
         // De-duplicated inside trackPageView: a state change that stays on the same
@@ -209,6 +240,9 @@ export function RootNavigator() {
         <Stack.Screen name="Donation" component={DonationScreen} />
         <Stack.Screen name="Transfer" component={TransferScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
+        <Stack.Screen name="News" component={NewsScreen} />
+        <Stack.Screen name="Blog" component={BlogScreen} />
+        <Stack.Screen name="BlogPost" component={BlogPostScreen} />
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
         <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />
         <Stack.Screen name="EmailPreferences" component={EmailPreferencesScreen} />

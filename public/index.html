@@ -154,6 +154,54 @@
         display: none !important;
       }
     </style>
+
+    <!-- Static landing hero (see #kv-hero in <body>). Mirrors the nav + hero of
+         SplashScreen.web.tsx so the first paint shows real content instead of a
+         blank page while the JS bundle loads. -->
+    <style id="kv-hero-style">
+      #kv-hero { position: fixed; inset: 0; z-index: 9999; overflow: hidden; background: #052e16;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      #kv-hero .nav { background: #052e16; border-bottom: 1px solid rgba(255,255,255,0.08); }
+      #kv-hero .nav-inner { max-width: 1100px; margin: 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 10px; box-sizing: border-box; }
+      #kv-hero .logo { width: 48px; height: 50px; object-fit: contain; }
+      #kv-hero .word { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; line-height: 32px; color: #fff; }
+      #kv-hero .tag { display: none; font-size: 9.5px; font-weight: 800; letter-spacing: 0.9px; margin-top: 3px; color: #86efac; }
+      #kv-hero .hero { min-height: 100vh; background: linear-gradient(#052e16, #064e3b, #0f766e); }
+      #kv-hero .content { max-width: 1100px; margin: 0 auto; padding: 60px 20px 0; box-sizing: border-box; }
+      #kv-hero .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px; padding: 8px 16px; margin-bottom: 24px; color: rgba(255,255,255,0.8); font-size: 16px; font-weight: 700; }
+      #kv-hero .dot { width: 8px; height: 8px; border-radius: 4px; background: #4ade80; }
+      #kv-hero .txt { font-size: 0; line-height: 0; margin-bottom: 32px; }
+      #kv-hero .gap { display: block; }
+      #kv-hero .g12 { height: 12px; }
+      #kv-hero .g18 { height: 18px; }
+      #kv-hero .h1 { font-size: 34px; font-weight: 900; color: #fff; letter-spacing: -1.5px; line-height: 60px; }
+      #kv-hero .tagline { font-size: 18px; line-height: 27px; font-weight: 700; font-style: italic; color: #4ade80; }
+      #kv-hero .sub { display: inline; font-size: 16px; font-weight: 500; line-height: 28px; color: rgba(255,255,255,0.7); }
+      #kv-hero .txt { max-width: 620px; }
+      #kv-hero .powered { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px; padding: 7px 14px; color: rgba(255,255,255,0.7); font-size: 13px; font-weight: 600; }
+      #kv-hero .powered b { color: #fff; font-weight: 800; }
+      #kv-hero .r3 { width: 20px; height: 20px; border-radius: 10px; background: #4ade80; color: #052e16; font-size: 8px; font-weight: 900;
+        display: inline-flex; align-items: center; justify-content: center; }
+      #kv-hero .cta { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; margin-top: 28px; }
+      #kv-hero .primary { background: #4ade80; color: #052e16; font-weight: 900; font-size: 16px; padding: 16px 28px; border-radius: 14px; text-decoration: none; }
+      #kv-hero .secondary { color: #4ade80; font-weight: 700; font-size: 15px; padding: 16px 24px; border-radius: 14px; border: 1.5px solid rgba(255,255,255,0.2); }
+      #kv-hero .play { display: flex; flex-direction: column; background: #000; border: 1px solid rgba(255,255,255,0.22); border-radius: 12px;
+        padding: 8px 18px; color: #fff; font-size: 15px; font-weight: 800; text-decoration: none; }
+      #kv-hero .play small { color: rgba(255,255,255,0.65); font-size: 9px; font-weight: 700; letter-spacing: 1.2px; }
+      @media (min-width: 768px) {
+        #kv-hero .nav-inner { padding: 14px 32px; }
+        #kv-hero .logo { width: 70px; height: 73px; }
+        #kv-hero .word { font-size: 28px; }
+        #kv-hero .tag { display: block; }
+        #kv-hero .content { padding: 60px 32px 0; }
+        #kv-hero .h1 { font-size: 50px; }
+        #kv-hero .tagline { font-size: 22px; line-height: 33px; }
+        #kv-hero .sub { font-size: 18px; }
+        #kv-hero .cta { flex-direction: row; gap: 16px; }
+      }
+    </style>
   </head>
 
   <body>
@@ -170,6 +218,61 @@
       </p>
       <p>You need to enable JavaScript to run this app.</p>
     </noscript>
+    <!-- Static landing hero: painted before the JS bundle arrives so the page's
+         largest text shows in under a second. It sits outside #root, covers the
+         viewport, and RootNavigator fades it out (window.__kvHideStaticHero) once
+         the real screen has rendered. Only shown on "/" to logged-out visitors. -->
+    <div id="kv-hero" aria-hidden="true">
+      <div class="nav">
+        <div class="nav-inner">
+          <img class="logo" src="/logo-icon.webp" alt="" width="70" height="73" />
+          <div>
+            <div class="word">Karma<span style="color:#4ade80">Ver$e</span></div>
+            <div class="tag">EARN &nbsp;•&nbsp; IMPACT &nbsp;•&nbsp; <span style="color:#fbbf24">ELEVATE</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="hero">
+        <div class="content">
+          <div class="badge"><span class="dot"></span>AI-Powered Sustainability Platform</div>
+          <!-- One text block (inline spans + text-less spacers) on purpose: LCP counts
+               a block's text as one candidate, so this stays larger than any single
+               paragraph React paints later and LCP is credited to this early paint. -->
+          <div class="txt">
+            <span class="h1">Smart Sustainability,<br />Real <span style="color:#4ade80">Rewards.</span></span>
+            <i class="gap g12"></i>
+            <span class="tagline">“Kar Bhala Toh Ho Bhala.” 🌱</span>
+            <i class="gap g18"></i>
+            <span class="sub">KarmaVer$e rewards every sustainable action — schedule green pickups, sharpen your green knowledge with our AI-powered eco-quiz, and turn it all into KarmaCoins with real, measurable impact.</span>
+          </div>
+          <div class="powered"><span class="r3">3R</span>Powered by <b>3RZeroWaste</b></div>
+          <div class="cta">
+            <a class="primary" href="/login">Start your journey →</a>
+            <span class="secondary">Explore rewards</span>
+            <a class="play" href="https://play.google.com/store/apps/details?id=com.karmacredits.app"><small>GET IT ON</small>Google Play</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var hero = document.getElementById('kv-hero');
+        var path = location.pathname.replace(/\/+$/, '');
+        var token = null;
+        try { token = localStorage.getItem('userToken'); } catch (e) {}
+        var loggedIn = !!token && token !== 'undefined' && token !== 'null';
+        if (path !== '' || loggedIn) { hero.parentNode.removeChild(hero); return; }
+        window.__KV_STATIC_HERO__ = true;
+        window.__kvHideStaticHero = function () {
+          var el = document.getElementById('kv-hero');
+          if (!el) return;
+          el.style.transition = 'opacity 200ms';
+          el.style.opacity = '0';
+          el.style.pointerEvents = 'none';
+          setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 250);
+        };
+      })();
+    </script>
     <!-- The root element for your Expo app. -->
     <div id="root"></div>
   </body>

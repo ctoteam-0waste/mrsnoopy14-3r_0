@@ -11,6 +11,9 @@
       },
       "ios": {
         "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://karmacoin-backend-11.onrender.com"
       }
     },
     "preview": {
@@ -19,10 +22,22 @@
         "buildType": "apk"
       },
       "ios": {
-        "simulator": true
+        "simulator": false
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.karmaverse.earth"
+        "EXPO_PUBLIC_API_URL": "https://karmacoin-backend-11.onrender.com"
+      }
+    },
+    "staging": {
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "autoIncrement": true
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://karmacoin-backend-11.onrender.com"
       }
     },
     "production": {

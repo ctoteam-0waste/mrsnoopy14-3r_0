@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Easing, Image } from 'react-native';
 
 // The approved KarmaVerse coin — the gold K-coin lifted from the logo
-// (assets/coin.png, generated from logo-icon.png with baked-in gloss/shading).
+// (assets/coin.webp, generated from logo-icon.png with baked-in gloss/shading).
 // `animated` gives it a periodic 3D spin around the Y axis, like a real coin.
 export function KarmaCoin({ size = 48, glow = false, animated = false }: { size?: number; glow?: boolean; animated?: boolean }) {
   const spin = useRef(new Animated.Value(0)).current;
@@ -49,7 +49,7 @@ export function KarmaCoin({ size = 48, glow = false, animated = false }: { size?
         }}
       >
         <Image
-          source={require('../../../assets/coin.png')}
+          source={require('../../../assets/coin.webp')}
           resizeMode="contain"
           style={{ width: size, height: size }}
         />

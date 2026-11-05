@@ -7,6 +7,7 @@ import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { profileService } from '../services/profile';
 import { showAlert } from '../utils/alert';
 import { makeStyles } from '../theme';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 // UI-only for now — no backend donation endpoint exists yet. Wire this up to a real
 // API (deduct coins, record the donation) once the backend contract is available.
@@ -67,7 +68,7 @@ export function DonationScreen({ navigation, route }: any) {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <View style={styles.topNotchFiller} />
+      <StatusBarFiller color="#064e3b" />
 
       <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
         <SafeAreaView>
@@ -145,7 +146,6 @@ export function DonationScreen({ navigation, route }: any) {
 
 const useStyles = makeStyles((c) => ({
   container: { flex: 1, backgroundColor: c.bg },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   scroll: { flex: 1 },
 
   header: { paddingBottom: 20 },

@@ -14,6 +14,16 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
   const mapRef = useRef<any>(null);
   const cameraRef = useRef<any>(null);
   const lastInternalCenter = useRef<[number, number] | null>(null);
+  const latestCenter = useRef(center);
+  const mapLoaded = useRef(false);
+  latestCenter.current = center;
+
+  // A camera move sent while the map is still loading is dropped, so the map
+  // stayed on its first center. Apply the latest one once it has loaded.
+  const handleMapLoaded = () => {
+    mapLoaded.current = true;
+    cameraRef.current?.setCamera({ centerCoordinate: latestCenter.current, animationDuration: 0 });
+  };
 
   const handleRegionDidChange = async () => {
     if (!mapRef.current) return;
@@ -29,7 +39,7 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
   useEffect(() => {
     const last = lastInternalCenter.current;
     const isEcho = !!last && Math.abs(last[0] - center[0]) < EPS && Math.abs(last[1] - center[1]) < EPS;
-    if (!isEcho && cameraRef.current) {
+    if (!isEcho && mapLoaded.current && cameraRef.current) {
       cameraRef.current.flyTo(center, 500);
     }
   }, [center]);
@@ -39,6 +49,7 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
       <MapplsGL.MapView
         ref={mapRef}
         style={styles.map}
+        onDidFinishLoadingMap={handleMapLoaded}
         onRegionDidChange={handleRegionDidChange}
         regionDidChangeDebounceTime={400}
         logoEnabled={false}

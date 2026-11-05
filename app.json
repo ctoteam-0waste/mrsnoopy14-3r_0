@@ -16,21 +16,48 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.karmacredits.app",
-      "buildNumber": "1",
+      "buildNumber": "4",
+      "usesAppleSignIn": true,
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "KarmaVerse uses your location to auto-fill your pickup address and show pickup partners near you on the map.",
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
       }
     },
     "android": {
       "package": "com.karmacredits.app",
-      "versionCode": 9,
+      "versionCode": 12,
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#052e16"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            { "scheme": "https", "host": "karmaverse.earth" },
+            { "pathPrefix": "/OrderTracking" },
+            { "pathPrefix": "/Orders" },
+            { "pathPrefix": "/Wallet" },
+            { "pathPrefix": "/Store" },
+            { "pathPrefix": "/Dashboard" },
+            { "pathPrefix": "/Profile" },
+            { "pathPrefix": "/SchedulePickup" },
+            { "pathPrefix": "/KnowledgeHub" },
+            { "pathPrefix": "/Quiz" },
+            { "pathPrefix": "/Referral" },
+            { "pathPrefix": "/Redeem" },
+            { "pathPrefix": "/Donation" },
+            { "pathPrefix": "/Transfer" }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -45,10 +72,15 @@
     },
     "plugins": [
       "./plugins/withMappls",
+      "./plugins/withIosModularHeaders",
+      "./plugins/withIosSceneDelegate",
+      "./plugins/withFirebaseIos",
+      "./plugins/withIosHideScrollEdgeEffect",
+      "expo-apple-authentication",
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.1078804135433-uflagcil41uhmlgd3tf1g80snh0kj3b2"
+          "iosUrlScheme": "com.googleusercontent.apps.152765471990-c56hvo7q6pkqgaje639q9bupvoq0sa55"
         }
       ],
       [
@@ -71,7 +103,17 @@
         }
       ],
       "expo-audio",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "-keep class com.mappls.** { *; }\n-keep interface com.mappls.** { *; }\n-dontwarn com.mappls.**\n-keep class com.mmi.** { *; }\n-dontwarn com.mmi.**\n-keep class com.facebook.** { *; }\n-dontwarn com.facebook.**\n-keep class com.reactnativegooglesignin.** { *; }\n-keep class com.google.android.gms.auth.** { *; }"
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {

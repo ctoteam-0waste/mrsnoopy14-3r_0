@@ -469,7 +469,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{earnedCoins ?? bookingData.estimatedCoins} KC</Text>
+            <Text style={styles.statValue}>{Number(earnedCoins ?? bookingData.estimatedCoins ?? 0).toLocaleString('en-IN')} KC</Text>
             <Text style={styles.statLabel}>{earnedCoins !== null ? 'Coins earned' : 'Est. coins'}</Text>
           </View>
         </View>

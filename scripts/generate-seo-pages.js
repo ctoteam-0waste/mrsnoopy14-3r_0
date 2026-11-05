@@ -143,6 +143,29 @@ const pages = [
     </dl>`,
   },
   {
+    // The posts themselves load live from 0waste.co.in's feed; each article's
+    // canonical URL points back to 0waste.co.in.
+    urlPath: 'blog',
+    outPath: 'blog/index.html',
+    title: 'Blog — KarmaVerse',
+    description:
+      'Practical guides on recycling, zero waste, EPR, ESG and climate action in India from the KarmaVerse and 3R ZeroWaste team.',
+    jsonLd: [
+      orgJsonLd,
+      {
+        '@context': 'https://schema.org',
+        '@type': 'Blog',
+        name: 'KarmaVerse Blog',
+        url: `${SITE}/blog`,
+        isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
+        publisher: { '@type': 'Organization', name: '3RZeroWaste', url: 'https://0waste.co.in/' },
+      },
+    ],
+    noscriptBody: `<h1>KarmaVerse Blog</h1>
+    <p>Guides and stories on recycling, zero waste, EPR, ESG and climate action in India.
+    Read all posts at <a href="https://0waste.co.in/blog">0waste.co.in/blog</a>.</p>`,
+  },
+  {
     urlPath: 'login',
     outPath: 'login/index.html',
     title: 'Log In or Sign Up — KarmaVerse',

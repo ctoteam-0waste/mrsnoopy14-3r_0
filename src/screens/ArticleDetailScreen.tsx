@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Share, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Share2, Heart, Clock, Lightbulb } from 'lucide-react-native';
-import { getArticleById, ARTICLES } from '../data/articles';
+import { getArticleById, ARTICLES, articleThumb } from '../data/articles';
 import { useTheme, makeStyles } from '../theme';
 
 export function ArticleDetailScreen({ route, navigation }: any) {
@@ -101,7 +101,7 @@ export function ArticleDetailScreen({ route, navigation }: any) {
             activeOpacity={0.85}
             onPress={() => navigation.push('ArticleDetail', { id: nextArticle.id })}
           >
-            <Image source={{ uri: nextArticle.image }} style={styles.nextThumb} resizeMode="cover" />
+            <Image source={{ uri: articleThumb(nextArticle.image) }} style={styles.nextThumb} resizeMode="cover" />
             <View style={{ flex: 1 }}>
               <Text style={styles.nextLabel}>UP NEXT</Text>
               <Text style={styles.nextTitle} numberOfLines={2}>{nextArticle.title}</Text>

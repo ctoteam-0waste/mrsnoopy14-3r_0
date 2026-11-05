@@ -12,6 +12,7 @@ import { showAlert } from '../utils/alert';
 import { REDEEM_INFO_MESSAGE } from '../utils/redeemInfo';
 import { trackEvent } from '../utils/analytics';
 import { LedgerType, PICKUP_RATE, rupeesFor, formatRupees } from '../utils/streakTiers';
+import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
 const MIN_COINS = 10;
 const QUICK_AMOUNTS = [10, 20, 50, 100];
@@ -136,7 +137,7 @@ export function RedeemScreen({ navigation, route }: any) {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
-      <View style={styles.topNotchFiller} />
+      <StatusBarFiller color="#064e3b" />
 
       <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
         <SafeAreaView>
@@ -296,7 +297,6 @@ export function RedeemScreen({ navigation, route }: any) {
 
 const useStyles = makeStyles((c) => ({
   container: { flex: 1, backgroundColor: c.bg },
-  topNotchFiller: { position: 'absolute', top: 0, left: 0, right: 0, height: 60, backgroundColor: '#064e3b' },
   scroll: { flex: 1 },
 
   header: { paddingBottom: 20 },

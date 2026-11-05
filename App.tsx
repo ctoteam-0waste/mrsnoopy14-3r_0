@@ -25,10 +25,9 @@ try {
     // project as google-services.json + the Android OAuth client (package + SHA-1). The
     // Android idToken audience is this Web client, which the backend must verify against.
     webClientId: '152765471990-4g23up0gau0bclvkm3gk67fa1mpbe5r8.apps.googleusercontent.com',
-    // NOTE: iosClientId still points at the old project (1078804135433). iOS Sign-In needs
-    // an iOS OAuth client from project 152765471990 (and the matching iosUrlScheme in
-    // app.json) before it works — Android/APK builds ignore this field.
-    iosClientId: '1078804135433-uflagcil41uhmlgd3tf1g80snh0kj3b2.apps.googleusercontent.com',
+    // iOS client from the same project (CLIENT_ID in GoogleService-Info.plist); its reversed
+    // form is the iosUrlScheme in app.json. Android/APK builds ignore this field.
+    iosClientId: '152765471990-c56hvo7q6pkqgaje639q9bupvoq0sa55.apps.googleusercontent.com',
     scopes: ['email', 'profile'],
   });
 } catch (_) {}

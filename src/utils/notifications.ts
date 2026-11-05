@@ -1,6 +1,7 @@
 import { Platform, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/api';
+import { getFcmToken } from './fcmToken';
 
 let Notifications: any = null;
 let Device: any = null;
@@ -109,7 +110,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
   if (status !== 'granted') return null;
 
   const tokenData = await Notifications.getDevicePushTokenAsync();
-  return tokenData.data;
+  return getFcmToken(tokenData.data);
 }
 
 // Whether OS push notifications are usable at all on this build (native, not web,
@@ -178,9 +179,10 @@ export async function removeTokenFromBackend(): Promise<void> {
   if (!Notifications) return;
   try {
     const tokenData = await Notifications.getDevicePushTokenAsync();
-    if (tokenData?.data) {
+    const token = tokenData?.data ? await getFcmToken(tokenData.data) : null;
+    if (token) {
       await api.delete('/api/v1/notifications/device-token', {
-        data: { token: tokenData.data },
+        data: { token },
       });
     }
   } catch (e) {
@@ -203,9 +205,20 @@ export async function markNotificationOpened(notificationId?: string): Promise<v
 
 export function addPushTokenRefreshListener(callback: (token: string) => void) {
   if (!Notifications) return { remove: () => {} };
+  // On iOS this fires with the raw APNs token — exchange it like registration does.
   return Notifications.addPushTokenListener(({ data }: { data: string }) => {
-    callback(data);
+    getFcmToken(data).then((token) => { if (token) callback(token); });
   });
+}
+
+// On iOS, expo-notifications only reads a remote push's data from an Expo-style
+// `body` key. FCM puts the data keys at the top level of the APNs payload, which
+// expo exposes as the push trigger's payload — fall back to that.
+function notificationData(notification: any): any {
+  const request = notification?.request;
+  const data = request?.content?.data;
+  if (data && Object.keys(data).length > 0) return data;
+  return request?.trigger?.payload || null;
 }
 
 // The callback also receives the tapped action's identifier. A plain body tap is
@@ -215,7 +228,7 @@ export function addNotificationResponseListener(
 ) {
   if (!Notifications) return { remove: () => {} };
   return Notifications.addNotificationResponseReceivedListener((response: any) => {
-    callback(response.notification.request.content.data, response.actionIdentifier);
+    callback(notificationData(response.notification), response.actionIdentifier);
   });
 }
 
@@ -226,7 +239,7 @@ export async function getLastNotificationResponse(): Promise<
   const response = await Notifications.getLastNotificationResponseAsync();
   if (!response) return null;
   return {
-    data: response.notification?.request?.content?.data || null,
+    data: notificationData(response.notification),
     actionIdentifier: response.actionIdentifier,
   };
 }

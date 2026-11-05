@@ -77,6 +77,11 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   const [resolvedCoords, setResolvedCoords] = useState<[number, number] | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isOutOfServiceArea, setIsOutOfServiceArea] = useState(false);
+  // The map is created only after the open effect has set this session's start
+  // point. Mounted in the same render as `visible`, it was built on the previous
+  // (or India-centroid) center, so the pin sat outside Gurugram while the sheet
+  // showed the right address.
+  const [mapMounted, setMapMounted] = useState(false);
 
   // Details form
   const [houseNo, setHouseNo] = useState('');
@@ -131,6 +136,9 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
         : DEFAULT_CENTER;
       setCenter(start);
       reverseGeocodeCenter(start);
+      setMapMounted(true);
+    } else {
+      setMapMounted(false);
     }
   }, [visible]);
 
@@ -363,7 +371,9 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
 
         {/* ── Map body ── */}
         <View style={styles.mapBody}>
-          <MapPicker center={center} onCenterChange={(coords) => { setCenter(coords); reverseGeocodeCenter(coords); }} />
+          {mapMounted && (
+            <MapPicker center={center} onCenterChange={(coords) => { setCenter(coords); reverseGeocodeCenter(coords); }} />
+          )}
 
           {!showOverlay && (
             <TouchableOpacity
@@ -438,7 +448,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
             {isOutOfServiceArea && !isGeocoding && (
               <View style={styles.outOfAreaBanner}>
                 <Text style={styles.outOfAreaText}>
-                  We're currently only available in Gurugram and nearby areas (within ~25km). This location is outside our service area.
+                  Sorry, we currently operate only in Gurugram and nearby areas within 50km. This location is outside our service area.
                 </Text>
               </View>
             )}

@@ -133,12 +133,13 @@ export const authService = {
   },
 
   // Apple Sign-In — send Apple's identityToken (+ name on first authorization only)
-  // to backend, receive our JWT (mirrors googleLogin/facebookLogin above).
-  // Backend TODO: POST /api/v1/auth/apple-login — verify identityToken against
-  // Apple's public keys, create/find the user, return our JWT.
-  appleLogin: async (identityToken: string, fullName?: string | null) => {
+  // to backend, receive our JWT (mirrors googleLogin/facebookLogin above). The
+  // authorizationCode lets the backend get a refresh token, which Apple requires it
+  // to revoke when the user deletes their account.
+  // Backend TODO: POST /api/v1/auth/apple-login — see IOS_AUTH_BACKEND_SPEC.md.
+  appleLogin: async (identityToken: string, authorizationCode?: string | null, fullName?: string | null) => {
     try {
-      const response = await api.post('/api/v1/auth/apple-login', { identityToken, fullName });
+      const response = await api.post('/api/v1/auth/apple-login', { identityToken, authorizationCode, fullName });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
       await setToken(token);

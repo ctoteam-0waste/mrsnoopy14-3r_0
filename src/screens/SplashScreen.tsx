@@ -6,6 +6,10 @@ import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { ArrowRight, Box, Calendar, CheckSquare, Leaf, Wind, Trees } from 'lucide-react-native';
 import { SCREEN_WIDTH as width, SCREEN_HEIGHT as height } from '../utils/layout';
 
+// KarmaCoin's animated rings grow to 1.7x the coin, outside its own box — reserve
+// that much height so they don't spill over the headline below.
+const COIN_RING_SPREAD = 1.7;
+
 const SLIDES = [
   {
     id: 'intro',
@@ -149,7 +153,7 @@ export function SplashScreen({ navigation }: any) {
   const renderVisual = (id: string) => {
     if (id === 'intro') {
       return (
-        <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+        <View style={[styles.coinVisual, { height: 140 * COIN_RING_SPREAD }]}>
           <KarmaCoin size={140} glow animated />
         </View>
       );
@@ -230,7 +234,7 @@ export function SplashScreen({ navigation }: any) {
     }
     if (id === 'welcome') {
       return (
-        <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1, gap: 24 }}>
+        <View style={[styles.coinVisual, { height: 120 * COIN_RING_SPREAD }]}>
           <KarmaCoin size={120} glow animated />
         </View>
       );
@@ -358,6 +362,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 8,
   },
+  coinVisual: { alignItems: 'center', justifyContent: 'center' },
   contentContainer: {},
   // Pagination + Next button stay pinned below the scroll area.
   footerBlock: { paddingTop: 12 },

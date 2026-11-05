@@ -6,8 +6,8 @@ import { navigationRef } from '../navigation/navRef';
 // or not — deep-links the same way.
 //
 // A notification carries: `type` (the event), optional `bookingId`, optional `screen`
-// (an explicit target the backend can set), and — for a tapped action button — an
-// `actionIdentifier`.
+// or `route` (an explicit target the backend can set — its push templates send
+// `route`), and — for a tapped action button — an `actionIdentifier`.
 
 // A plain body tap arrives as the DEFAULT action; action buttons send their own id.
 export const DEFAULT_ACTION = 'expo.modules.notifications.actions.DEFAULT';
@@ -43,6 +43,7 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
 
   const bookingId = data?.bookingId;
   const booking = bookingId ? { _id: bookingId } : undefined;
+  const target = data?.screen || data?.route;
 
   // ── An action button was tapped — route by the button, not the default target. ──
   if (actionIdentifier && actionIdentifier !== DEFAULT_ACTION) {
@@ -62,7 +63,7 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
       case 'open_pickup': nav.navigate('SchedulePickup'); return;
       case 'open_referral': nav.navigate('Referral'); return;
       case 'open':
-        if (goToScreen(nav, data?.screen)) return;
+        if (goToScreen(nav, target)) return;
         break;
     }
   }
@@ -74,9 +75,11 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
     case 'AGENT_REACHED':
     case 'BOOKING_PICKED_UP':
     case 'BOOKING_IN_POOL':
+    case 'PICKUP_REMINDER':
       if (booking) { nav.navigate('OrderTracking', { booking }); return; }
       break;
     case 'BOOKING_COMPLETED':
+    case 'RATING_REQUEST':
       if (booking) { nav.navigate('BookingDetails', { booking }); return; }
       break;
     case 'BOOKING_CANCEL_SUCCESS':
@@ -84,10 +87,11 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
       return;
   }
 
-  // ── NON-TRANSACTIONAL — engagement / marketing. Route by a known type first,
-  //    then by an explicit `screen` target the backend set. ──
+  // ── Everything else (engagement / marketing, payouts, alerts). Route by the
+  //    explicit target the backend set, then by a known type. ──
+  if (target === 'OrderTracking' && booking) { nav.navigate('OrderTracking', { booking }); return; }
+  if (goToScreen(nav, target)) return;
   if (data?.type && goToScreen(nav, TYPE_SCREEN[data.type])) return;
-  if (goToScreen(nav, data?.screen)) return;
 
   // Fallback: any booking-linked notification with no/unknown type → booking details.
   if (booking) nav.navigate('BookingDetails', { booking });

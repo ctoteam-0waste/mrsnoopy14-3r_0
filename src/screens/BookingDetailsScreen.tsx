@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LiveMap } from '../components/shared/LiveMap';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import {
-  ArrowLeft, MoreHorizontal, MapPin,
+  ArrowLeft, MapPin,
   Phone, Star, Navigation, FileText
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
@@ -85,9 +85,8 @@ export function BookingDetailsScreen({ navigation, route }: any) {
             <ArrowLeft size={20} color={colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Booking details</Text>
-          <TouchableOpacity style={styles.moreBtn}>
-            <MoreHorizontal size={20} color={colors.text} />
-          </TouchableOpacity>
+          {/* Keeps the title centred opposite the back button. */}
+          <View style={styles.headerSpacer} />
         </View>
       </SafeAreaView>
 
@@ -244,7 +243,7 @@ const useStyles = makeStyles((c) => ({
   header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12 },
   backBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
   headerTitle: { flex: 1, textAlign: 'center', fontSize: 17, fontWeight: '800', color: c.text },
-  moreBtn: { width: 36, height: 36, borderRadius: 18, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center', elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.08, shadowRadius: 4, shadowOffset: { width: 0, height: 1 } },
+  headerSpacer: { width: 36, height: 36 },
 
   card: { backgroundColor: c.surface, marginHorizontal: 16, marginBottom: 12, borderRadius: 20, padding: 18, elevation: 2, shadowColor: c.shadow, shadowOpacity: 0.06, shadowRadius: 10, shadowOffset: { width: 0, height: 2 } },
 

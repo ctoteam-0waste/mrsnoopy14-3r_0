@@ -22,12 +22,15 @@ function Perk({ icon, text }: { icon: React.ReactNode; text: string }) {
   );
 }
 
-export default function NotificationPrimerModal() {
+// `enabled` lets the host hold the primer back while another overlay (e.g. the
+// first-visit tour) is on screen — iOS can't present two modals at once.
+export default function NotificationPrimerModal({ enabled = true }: { enabled?: boolean }) {
   const styles = useStyles();
   const { enablePush } = useNotifications();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
     (async () => {
       if (!isPushSupported()) return; // web / Expo Go — no OS prompt to protect
@@ -40,7 +43,7 @@ export default function NotificationPrimerModal() {
       if (active && p.undetermined) setVisible(true);
     })();
     return () => { active = false; };
-  }, []);
+  }, [enabled]);
 
   const dismiss = async () => {
     setVisible(false);

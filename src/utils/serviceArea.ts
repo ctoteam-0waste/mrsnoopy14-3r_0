@@ -1,9 +1,9 @@
-// Mirrors the backend's service-area check (25km from central Gurugram) so the
+// Mirrors the backend's service-area check (50km from central Gurugram) so the
 // map picker can warn the user before they fill the address form. The backend
 // still enforces this independently on POST/PATCH /users/addresses — this is
 // a UX nicety only, never the source of truth.
 export const GURUGRAM_CENTER = { lat: 28.4595, lon: 77.0266 };
-export const SERVICE_RADIUS_METERS = 25000;
+export const SERVICE_RADIUS_METERS = 50000;
 
 export function isWithinServiceArea(lat: number, lon: number): boolean {
   const R = 6371000;

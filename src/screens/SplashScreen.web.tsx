@@ -16,6 +16,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { MascotPopupBanner } from '../components/shared/MascotPopupBanner';
 import { LaunchDayBanner } from '../components/shared/LaunchDayBanner';
+import { GooglePlayLogo } from '../components/shared/StoreLogos';
+import { NewsCard } from '../components/shared/NewsCard';
+import { NEWSLETTERS } from '../data/newsletters';
+import { NewsletterStrip } from '../components/shared/NewsletterCard';
+import { NEWS } from '../data/news';
 import { LaunchConfetti } from '../components/shared/LaunchConfetti';
 import { CoinShower } from '../components/shared/CoinShower';
 import { EarlyBirdPopup } from '../components/shared/EarlyBirdPopup';
@@ -25,6 +30,11 @@ import { getLocalDateStr } from '../utils/quizDate';
 const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
 const MAX = 1100;
+
+// public/index.html paints a static copy of this hero before the JS bundle loads
+// (fixes the landing-page LCP) and sets this flag. When it did, skip the fade-in and
+// typewriter so the swap from the static copy to this screen is seamless.
+const STATIC_HERO_SHOWN = typeof window !== 'undefined' && !!(window as any).__KV_STATIC_HERO__;
 
 const KARMA_PHRASE = 'Rewards.';
 const HEADLINE_TEXT = `Smart Sustainability,\nReal ${KARMA_PHRASE}`;
@@ -74,15 +84,15 @@ function Card({ children, style, delay = 0 }: { children: React.ReactNode; style
 }
 
 export function SplashScreen({ navigation, route }: any) {
-  const fadeIn = useRef(new Animated.Value(0)).current;
-  const slideUp = useRef(new Animated.Value(40)).current;
+  const fadeIn = useRef(new Animated.Value(STATIC_HERO_SHOWN ? 1 : 0)).current;
+  const slideUp = useRef(new Animated.Value(STATIC_HERO_SHOWN ? 0 : 40)).current;
   const cursorBlink = useRef(new Animated.Value(1)).current;
   const coinsPulse = useRef(new Animated.Value(0)).current;
   const floatA = useRef(new Animated.Value(0)).current;
   const floatB = useRef(new Animated.Value(0)).current;
   const ctaPulse = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef<ScrollView>(null);
-  const [typedHeadline, setTypedHeadline] = useState('');
+  const [typedHeadline, setTypedHeadline] = useState(STATIC_HERO_SHOWN ? HEADLINE_TEXT : '');
   const sectionY = useRef({ howItWorks: 0, learning: 0, rewards: 0 });
   const [nearFooter, setNearFooter] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -143,6 +153,7 @@ export function SplashScreen({ navigation, route }: any) {
   };
 
   useEffect(() => {
+    if (STATIC_HERO_SHOWN) return;
     Animated.parallel([
       Animated.timing(fadeIn, { toValue: 1, duration: 800, useNativeDriver: true }),
       Animated.timing(slideUp, { toValue: 0, duration: 800, useNativeDriver: true }),
@@ -203,6 +214,7 @@ export function SplashScreen({ navigation, route }: any) {
   // Typewriter: types out the headline once on mount, character by character.
   // Confetti bursts right as "Smart Sustainability, Real Rewards." finishes typing.
   useEffect(() => {
+    if (STATIC_HERO_SHOWN) { setShowHeroConfetti(true); return; }
     let i = 0;
     const interval = setInterval(() => {
       i += 1;
@@ -273,6 +285,12 @@ export function SplashScreen({ navigation, route }: any) {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollToSection('learning')}>
                 <Text style={s.navTabText}>Learn</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('News')}>
+                <Text style={s.navTabText}>News</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Blog')}>
+                <Text style={s.navTabText}>Blog</Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => scrollRef.current?.scrollToEnd({ animated: true })}>
                 <Text style={s.navTabText}>Contact</Text>
@@ -348,12 +366,15 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={s.ctaSecondaryText}>Explore rewards</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={{ alignItems: 'flex-start', justifyContent: 'center', backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#000000', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 8, borderWidth: 1, borderColor: 'rgba(255,255,255,0.22)' }}
                 onPress={() => { const u = 'https://play.google.com/store/apps/details?id=com.karmacredits.app'; if (typeof window !== 'undefined') window.open(u, '_blank', 'noopener'); else Linking.openURL(u); }}
                 activeOpacity={0.85}
               >
-                <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>GET IT ON</Text>
-                <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>Google Play</Text>
+                <GooglePlayLogo size={24} />
+                <View>
+                  <Text style={{ color: 'rgba(255,255,255,0.65)', fontSize: 9, fontWeight: '700', letterSpacing: 1.2 }}>GET IT ON</Text>
+                  <Text style={{ color: '#ffffff', fontSize: 15, fontWeight: '800' }}>Google Play</Text>
+                </View>
               </TouchableOpacity>
             </View>
 
@@ -452,12 +473,12 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.featGrid, { marginTop: 28 }, isMobile && { flexDirection: 'column' }]}>
               {[
-                { img: require('../../assets/rewards/green-store.jpg'), title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
-                { img: require('../../assets/rewards/gift-cards.jpg'), title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
-                { img: require('../../assets/rewards/savings.jpg'), title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
-                { img: require('../../assets/rewards/experiences.jpg'), title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
-                { img: require('../../assets/rewards/partners.jpg'), title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
-                { img: require('../../assets/rewards/plant-tree.jpg'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
+                { img: require('../../assets/rewards/green-store.webp'), title: 'Green Store', desc: 'Sustainable goods that give back to the planet' },
+                { img: require('../../assets/rewards/gift-cards.webp'), title: 'Eco Gift Cards', desc: 'Green vouchers from your favourite brands' },
+                { img: require('../../assets/rewards/savings.webp'), title: 'Conscious Savings', desc: 'Save on the everyday things you already buy' },
+                { img: require('../../assets/rewards/experiences.webp'), title: 'Eco Experiences', desc: 'Unlock green experiences money can\'t buy' },
+                { img: require('../../assets/rewards/partners.webp'), title: 'Impact Partners', desc: 'Curated offers from our sustainable partners' },
+                { img: require('../../assets/rewards/plant-tree.webp'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.rewardCard, { width: isMobile ? '100%' : '31%' }]}>
                   <Image source={r.img} resizeMode="cover" style={s.rewardImg} />
@@ -502,6 +523,32 @@ export function SplashScreen({ navigation, route }: any) {
             </View>
           </View>
         </View>
+
+        {/* ── LATEST NEWS ── */}
+        {NEWS.length > 0 && (
+          <View style={s.section}>
+            <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
+              <View style={[s.newsHeadRow, isMobile && { flexDirection: 'column', alignItems: 'flex-start', gap: 16 }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={s.sectionLabel}>LATEST NEWS</Text>
+                  <Text style={[s.sectionTitle, { marginBottom: 0 }, isMobile && { fontSize: 28 }]}>KarmaVer$e in the news</Text>
+                </View>
+                <TouchableOpacity style={s.newsAllBtn} onPress={() => navigation.navigate('News')} activeOpacity={0.85}>
+                  <Text style={s.newsAllText}>View all news</Text>
+                  <ArrowRight size={16} color="#16a34a" />
+                </TouchableOpacity>
+              </View>
+              <View style={[s.featGrid, { marginTop: 32 }, isMobile && { flexDirection: 'column' }]}>
+                {NEWS.slice(0, 3).map((item, i) => (
+                  <Card key={item.id} delay={i * 70} style={isMobile ? { width: '100%' } : { flex: 1 }}>
+                    <NewsCard item={item} style={{ flex: 1 }} />
+                  </Card>
+                ))}
+              </View>
+              {NEWSLETTERS.length > 0 && <NewsletterStrip item={NEWSLETTERS[0]} />}
+            </View>
+          </View>
+        )}
 
         {/* ── FOOTER ── */}
         <View style={s.footer}>
@@ -549,6 +596,12 @@ export function SplashScreen({ navigation, route }: any) {
                 <Text style={s.footerLinkTitle}>Company</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('AboutUs')}>
                   <Text style={s.footerLink}>About us</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('News')}>
+                  <Text style={s.footerLink}>News</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('Blog')}>
+                  <Text style={s.footerLink}>Blog</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>
                   <Text style={s.footerLink}>Privacy policy</Text>
@@ -694,6 +747,11 @@ const s = StyleSheet.create({
   // Ecosystem chips (icon + label only)
   ecoCard: { backgroundColor: 'white', borderRadius: 16, padding: 22, borderWidth: 1, borderColor: '#e2e8f0', alignItems: 'flex-start', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
   ecoLabel: { fontSize: 16, fontWeight: '800', color: '#0f172a' },
+
+  // Latest news
+  newsHeadRow: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 24 },
+  newsAllBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, borderWidth: 1.5, borderColor: '#bbf7d0', borderRadius: 12, paddingHorizontal: 18, paddingVertical: 11 },
+  newsAllText: { color: '#16a34a', fontSize: 14, fontWeight: '800' },
 
   // Rewards
   rewardsVisualRow: { flexDirection: 'row', alignItems: 'center', gap: 24, marginBottom: 8 },

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, useWindowDimensions, Image, L
 import { Mail, MapPin, Phone, Instagram, Facebook, Linkedin, Twitter, Youtube } from 'lucide-react-native';
 import { getToken } from '../../utils/tokenStore';
 import { useNavigation } from '@react-navigation/native';
+import { GooglePlayLogo, AppleLogo } from './StoreLogos';
 
 const MAX = 1200;
 const ADDRESS = 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051';
@@ -45,8 +46,10 @@ export function WebFooter() {
     },
     { label: 'Daily quiz', onPress: () => navigation.navigate('Quiz') },
     { label: 'Knowledge hub', onPress: () => navigation.navigate('KnowledgeHub') },
+    { label: 'Blog', onPress: () => navigation.navigate('Blog') },
     { label: 'Referral program', onPress: () => navigation.navigate('Referral') },
     { label: 'About us', onPress: () => navigation.navigate('AboutUs') },
+    { label: 'News', onPress: () => navigation.navigate('News') },
   ];
 
   const SocialRow = () => (
@@ -129,13 +132,19 @@ export function WebFooter() {
             <Text style={s.colTitle}>Get the app</Text>
             <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
               <TouchableOpacity style={[s.storeBtn, { flexGrow: 1 }]} onPress={() => openExternal(PLAY_STORE_URL)} activeOpacity={0.85}>
-                <Text style={s.storeBtnSub}>GET IT ON</Text>
-                <Text style={s.storeBtnText}>Google Play</Text>
+                <GooglePlayLogo size={24} />
+                <View>
+                  <Text style={s.storeBtnSub}>GET IT ON</Text>
+                  <Text style={s.storeBtnText}>Google Play</Text>
+                </View>
               </TouchableOpacity>
               <View style={[s.storeBtn, s.storeBtnDisabled, { flexGrow: 1 }]}>
-                <Text style={s.storeBtnSub}>DOWNLOAD ON</Text>
-                <Text style={s.storeBtnText}>App Store</Text>
-                <Text style={s.comingSoonInline}>Coming soon</Text>
+                <AppleLogo size={24} />
+                <View>
+                  <Text style={s.storeBtnSub}>DOWNLOAD ON</Text>
+                  <Text style={s.storeBtnText}>App Store</Text>
+                  <Text style={s.comingSoonInline}>Coming soon</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -190,7 +199,7 @@ const s = StyleSheet.create({
   contactText: { color: '#94a3b8', fontSize: 13, fontWeight: '500', flex: 1 },
   addressLink: { textDecorationLine: 'underline' },
 
-  storeBtn: { minWidth: 130, backgroundColor: '#1e293b', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 10, borderWidth: 1, borderColor: '#334155' },
+  storeBtn: { minWidth: 130, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#1e293b', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 10, borderWidth: 1, borderColor: '#334155' },
   storeBtnDisabled: { opacity: 0.5 },
   storeBtnSub: { color: '#94a3b8', fontSize: 9, fontWeight: '700', letterSpacing: 1 },
   storeBtnText: { color: 'white', fontSize: 14, fontWeight: '700', marginTop: 1 },
