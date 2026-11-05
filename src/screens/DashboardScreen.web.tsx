@@ -21,8 +21,8 @@ const MAX = 1200;
 const FEATURE_DETAILS = [
   {
     id: 'refer', title: 'Refer & earn', emoji: '👥', icon: Gift,
-    desc: 'Share your referral code with friends. When they make their first pickup, you both get 1,000 bonus KarmaCoins XP!',
-    steps: ['Share your unique code', 'Friend signs up & books pickup', 'Both earn bonus coins', 'No limit on referrals'],
+    desc: 'Share your referral code with friends. When they sign up with it, you both get 1,000 bonus KarmaCoins XP!',
+    steps: ['Share your unique code', 'Friend signs up with your code', 'Both earn bonus coins', 'No limit on referrals'],
     benefit: 'Bonus coins for every friend',
     gradient: ['#881337', '#e11d48'] as [string, string],
     accent: '#fb7185',
@@ -309,7 +309,7 @@ export function DashboardScreen({ navigation, route }: any) {
           <View style={z.referBannerDecor} />
           <View style={{ flex: isMobile ? undefined : 1, zIndex: 1 }}>
             <Text style={[z.referTitle, isMobile && { fontSize: 18 }]}>Invite friends, earn together</Text>
-            <Text style={z.referSub}>Share your referral code and both of you earn 1,000 bonus KarmaCoins XP on their first pickup</Text>
+            <Text style={z.referSub}>Share your referral code and when a friend signs up with it, you both get 1,000 bonus KarmaCoins XP</Text>
           </View>
           <TouchableOpacity style={z.referBtn} onPress={() => nav('Referral')}>
             <Users size={18} color="#422006" />

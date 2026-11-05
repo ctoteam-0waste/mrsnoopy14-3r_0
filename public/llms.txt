@@ -2,7 +2,7 @@
 
 > India's first circular economy rewards platform — schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle. Built by 3R ZeroWaste.
 
-KarmaVerse is a mobile and web app that lets households across India request free doorstep
+KarmaVerse is a mobile and web app that lets households request free doorstep
 recycling pickups (plastic, paper, metal, e-waste, textile, cardboard, and more). A verified
 agent collects, weighs, and confirms the items on the spot, and KarmaCoins XP are credited to
 the user's wallet immediately. Coins are redeemable for eco-friendly products, tree planting,
@@ -12,10 +12,12 @@ Gurugram, Haryana, India.
 ## Key facts
 
 - Doorstep pickup is 100% free — no cost to the user, ever
+- Service area: Gurugram, Haryana and nearby areas within 50 km of central Gurugram (the app checks each address)
+- Pickups are rewarded in KarmaCoins XP only — no cash at the doorstep
 - 10 waste categories accepted: plastic, paper, metal, e-waste, textile, cardboard, and more
 - 1.85 Lakh+ (185,000+) citizens reached with recycling awareness so far
 - Rewards: KarmaCoins XP earned per kg recycled, redeemable for products, tree planting, or donations
-- Referral program: both the referrer and the new user each earn 1,000 KarmaCoins XP
+- Referral program: when a new user signs up with a referral code, both the referrer and the new user get 1,000 KarmaCoins XP
 - Also includes a daily eco-quiz for additional KarmaCoins XP
 - Operator: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051, India
 

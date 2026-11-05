@@ -102,6 +102,10 @@ const pages = [
             'Yes — doorstep pickup is 100% free, with no cost to the user, ever.'
           ),
           faq(
+            'Where is doorstep pickup available?',
+            'Doorstep pickup is currently available in Gurugram, Haryana and nearby areas within 50 km of central Gurugram. The app checks your exact address when you book.'
+          ),
+          faq(
             'What waste categories does KarmaVerse accept?',
             '8 categories: plastic, paper, metal, e-waste, textile, cardboard, and more.'
           ),
@@ -115,7 +119,7 @@ const pages = [
           ),
           faq(
             'How does the referral program work?',
-            'Refer a friend and you both earn 1,000 KarmaCoins XP instantly.'
+            'When a friend signs up with your referral code, you both get 1,000 KarmaCoins XP.'
           ),
         ],
       },
@@ -132,6 +136,8 @@ const pages = [
     <dl>
       <dt>Is doorstep pickup really free?</dt>
       <dd>Yes — doorstep pickup is 100% free, with no cost to the user, ever.</dd>
+      <dt>Where is doorstep pickup available?</dt>
+      <dd>Doorstep pickup is currently available in Gurugram, Haryana and nearby areas within 50 km of central Gurugram. The app checks your exact address when you book.</dd>
       <dt>What waste categories does KarmaVerse accept?</dt>
       <dd>8 categories: plastic, paper, metal, e-waste, textile, cardboard, and more.</dd>
       <dt>How do I earn KarmaCoins XP?</dt>
@@ -139,7 +145,7 @@ const pages = [
       <dt>What can I redeem KarmaCoins XP for?</dt>
       <dd>Eco-friendly products, tree planting, or charitable donations.</dd>
       <dt>How does the referral program work?</dt>
-      <dd>Refer a friend and you both earn 1,000 KarmaCoins XP instantly.</dd>
+      <dd>When a friend signs up with your referral code, you both get 1,000 KarmaCoins XP.</dd>
     </dl>`,
   },
   {

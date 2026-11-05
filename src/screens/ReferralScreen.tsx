@@ -204,7 +204,7 @@ export function ReferralScreen({ navigation }: any) {
               <View style={styles.emptyState}>
                 <Users size={40} color={colors.textFaint} />
                 <Text style={styles.emptyTitle}>No referrals yet</Text>
-                <Text style={styles.emptyText}>Share your code — when a friend joins, both of you earn coins.</Text>
+                <Text style={styles.emptyText}>Share your code — when a friend signs up with it, you both get 1,000 KarmaCoins XP.</Text>
                 <TouchableOpacity style={styles.emptyShareBtn} onPress={handleShare} disabled={!referralCode}>
                   <Share2 size={16} color="white" />
                   <Text style={styles.emptyShareText}>Share now</Text>

@@ -117,7 +117,6 @@ export function ProfileScreen({ navigation }: any) {
           demographics: {
             age: data.demographics?.age || data.age || 25,
             gender: data.demographics?.gender || data.gender || 'Not Specified',
-            sexualOrientation: data.demographics?.sexualOrientation || data.sexualOrientation || 'Not Specified',
             maritalStatus: data.demographics?.maritalStatus || data.maritalStatus || 'Not Specified',
             employment: data.demographics?.employment || data.employment || 'Not Specified',
             city: data.demographics?.city || data.city || '',
@@ -191,7 +190,6 @@ export function ProfileScreen({ navigation }: any) {
   const [demoEditForm, setDemoEditForm] = useState({
     age: '26',
     gender: 'Male',
-    sexualOrientation: '',
     maritalStatus: 'Single',
     employment: 'Employed',
     state: '',
@@ -399,10 +397,6 @@ export function ProfileScreen({ navigation }: any) {
     setDemoEditForm({
       age: userProfile?.demographics?.age?.toString() || '25',
       gender: userProfile?.demographics?.gender || 'Not Specified',
-      // Absent/'Not Specified' → no chip pre-selected (SelectionPills matches exact value).
-      sexualOrientation: userProfile?.demographics?.sexualOrientation && userProfile.demographics.sexualOrientation !== 'Not Specified'
-        ? userProfile.demographics.sexualOrientation
-        : '',
       maritalStatus: userProfile?.demographics?.maritalStatus || 'Not Specified',
       employment: userProfile?.demographics?.employment || 'Not Specified',
       state: userProfile?.demographics?.state || userProfile?.state || '',
@@ -685,7 +679,7 @@ export function ProfileScreen({ navigation }: any) {
                <Text style={{ color: colors.textFaint, fontSize: 13, textAlign: 'center' }}>Check your internet connection and try again.</Text>
                <TouchableOpacity
                  style={{ backgroundColor: '#16a34a', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
-                 onPress={() => { setIsLoadingProfile(true); profileService.getProfile().then(data => { setUserProfile({ name: data.name || 'User', phone: data.phone || '', email: data.email || '', coins: data.karmaCoins || data.coins || 0, address: data.address ? (typeof data.address === 'object' ? data.address.fullAddress : data.address) : '', demographics: { age: data.demographics?.age || data.age || 25, gender: data.demographics?.gender || data.gender || 'Not Specified', sexualOrientation: data.demographics?.sexualOrientation || data.sexualOrientation || 'Not Specified', maritalStatus: data.demographics?.maritalStatus || 'Not Specified', employment: data.demographics?.employment || 'Not Specified' } }); }).catch(() => {}).finally(() => setIsLoadingProfile(false)); }}
+                 onPress={() => { setIsLoadingProfile(true); profileService.getProfile().then(data => { setUserProfile({ name: data.name || 'User', phone: data.phone || '', email: data.email || '', coins: data.karmaCoins || data.coins || 0, address: data.address ? (typeof data.address === 'object' ? data.address.fullAddress : data.address) : '', demographics: { age: data.demographics?.age || data.age || 25, gender: data.demographics?.gender || data.gender || 'Not Specified', maritalStatus: data.demographics?.maritalStatus || 'Not Specified', employment: data.demographics?.employment || 'Not Specified' } }); }).catch(() => {}).finally(() => setIsLoadingProfile(false)); }}
                >
                  <Text style={{ color: 'white', fontWeight: '800' }}>Retry</Text>
                </TouchableOpacity>
@@ -901,14 +895,6 @@ export function ProfileScreen({ navigation }: any) {
                   </View>
 
                   <View style={styles.demoListRow}>
-                    <View style={[styles.demoListIconBg, { backgroundColor: '#f3e8ff' }]}><Heart size={20} color="#8b5cf6" /></View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.demoListLabel}>Sexual orientation</Text>
-                      <Text style={styles.demoListValue}>{userProfile?.demographics?.sexualOrientation && userProfile.demographics.sexualOrientation !== 'Not Specified' ? userProfile.demographics.sexualOrientation : '--'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.demoListRow}>
                     <View style={[styles.demoListIconBg, { backgroundColor: '#fff1f2' }]}><Heart size={20} color="#e11d48" /></View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.demoListLabel}>Marital Status</Text>
@@ -950,10 +936,6 @@ export function ProfileScreen({ navigation }: any) {
                     <SelectionPills options={['Male', 'Female', 'Other']} selected={demoEditForm.gender} onSelect={(t) => setDemoEditForm({...demoEditForm, gender: t})} />
                   </View>
                   <View>
-                    <Text style={styles.fieldLabel}>Sexual orientation</Text>
-                    <SelectionPills options={['Straight', 'Lesbian', 'Gay', 'Others']} selected={demoEditForm.sexualOrientation} onSelect={(t) => setDemoEditForm({...demoEditForm, sexualOrientation: t})} />
-                  </View>
-                  <View>
                     <Text style={styles.fieldLabel}>Marital Status</Text>
                     <SelectionPills options={['Single', 'Married']} selected={demoEditForm.maritalStatus} onSelect={(t) => setDemoEditForm({...demoEditForm, maritalStatus: t})} />
                   </View>
@@ -978,10 +960,7 @@ export function ProfileScreen({ navigation }: any) {
                         return;
                       }
                       try {
-                        // Omit an empty sexualOrientation — the backend rejects '' (it
-                        // must be one of the allowed values); no selection = don't send it.
                         const payload: any = { ...demoEditForm, age: parsedAge, state: demoEditForm.state.trim(), city: demoEditForm.city.trim() };
-                        if (!payload.sexualOrientation) delete payload.sexualOrientation;
                         await profileService.updateDemographics(payload);
                         setUserProfile({...userProfile, demographics: { ...demoEditForm, age: parsedAge }});
                         setIsDemoEditing(false);

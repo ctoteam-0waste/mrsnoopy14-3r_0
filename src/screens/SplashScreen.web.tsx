@@ -436,7 +436,7 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
               {[
-                { num: '1', icon: Target, color: '#16a34a', bg: '#f0fdf4', title: 'Choose sustainable actions', desc: 'Schedule a pickup, play the eco-quiz, or complete a challenge' },
+                { num: '1', icon: Target, color: '#16a34a', bg: '#f0fdf4', title: 'Choose sustainable actions', desc: 'Schedule a free doorstep pickup (Gurugram and nearby, within 50 km), play the eco-quiz, or complete a challenge' },
                 { num: '2', icon: Shield, color: '#0891b2', bg: '#ecfeff', title: 'Complete actions & verify', desc: 'Your action is checked and verified for authenticity' },
                 { num: '3', icon: Coins, color: '#d97706', bg: '#fffbeb', title: 'Earn KarmaCoins', desc: 'Coins are credited to your wallet instantly' },
                 { num: '4', icon: Gift, color: '#e11d48', bg: '#fff1f2', title: 'Redeem rewards', desc: 'Trade coins for products, discounts, or real-world impact' },

@@ -31,7 +31,8 @@ export const TERMS: LegalDoc = {
       bullets: [
         'What we do — we collect segregated recyclable waste from your address, free of charge, in areas we currently serve.',
         'What you get — KarmaCoins XP, loyalty reward points. They are not money and not a payment instrument.',
-        'Where we operate — Gurgaon / Gurugram, Haryana only, at present. Bookings outside a live service area cannot be accepted.',
+        'No cash at pickup — Agents do not pay cash for your material. Every Pickup is rewarded only in KarmaCoins XP, which you can later redeem in the app.',
+        'Where we operate — Gurugram, Haryana and nearby areas within 50 km of central Gurugram, at present. The app checks your exact address when you book; bookings outside a live service area cannot be accepted.',
         'Cashing out — redemption opens on the dates in the KarmaCoins XP section. Payouts run through RazorpayX and require KYC.',
         'Rate for quiz & referral coins — depends on your unbroken verified-pickup streak at the moment you redeem.',
         'Rate for pickup coins — always the best rate: 10 coins = ₹1. Your streak does not affect it.',
@@ -43,7 +44,7 @@ export const TERMS: LegalDoc = {
       heading: 'Definitions',
       bullets: [
         'Agent — an independent pickup partner engaged and verified by the Company to collect, weigh, and verify recyclable waste. Agents are not employees of the Company.',
-        'KarmaCoins XP — non-transferable loyalty reward points issued by the Company. A promotional benefit; not currency, not a security, and not a prepaid payment instrument.',
+        'KarmaCoins XP — loyalty reward points issued by the Company. They can be sent to another registered User only through the in-app "Send coins" feature and are otherwise non-transferable. A promotional benefit; not currency, not a security, and not a prepaid payment instrument.',
         'Payment Partner — RazorpayX, or any successor payment service provider engaged to disburse redemption payouts.',
         'Pickup — a scheduled collection of segregated recyclable waste from a Pickup Address by an Agent.',
         'Pickup Address — the address and coordinates you select or confirm in the app for a given Pickup.',
@@ -130,10 +131,11 @@ export const TERMS: LegalDoc = {
     {
       heading: 'KarmaCoins XP',
       body: [
-        'KarmaCoins XP are loyalty reward points issued as a promotional benefit. They are not legal tender, e-money, a prepaid payment instrument, a security, or a virtual digital asset. You cannot buy them, transfer them, or hold them as a store of value. Any cash payout is a discretionary promotional disbursement, not the redemption of stored value.',
+        'KarmaCoins XP are loyalty reward points issued as a promotional benefit. They are not legal tender, e-money, a prepaid payment instrument, a security, or a virtual digital asset. You cannot buy them, sell them, transfer them outside the app, or hold them as a store of value. Any cash payout is a discretionary promotional disbursement, not the redemption of stored value.',
       ],
       bullets: [
-        'Earning — coins are credited on the category and Agent-verified weight of material collected, and for the daily quiz or qualifying referrals. Rates are set by the Company and may change prospectively.',
+        'Earning — coins are credited on the category and Agent-verified weight of material collected, and for the daily quiz or qualifying referrals. Rates are set by the Company and may change prospectively. Pickups are rewarded only in KarmaCoins XP — Agents do not pay cash at the doorstep.',
+        'Sending coins — you may send KarmaCoins XP to another registered User, identified by their mobile number, through the in-app "Send coins" feature. Pickup coins move one-for-one. Quiz and referral coins move at their ₹ value, so the number the recipient receives can differ from the number you send, depending on each side’s Streak rate; the exact amounts are shown before you confirm. Buying or selling coins for money, inside or outside the app, is not permitted, and we may reverse transfers made in error or through fraud or abuse.',
         'Adjustment — we may adjust, reverse, or revoke coins credited in error or through fraud, abuse, manipulation, system fault, or breach, and will notify you of the reason.',
         'Expiry — coins may carry an expiry period notified in the app; at least 30 days’ notice is given before an expiry is introduced or shortened for coins already in your Wallet.',
         'Redemption is enabled in stages — Pickup coins after 30 September 2026 (subject to verification); Quiz coins after 31 December 2026; Referral coins after 31 December 2026 (subject to anti-abuse rules).',
@@ -167,7 +169,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Referral programme',
       bullets: [
-        'Each User receives a unique referral code. Bonus coins are credited to both the referrer and the referee on the referee’s first successfully completed and verified Pickup.',
+        'Each User receives a unique referral code. When a genuinely new User signs up with your code, both the referrer and the referee are credited 1,000 bonus KarmaCoins XP. Referral coins can be redeemed only from the date and at the Streak-based rate set out above.',
         'The referee must be a genuinely new User who has not previously held an account.',
         'Self-referrals, referrals to accounts you control, fake or automated sign-ups, and coordinated abuse result in reversal of the bonus, termination of the accounts involved, and forfeiture of all coins in them.',
         'We may cap the number of eligible referrals in any period, and may modify or discontinue the programme on notice.',
@@ -285,11 +287,8 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Active service areas',
       bullets: [
-        'Gurgaon / Gurugram, Haryana — Active · Pickups available.',
-        'Delhi — Planned · not yet available.',
-        'Noida, Uttar Pradesh — Planned · not yet available.',
-        'Faridabad, Haryana — Planned · not yet available.',
-        'Ghaziabad, Uttar Pradesh — Planned · not yet available.',
+        'Gurgaon / Gurugram, Haryana and nearby areas within 50 km of central Gurugram — Active · Pickups available.',
+        'Delhi, Noida, Faridabad, and Ghaziabad — addresses within that 50 km radius are already covered; the rest of each city is Planned · not yet available.',
         '"Planned" areas are indicative only and create no commitment as to timing. Coverage within an active area may be partial; the version shown in the app is authoritative.',
       ],
     },

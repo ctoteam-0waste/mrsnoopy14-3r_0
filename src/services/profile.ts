@@ -3,7 +3,7 @@ import { extractList } from '../utils/apiList';
 
 export const profileService = {
   // Update demographics during signup or from profile edit
-  updateDemographics: async (data: { age?: number, gender?: string, maritalStatus?: string, employment?: string, sexualOrientation?: string, city?: string, state?: string }) => {
+  updateDemographics: async (data: { age?: number, gender?: string, maritalStatus?: string, employment?: string, city?: string, state?: string }) => {
     try {
       const response = await api.patch('/api/v1/users/profile', data);
       return response.data;
