@@ -28,6 +28,8 @@ export const NEWS: NewsItem[] = [
     source: 'ThePrint',
     date: '2026-10-21',
     url: 'https://theprint.in/ani-press-releases/3r-zerowaste-reports-consistent-15-20-percent-annual-growth-strengthening-indias-circular-economy-movement/3077776/',
+    // The article's own photo; its og:image is only ThePrint's default logo.
+    image: 'https://staticprintenglish.theprint.in/wp-content/uploads/2026/10/ANI-20261021104251-696x522.jpg',
   },
   {
     id: 'apac-e-waste-urban-mining',
