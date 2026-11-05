@@ -54,17 +54,18 @@ function renderLegalDocHtml(doc) {
 const orgJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: '3RZeroWaste',
+  name: '3R ZeroWaste',
+  legalName: '3R ZeroWaste Private Limited',
   url: 'https://0waste.co.in/',
   logo: `${SITE}/apple-touch-icon.png`,
   email: 'cto.team@0waste.co.in',
   telephone: '+91-70931-98828',
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Plot 62, Sector 8 Rd, IMT Manesar',
+    streetAddress: 'Plot 62, Sector 8, IMT Manesar',
     addressLocality: 'Gurugram',
     addressRegion: 'Haryana',
-    postalCode: '122503',
+    postalCode: '122051',
     addressCountry: 'IN',
   },
 };
@@ -88,9 +89,9 @@ const pages = [
         description:
           "KarmaVerse is India's sustainability rewards ecosystem. Earn KarmaCoins for everyday eco-friendly actions — from doorstep recycling pickups to eco-quizzes — and redeem them for real rewards while creating measurable environmental impact.",
         disambiguatingDescription:
-          'KarmaVerse (karmaverse.earth) is a real-world recycling and sustainability rewards app operated by 3RZeroWaste in India. It has no connection to any blockchain, NFT, or GameFi project of a similar name.',
+          'KarmaVerse (karmaverse.earth) is a real-world recycling and sustainability rewards app operated by 3R ZeroWaste in India. It has no connection to any blockchain, NFT, or GameFi project of a similar name.',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
-        publisher: { '@type': 'Organization', name: '3RZeroWaste', url: 'https://0waste.co.in/' },
+        publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
       {
         '@context': 'https://schema.org',
@@ -121,7 +122,7 @@ const pages = [
     ],
     noscriptBody: `<h1>KarmaVerse — Turning Sustainable Gestures into Rewards</h1>
     <p>
-      KarmaVerse is India's sustainability rewards ecosystem, built by 3RZeroWaste.
+      KarmaVerse is India's sustainability rewards ecosystem, built by 3R ZeroWaste.
       Complete everyday sustainable actions — like doorstep recycling pickups for plastic,
       paper, metal, e-waste, textile and more — and earn KarmaCoins XP. Every action is
       verified, and coins are credited instantly, redeemable for eco-friendly products,
@@ -168,7 +169,7 @@ const pages = [
     outPath: 'legal/privacy/index.html',
     title: 'Privacy Policy — KarmaVerse',
     description:
-      "How KarmaVerse (by 3RZeroWaste) collects, uses, and protects your data. Read the full privacy policy for the KarmaVerse recycling rewards app.",
+      "How KarmaVerse (by 3R ZeroWaste) collects, uses, and protects your data. Read the full privacy policy for the KarmaVerse recycling rewards app.",
     jsonLd: [
       orgJsonLd,
       {
@@ -177,7 +178,7 @@ const pages = [
         name: 'Privacy Policy',
         url: `${SITE}/legal/privacy`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
-        publisher: { '@type': 'Organization', name: '3RZeroWaste', url: 'https://0waste.co.in/' },
+        publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
     ],
     noscriptBody: renderLegalDocHtml(PRIVACY),
@@ -187,7 +188,7 @@ const pages = [
     outPath: 'legal/terms/index.html',
     title: 'Terms & Conditions — KarmaVerse',
     description:
-      'The terms and conditions governing use of the KarmaVerse app and website, operated by 3RZeroWaste.',
+      'The terms and conditions governing use of the KarmaVerse app and website, operated by 3R ZeroWaste.',
     jsonLd: [
       orgJsonLd,
       {
@@ -196,7 +197,7 @@ const pages = [
         name: 'Terms & Conditions',
         url: `${SITE}/legal/terms`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
-        publisher: { '@type': 'Organization', name: '3RZeroWaste', url: 'https://0waste.co.in/' },
+        publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
     ],
     noscriptBody: renderLegalDocHtml(TERMS),
@@ -215,7 +216,7 @@ const pages = [
         name: 'Data Deletion',
         url: `${SITE}/legal/data-deletion`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
-        publisher: { '@type': 'Organization', name: '3RZeroWaste', url: 'https://0waste.co.in/' },
+        publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
     ],
     noscriptBody: renderLegalDocHtml(DATA_DELETION),

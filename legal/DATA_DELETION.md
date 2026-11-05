@@ -1,6 +1,6 @@
 # Data Deletion
 
-**KarmaVer$e** — operated by **3RZeroWaste**
+**KarmaVer$e** — operated by **3R ZeroWaste**
 _Last updated: July 2026_
 
 You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (such as Google or Facebook), at any time.
@@ -30,6 +30,6 @@ Email us from the address associated with your account:
 For questions about this process:
 
 - **Email**: info@0waste.co.in
-- **Address**: 3RZeroWaste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503
+- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
 
-© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.
+© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.

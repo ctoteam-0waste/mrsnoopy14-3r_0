@@ -9,7 +9,7 @@ const BRAND = {
   name: 'KarmaVer$e',            // display wordmark (body/logo)
   namePlain: 'KarmaVerse',       // subject-safe (avoids "$" spam signals)
   currency: 'KarmaCoins XP',     // in-app currency — exact spelling everywhere
-  company: '3RZeroWaste',
+  company: '3R ZeroWaste',
   site: 'https://karmaverse.earth',
   logo: 'https://karmaverse.earth/email-logo.png', // public HTTPS (served by Netlify)
   androidUrl: 'https://play.google.com/store/apps/details?id=com.karmacredits.app',

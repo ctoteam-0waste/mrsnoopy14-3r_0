@@ -1,9 +1,9 @@
 # Privacy Policy
 
-**KarmaVer$e** — operated by **3RZeroWaste**
+**KarmaVer$e** — operated by **3R ZeroWaste**
 _Last updated: July 2026_
 
-This policy explains what information KarmaVer$e (by 3RZeroWaste) collects, how we use it, and the choices you have. We are committed to protecting your privacy and handling your data responsibly.
+This policy explains what information KarmaVer$e (by 3R ZeroWaste) collects, how we use it, and the choices you have. We are committed to protecting your privacy and handling your data responsibly.
 
 ## 1. Information we collect
 
@@ -92,7 +92,7 @@ To provide and improve our services, we collect:
 In accordance with the Information Technology Act, 2000, rules made thereunder, and the Digital Personal Data Protection Act, 2023, grievances regarding this policy may be directed to our Grievance Officer at:
 
 - **Email**: info@0waste.co.in
-- **Address**: 3RZeroWaste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503
+- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
 - **Response time**: We will acknowledge grievances within 24 hours and aim to resolve them within 15 days, as required by law.
 
 ## 14. Changes to this policy
@@ -106,8 +106,8 @@ In accordance with the Information Technology Act, 2000, rules made thereunder, 
 For any privacy questions or requests:
 
 - **Email**: info@0waste.co.in
-- **Address**: 3RZeroWaste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503
+- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
 
 ---
 
-© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.
+© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.

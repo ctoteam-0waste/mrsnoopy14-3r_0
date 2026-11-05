@@ -38,14 +38,14 @@ export function AboutUsScreen({ navigation }: any) {
               </View>
             </View>
             <Text style={styles.headerTitle}>About KarmaVer$e</Text>
-            <Text style={styles.headerSub}>A product of 3RZeroWaste Pvt. Ltd.</Text>
+            <Text style={styles.headerSub}>A product of 3R ZeroWaste Private Limited</Text>
           </View>
         </SafeAreaView>
       </LinearGradient>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <Text style={styles.intro}>
-          KarmaVer$e is the sustainable rewards platform built by 3RZeroWaste Pvt. Ltd. — a Haryana-based
+          KarmaVer$e is the sustainable rewards platform built by 3R ZeroWaste Private Limited — a Haryana-based
           company founded to make responsible resource recovery effortless and rewarding for every household in India.
         </Text>
 
@@ -94,7 +94,7 @@ export function AboutUsScreen({ navigation }: any) {
         ))}
 
         <TouchableOpacity style={styles.companyLink} onPress={() => Linking.openURL('https://0waste.co.in/')}>
-          <Text style={styles.companyLinkText}>Learn more about 3RZeroWaste at 0waste.co.in ↗</Text>
+          <Text style={styles.companyLinkText}>Learn more about 3R ZeroWaste at 0waste.co.in ↗</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

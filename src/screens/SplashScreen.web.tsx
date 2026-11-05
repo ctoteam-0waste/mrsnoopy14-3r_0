@@ -332,7 +332,7 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={s.poweredByBadge}>
               <View style={s.poweredByDot}><Text style={s.poweredByDotText}>3R</Text></View>
-              <Text style={s.poweredByText}>Powered by <Text style={{ color: 'white', fontWeight: '800' }}>3RZeroWaste</Text></Text>
+              <Text style={s.poweredByText}>Powered by <Text style={{ color: 'white', fontWeight: '800' }}>3R ZeroWaste</Text></Text>
             </View>
 
             {/* CTA */}
@@ -511,7 +511,7 @@ export function SplashScreen({ navigation, route }: any) {
                 <Image source={require('../../assets/logo-nav.png')} resizeMode="contain" style={s.footerLogoImg} />
               </View>
               <Text style={s.footerDesc}>
-                3RZeroWaste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its sustainability rewards ecosystem.
+                3R ZeroWaste was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its sustainability rewards ecosystem.
               </Text>
               <TouchableOpacity onPress={() => Linking.openURL('https://0waste.co.in/')}>
                 <Text style={[s.footerLink, { marginTop: 10, color: '#4ade80', fontWeight: '700' }]}>0waste.co.in ↗</Text>
@@ -582,7 +582,7 @@ export function SplashScreen({ navigation, route }: any) {
             </View>
           </View>
           <View style={[s.container, s.footerBottom, isMobile && { paddingHorizontal: 20 }]}>
-            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.</Text>
+            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3R ZeroWaste. All rights reserved.</Text>
           </View>
         </View>
 

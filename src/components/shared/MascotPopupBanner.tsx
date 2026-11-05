@@ -229,7 +229,7 @@ export function MascotPopupBanner({ suppressed = false }: Props) {
         </TouchableOpacity>
 
         <TouchableOpacity style={s.lookPill} onPress={visitWebsite} activeOpacity={0.85}>
-          <Text style={s.lookPillText}>We're part of the 3RZeroWaste movement</Text>
+          <Text style={s.lookPillText}>We're part of the 3R ZeroWaste movement</Text>
           <ArrowRight size={12} color="#16a34a" />
         </TouchableOpacity>
       </Animated.View>

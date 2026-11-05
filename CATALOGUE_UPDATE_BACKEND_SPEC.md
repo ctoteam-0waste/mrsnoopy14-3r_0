@@ -10,7 +10,7 @@ validator enum). Once confirmed, the frontend will wire each item (with images/l
 the **exact** `category` + `subCategory` strings you finalise.
 
 Legend: `unit` = kg | piece · `condition` = items sold as Working / Not Working (2 prices).
-Reward values below are the requested targets — **confirm final KC with 3RZeroWaste/CEO**.
+Reward values below are the requested targets — **confirm final KC with 3R ZeroWaste/CEO**.
 
 ---
 
@@ -85,7 +85,7 @@ Store screen is currently "Coming soon". To list partner rewards we need, per pa
 - **Glass tab → Red** (official-bin colour); Textile label softened ("Textiles")
 - **Knowledge Hub — Indian & International sustainability leaders** (2 new articles)
 
-## Pending 3RZeroWaste inputs (design/brand, not code)
+## Pending 3R ZeroWaste inputs (design/brand, not code)
 - Full **official bin-colour mapping** for every category (only Glass=Red is applied so far)
 - Apple / Google / OnePlus **logo assets** for E-Waste
 - Partner **logos + reward terms** for the Store

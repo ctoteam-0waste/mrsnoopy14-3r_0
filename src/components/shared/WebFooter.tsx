@@ -145,7 +145,7 @@ export function WebFooter() {
       {/* Bottom bar */}
       <View style={s.bottomBar}>
         <View style={[s.container, { paddingHorizontal: pad }, isMobile ? s.bottomContentMobile : s.bottomContent]}>
-          <Text style={s.copyright}>© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.</Text>
+          <Text style={s.copyright}>© 2026 KarmaVer$e by 3R ZeroWaste. All rights reserved.</Text>
           <View style={s.legalLinks}>
             <TouchableOpacity onPress={() => navigation.navigate('Legal', { type: 'privacy' })}>
               <Text style={s.legalLink}>Privacy policy</Text>

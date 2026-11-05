@@ -1,9 +1,9 @@
 # Terms & Conditions
 
-**KarmaVer$e** — operated by **3RZeroWaste**
+**KarmaVer$e** — operated by **3R ZeroWaste**
 _Last updated: July 2026_
 
-Welcome to KarmaVer$e, operated by 3RZeroWaste. By downloading, installing, or using the KarmaVer$e app or website, you agree to be bound by these terms. If you do not agree, please do not use the service.
+Welcome to KarmaVer$e, operated by 3R ZeroWaste. By downloading, installing, or using the KarmaVer$e app or website, you agree to be bound by these terms. If you do not agree, please do not use the service.
 
 ## 1. Definitions
 
@@ -84,7 +84,7 @@ By using the service, you agree not to:
 
 ## 10. Intellectual property
 
-- The KarmaVer$e app, website, logo, the names "KarmaVer$e" and "KarmaCoins XP," and all related content, features, and functionality are owned by 3RZeroWaste and protected by applicable intellectual property laws.
+- The KarmaVer$e app, website, logo, the names "KarmaVer$e" and "KarmaCoins XP," and all related content, features, and functionality are owned by 3R ZeroWaste and protected by applicable intellectual property laws.
 - You may not copy, modify, distribute, sell, or lease any part of the app or its content without our prior written consent.
 - Any feedback, ratings, or reviews you submit may be used by us to operate and improve the platform. You grant us a non-exclusive, royalty-free, worldwide license to use such content for that purpose.
 
@@ -97,7 +97,7 @@ By using the service, you agree not to:
 
 ## 12. Indemnification
 
-- You agree to indemnify and hold harmless 3RZeroWaste, its officers, employees, and Agents from any claims, damages, losses, or expenses (including reasonable legal fees) arising from your violation of these terms, misuse of the service, or violation of any law or third-party rights.
+- You agree to indemnify and hold harmless 3R ZeroWaste, its officers, employees, and Agents from any claims, damages, losses, or expenses (including reasonable legal fees) arising from your violation of these terms, misuse of the service, or violation of any law or third-party rights.
 
 ## 13. Termination
 
@@ -115,7 +115,7 @@ By using the service, you agree not to:
 
 ## 15. General provisions
 
-- **Entire agreement**: These terms, together with our Privacy Policy, constitute the entire agreement between you and 3RZeroWaste regarding the service.
+- **Entire agreement**: These terms, together with our Privacy Policy, constitute the entire agreement between you and 3R ZeroWaste regarding the service.
 - **Severability**: If any provision of these terms is found invalid or unenforceable, the remaining provisions continue in full force and effect.
 - **No waiver**: Our failure to enforce any right or provision of these terms is not a waiver of that right or provision.
 - **Assignment**: We may assign or transfer these terms, in whole or in part, in connection with a merger, acquisition, or sale of assets. You may not assign your rights or obligations under these terms without our prior written consent.
@@ -132,10 +132,10 @@ For any questions or complaints about these terms or the service:
 
 - **Email**: info@0waste.co.in
 - **Phone**: 070931 98828
-- **Address**: 3RZeroWaste, Plot 62, Sector 8 Rd, IMT Manesar, Gurugram, Haryana 122503
+- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
 - **In-app**: use the "Need help?" option
 
 ---
 
 By using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these terms and conditions.
-© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.
+© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.

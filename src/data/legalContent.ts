@@ -1,6 +1,6 @@
 // Legal content for KarmaVer$e. Edit the copy here — the LegalScreen renders it,
 // and the website serves it at /legal/:type (terms | privacy | terms-of-use | data-deletion).
-// Source of truth: 3R Zero Waste legal documentation —
+// Source of truth: 3R ZeroWaste legal documentation —
 //   Terms & Conditions v2.0, Privacy Policy v2.0, Terms of Use v1.0 (August 2026).
 // Placeholders in the source docs (officer names, effective date, business hours) are
 // shown here as role + contact; fill the names/date/hours before publishing.
@@ -23,7 +23,7 @@ export const TERMS: LegalDoc = {
   title: 'Terms & conditions',
   updated: '2 September 2026',
   intro:
-    `KarmaVer$e is operated by 3R Zero Waste ("Company", "we", "us", "our"), with its registered office at Plot 62, Sector 8 Road, IMT Manesar, Gurugram, Haryana 122503. These Terms & Conditions ("Terms") govern your access to and use of the KarmaVer$e app, website, and related services (the "Service"). Our Privacy Policy is incorporated by reference and forms part of your agreement with us. By creating an account, scheduling a pickup, or otherwise using the Service, you confirm that you have read and accepted these Terms. If you do not accept them, you must not use the Service.`,
+    `KarmaVer$e is operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our"), with its registered office at 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010, and its operating office at Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051. These Terms & Conditions ("Terms") govern your access to and use of the KarmaVer$e app, website, and related services (the "Service"). Our Privacy Policy is incorporated by reference and forms part of your agreement with us. By creating an account, scheduling a pickup, or otherwise using the Service, you confirm that you have read and accepted these Terms. If you do not accept them, you must not use the Service.`,
   sections: [
     {
       heading: 'At a glance',
@@ -278,7 +278,8 @@ export const TERMS: LegalDoc = {
         'General enquiries — info@karmaverse.earth · 070931 98828',
         'Grievance Officer (Terms, content, and platform complaints) — grievance@karmaverse.earth',
         'Data protection / privacy requests — see the Privacy Policy, Contact section',
-        'Registered address — 3R Zero Waste, Plot 62, Sector 8 Road, IMT Manesar, Gurugram, Haryana 122503',
+        'Registered office — 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010',
+        'Operating office — Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051',
       ],
     },
     {
@@ -293,20 +294,20 @@ export const TERMS: LegalDoc = {
       ],
     },
   ],
-  closing: 'By using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these Terms & Conditions.\n© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.',
+  closing: 'By using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these Terms & Conditions.\n© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
 };
 
 export const PRIVACY: LegalDoc = {
   title: 'Privacy policy',
   updated: '2 September 2026',
   intro:
-    `3R Zero Waste ("Company", "we", "us", "our") operates the KarmaVer$e app and website (the "Service"). We are the Data Fiduciary for the personal data described here, which means we determine why and how it is processed. This Policy explains what personal data we collect, why, who we share it with, how long we keep it, and your rights under India’s Digital Personal Data Protection Act, 2023. It should be read together with our Terms & Conditions.`,
+    `3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our") operates the KarmaVer$e app and website (the "Service"). We are the Data Fiduciary for the personal data described here, which means we determine why and how it is processed. This Policy explains what personal data we collect, why, who we share it with, how long we keep it, and your rights under India’s Digital Personal Data Protection Act, 2023. It should be read together with our Terms & Conditions.`,
   sections: [
     {
       heading: 'At a glance',
       body: ['This summary is for convenience only. The detailed sections below govern.'],
       bullets: [
-        'Who controls my data? 3R Zero Waste, as Data Fiduciary under the DPDP Act, 2023.',
+        'Who controls my data? 3R ZeroWaste Private Limited, as Data Fiduciary under the DPDP Act, 2023.',
         'What is most sensitive? Your pickup address and location, and — if you cash out — your bank or UPI details.',
         'Do you track my location in the background? No. We access location only while you are scheduling or a Pickup is being fulfilled.',
         'Who sees my address? Only the Agent assigned to your Pickup, and our staff on a need-to-know basis. Never other Users.',
@@ -439,20 +440,20 @@ export const PRIVACY: LegalDoc = {
         'Privacy grievances and escalations — Grievance Officer, grievance@karmaverse.earth',
         'General enquiries — info@karmaverse.earth · 070931 98828',
         'In-app — "Need help?" → Privacy',
-        'Postal address — 3R Zero Waste, Plot 62, Sector 8 Road, IMT Manesar, Gurugram, Haryana 122503',
+        'Postal address — 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051 (registered office: 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010)',
         'Regulator — the Data Protection Board of India, if you are not satisfied with our response.',
         'This Policy is governed by the laws of India, principally the Digital Personal Data Protection Act, 2023 and the Information Technology Act, 2000. Disputes are subject to the courts at Gurugram, Haryana, without prejudice to your right to approach the Data Protection Board or a consumer forum where you reside or work.',
       ],
     },
   ],
-  closing: 'By using KarmaVer$e, you acknowledge that you have read and understood this Privacy Policy.\n© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.',
+  closing: 'By using KarmaVer$e, you acknowledge that you have read and understood this Privacy Policy.\n© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
 };
 
 export const TERMS_OF_USE: LegalDoc = {
   title: 'Terms of use',
   updated: '2 September 2026',
   intro:
-    `These Terms of Use govern your access to and use of the KarmaVer$e app and website (the "Platform"), operated by 3R Zero Waste. They cover what you are allowed to do on the Platform — the licence to use it, acceptable use, content you post, intellectual property, availability, and our role as an intermediary. By accessing or using the Platform — whether or not you register — you accept these Terms of Use. If you register or book a Pickup, our Terms & Conditions also apply. If you do not accept these Terms of Use, you must not use the Platform.`,
+    `These Terms of Use govern your access to and use of the KarmaVer$e app and website (the "Platform"), operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568). They cover what you are allowed to do on the Platform — the licence to use it, acceptable use, content you post, intellectual property, availability, and our role as an intermediary. By accessing or using the Platform — whether or not you register — you accept these Terms of Use. If you register or book a Pickup, our Terms & Conditions also apply. If you do not accept these Terms of Use, you must not use the Platform.`,
   sections: [
     {
       heading: 'How our documents fit together',
@@ -577,7 +578,7 @@ export const TERMS_OF_USE: LegalDoc = {
         'We may update these Terms of Use for changes to the Platform, our practices, or legal requirements. Material changes are notified at least 30 days before they take effect; non-material changes take effect on publication. Continued use after a change constitutes acceptance.',
         'These Terms of Use, with the Terms & Conditions and Privacy Policy, form the entire agreement about the Platform. If any provision is invalid it is severed; our failure to enforce a right is not a waiver. You may not assign your rights; we may, provided your rights are not reduced.',
         'These Terms of Use are made in English (the English version prevails) and are governed by the laws of India. Subject to your consumer rights, the courts at Gurugram, Haryana have exclusive jurisdiction. We attempt informal resolution for at least 30 days before legal proceedings, without preventing urgent interim relief.',
-        'Contact — general support in-app "Need help?"; Grievance Officer (content reports, platform complaints, IP notices) grievance@karmaverse.earth; security reports security@karmaverse.earth; privacy requests privacy@karmaverse.earth; general enquiries info@karmaverse.earth · 070931 98828; registered address 3R Zero Waste, Plot 62, Sector 8 Road, IMT Manesar, Gurugram, Haryana 122503.',
+        'Contact — general support in-app "Need help?"; Grievance Officer (content reports, platform complaints, IP notices) grievance@karmaverse.earth; security reports security@karmaverse.earth; privacy requests privacy@karmaverse.earth; general enquiries info@karmaverse.earth · 070931 98828; registered office 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010; operating office Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051.',
       ],
     },
     {
@@ -599,7 +600,7 @@ export const TERMS_OF_USE: LegalDoc = {
       ],
     },
   ],
-  closing: 'By accessing or using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these Terms of Use.\n© 2026 KarmaVer$e by 3R Zero Waste. All rights reserved.',
+  closing: 'By accessing or using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these Terms of Use.\n© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
 };
 
 export const DATA_DELETION: LegalDoc = {
@@ -640,9 +641,9 @@ export const DATA_DELETION: LegalDoc = {
       body: ['For questions about this process:'],
       bullets: [
         'Email: info@0waste.co.in',
-        'Address: 3RZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051',
+        'Address: 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051',
       ],
     },
   ],
-  closing: '© 2026 KarmaVer$e by 3RZeroWaste. All rights reserved.',
+  closing: '© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
 };

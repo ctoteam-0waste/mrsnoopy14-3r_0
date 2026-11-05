@@ -5,7 +5,7 @@ Paste everything below the line into Emergent.
 ---
 
 You are redesigning the transactional email templates for **KarmaVer$e**, a sustainability-rewards
-platform by **3RZeroWaste** (India). I need production-ready, email-client-safe HTML. Follow the hard
+platform by **3R ZeroWaste** (India). I need production-ready, email-client-safe HTML. Follow the hard
 constraints exactly — the emails plug into an existing backend and must not break it.
 
 ## What you must NOT change (hard contract)
@@ -28,9 +28,9 @@ constraints exactly — the emails plug into an existing backend and must not br
 
 ## Brand
 - Product wordmark: **KarmaVer$e** (the "$" is intentional). In-app currency: **KarmaCoins XP** (use
-  this exact spelling everywhere — never "Karma Coins" or "KC"). Company: **3RZeroWaste**.
+  this exact spelling everywhere — never "Karma Coins" or "KC"). Company: **3R ZeroWaste**.
 - Contact: `info@0waste.co.in`, `+91 70931 98828`, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana
-  122503. Website `https://0waste.co.in/`.
+  122051. Website `https://0waste.co.in/`.
 - Tagline you may use sparingly: "Kar Bhala Toh Ho Bhala."
 - Palette: deep green `#052e16`, green `#15803d`, mint CTA `#4ade80` (button text `#052e16`), page bg
   `#f1f5f9`, card `#ffffff`, muted text `#64748b`, dark text `#0f172a`.
