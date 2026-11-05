@@ -158,7 +158,7 @@ const pages = [
         name: 'KarmaVerse Blog',
         url: `${SITE}/blog`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
-        publisher: { '@type': 'Organization', name: '3RZeroWaste', url: 'https://0waste.co.in/' },
+        publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
     ],
     noscriptBody: `<h1>KarmaVerse Blog</h1>
