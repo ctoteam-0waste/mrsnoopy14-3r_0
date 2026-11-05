@@ -427,7 +427,7 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
               {m.type === 'upi' ? <AtSign size={18} color={colors.primary} /> : <Landmark size={18} color={colors.primary} />}
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.methodTitle} numberOfLines={1}>{methodLabel(m)}</Text>
+              <Text style={styles.methodTitle} numberOfLines={2}>{methodLabel(m)}</Text>
               <View style={styles.methodStatusRow}>
                 {st.icon}
                 <Text style={[styles.methodStatus, { color: st.color }]} numberOfLines={2}>{st.text}</Text>
