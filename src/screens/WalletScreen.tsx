@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator,
 import { useTheme, makeStyles } from '../theme';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Flame, Snowflake, Recycle, Gift, Award, X, ChevronRight } from 'lucide-react-native';
+import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Flame, Snowflake, Recycle, Gift, Award, X, ChevronRight, Banknote, Undo2 } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { CoinShower } from '../components/shared/CoinShower';
 import { isDiwaliSeason } from '../utils/festive';
@@ -23,6 +23,8 @@ function txSourceIcon(source?: string, isCredit?: boolean) {
     case 'QUIZ': return <Award size={20} color="#7c3aed" />;
     case 'REFERRAL': case 'WELCOME_BONUS': return <Gift size={20} color="#d97706" />;
     case 'STREAK_FREEZE': return <Snowflake size={20} color="#0ea5e9" />;
+    case 'REDEEM': return <Banknote size={20} color="#e11d48" />;
+    case 'REFUND': return <Undo2 size={20} color="#16a34a" />;
     case 'TRANSFER': return isCredit ? <ArrowDownLeft size={20} color="#16a34a" /> : <ArrowUpRight size={20} color="#d97706" />;
     default: return isCredit ? <ArrowDownLeft size={20} color="#16a34a" /> : <ArrowUpRight size={20} color="#e11d48" />;
   }

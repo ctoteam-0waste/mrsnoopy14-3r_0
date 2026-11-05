@@ -44,6 +44,7 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
   const bookingId = data?.bookingId;
   const booking = bookingId ? { _id: bookingId } : undefined;
   const target = data?.screen || data?.route;
+  const withdrawalId = data?.withdrawalId || data?.redeemId || data?.redeemRequestId;
 
   // ── An action button was tapped — route by the button, not the default target. ──
   if (actionIdentifier && actionIdentifier !== DEFAULT_ACTION) {
@@ -85,11 +86,26 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
     case 'BOOKING_CANCEL_SUCCESS':
       nav.navigate('App', { screen: 'Orders' });
       return;
+    // RazorpayX payouts: money sent, failed or bounced back → that withdrawal.
+    case 'WITHDRAWAL_PROCESSING':
+    case 'WITHDRAWAL_PAID':
+    case 'WITHDRAWAL_FAILED':
+    case 'WITHDRAWAL_REVERSED':
+      if (withdrawalId) nav.navigate('Withdrawal', { id: withdrawalId });
+      else nav.navigate('RedeemHistory');
+      return;
+    // A bank account or UPI ID finished verifying → the withdraw screen lists it.
+    case 'PAYOUT_METHOD_VERIFIED':
+    case 'PAYOUT_METHOD_NAME_MISMATCH':
+    case 'PAYOUT_METHOD_FAILED':
+      nav.navigate('Redeem');
+      return;
   }
 
   // ── Everything else (engagement / marketing, payouts, alerts). Route by the
   //    explicit target the backend set, then by a known type. ──
   if (target === 'OrderTracking' && booking) { nav.navigate('OrderTracking', { booking }); return; }
+  if (target === 'Withdrawal' && withdrawalId) { nav.navigate('Withdrawal', { id: withdrawalId }); return; }
   if (goToScreen(nav, target)) return;
   if (data?.type && goToScreen(nav, TYPE_SCREEN[data.type])) return;
 

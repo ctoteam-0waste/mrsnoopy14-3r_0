@@ -13,6 +13,8 @@ import { REDEEM_INFO_MESSAGE } from '../utils/redeemInfo';
 import { trackEvent } from '../utils/analytics';
 import { LedgerType, PICKUP_RATE, rupeesFor, formatRupees } from '../utils/streakTiers';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
+import { payoutService, PayoutMethod } from '../services/payout';
+import { WithdrawScreen } from './WithdrawScreen';
 
 const MIN_COINS = 10;
 const QUICK_AMOUNTS = [10, 20, 50, 100];
@@ -20,7 +22,45 @@ const QUICK_AMOUNTS = [10, 20, 50, 100];
 const IFSC_REGEX = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
 const ACCOUNT_NUMBER_REGEX = /^\d{9,18}$/;
 
-export function RedeemScreen({ navigation, route }: any) {
+// RazorpayX withdrawals once the backend has /payout-methods; the manual bank
+// form until then.
+export function RedeemScreen(props: any) {
+  const { colors } = useTheme();
+  const [gate, setGate] = useState<'loading' | 'error' | 'manual' | 'payout'>('loading');
+  const [methods, setMethods] = useState<PayoutMethod[]>([]);
+
+  const check = () => {
+    setGate('loading');
+    payoutService.listMethods()
+      .then((list) => {
+        if (list) { setMethods(list); setGate('payout'); }
+        else setGate('manual');
+      })
+      .catch(() => setGate('error'));
+  };
+
+  useEffect(check, []);
+
+  if (gate === 'payout') return <WithdrawScreen {...props} initialMethods={methods} />;
+  if (gate === 'manual') return <ManualRedeemScreen {...props} />;
+  return (
+    <View style={{ flex: 1, backgroundColor: colors.bg, alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24 }}>
+      {gate === 'loading' ? <ActivityIndicator color={colors.primary} /> : (
+        <>
+          <Text style={{ color: colors.textMuted, fontSize: 15, textAlign: 'center' }}>Could not load this page. Please check your connection.</Text>
+          <TouchableOpacity onPress={check} style={{ padding: 10 }}>
+            <Text style={{ color: colors.primary, fontSize: 15, fontWeight: '800' }}>Try again</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => props.navigation.canGoBack() ? props.navigation.goBack() : props.navigation.navigate('App')} style={{ padding: 10 }}>
+            <Text style={{ color: colors.textMuted, fontSize: 14, fontWeight: '700' }}>Go back</Text>
+          </TouchableOpacity>
+        </>
+      )}
+    </View>
+  );
+}
+
+function ManualRedeemScreen({ navigation, route }: any) {
   // Which wallet is being redeemed — 'pickup' (fixed 10:1) or 'reward' (streak tier rate).
   const ledger: LedgerType = route?.params?.ledger === 'reward' ? 'reward' : 'pickup';
   const isPickup = ledger === 'pickup';

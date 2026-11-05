@@ -72,6 +72,8 @@ const OrderTrackingScreen = lazyScreen(() => import('../screens/OrderTrackingScr
 const BookingDetailsScreen = lazyScreen(() => import('../screens/BookingDetailsScreen'), (m) => m.BookingDetailsScreen);
 const RedeemScreen = lazyScreen(() => import('../screens/RedeemScreen'), (m) => m.RedeemScreen);
 const RedeemHistoryScreen = lazyScreen(() => import('../screens/RedeemHistoryScreen'), (m) => m.RedeemHistoryScreen);
+const AddPayoutMethodScreen = lazyScreen(() => import('../screens/AddPayoutMethodScreen'), (m) => m.AddPayoutMethodScreen);
+const WithdrawalDetailScreen = lazyScreen(() => import('../screens/WithdrawalDetailScreen'), (m) => m.WithdrawalDetailScreen);
 const DonationScreen = lazyScreen(() => import('../screens/DonationScreen'), (m) => m.DonationScreen);
 const TransferScreen = lazyScreen(() => import('../screens/TransferScreen'), (m) => m.TransferScreen);
 
@@ -179,6 +181,8 @@ export function RootNavigator() {
             BookingDetails: 'BookingDetails',
             Redeem: 'Redeem',
             RedeemHistory: 'RedeemHistory',
+            AddPayoutMethod: 'AddPayoutMethod',
+            Withdrawal: 'Withdrawal',
             Donation: 'Donation',
             Transfer: 'Transfer',
             AboutUs: 'AboutUs',
@@ -250,6 +254,8 @@ export function RootNavigator() {
         <Stack.Screen name="Legal" component={LegalScreen} />
         <Stack.Screen name="Redeem" component={RedeemScreen} />
         <Stack.Screen name="RedeemHistory" component={RedeemHistoryScreen} />
+        <Stack.Screen name="AddPayoutMethod" component={AddPayoutMethodScreen} />
+        <Stack.Screen name="Withdrawal" component={WithdrawalDetailScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
         <Stack.Screen name="Transfer" component={TransferScreen} />
         <Stack.Screen name="AboutUs" component={AboutUsScreen} />
