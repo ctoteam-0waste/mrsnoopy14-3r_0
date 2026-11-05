@@ -22,6 +22,8 @@ const PROTECTED = [
   '/profile',
   '/redeem',
   '/redeemhistory',
+  '/addpayoutmethod',
+  '/withdrawal',
   '/quiz',
   '/referral',
   '/schedulepickup',

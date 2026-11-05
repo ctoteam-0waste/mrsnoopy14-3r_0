@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ChevronLeft, Clock, CheckCircle2, XCircle, History } from 'lucide-react-native';
+import { ChevronLeft, History, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
-import { redeemService } from '../services/redeem';
+import { payoutService, methodLabel, formatInr } from '../services/payout';
+import { withdrawalStatusMeta, refundNote } from '../components/shared/WithdrawalProgress';
+import { WebFooter } from '../components/shared/WebFooter';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
@@ -18,7 +20,7 @@ export function RedeemHistoryScreen({ navigation }: any) {
     const fetchRequests = async () => {
       try {
         setIsLoading(true);
-        const data = await redeemService.getMyRequests();
+        const data = await payoutService.getMyWithdrawals();
         setRequests(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch redeem requests', error);
@@ -32,16 +34,8 @@ export function RedeemHistoryScreen({ navigation }: any) {
     return unsubscribe;
   }, [navigation]);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'PAID': return { bg: '#dcfce7', text: '#16a34a', icon: <CheckCircle2 size={14} color="#16a34a" /> };
-      case 'REJECTED': return { bg: '#fee2e2', text: '#dc2626', icon: <XCircle size={14} color="#dc2626" /> };
-      case 'PENDING': default: return { bg: '#fef3c7', text: '#d97706', icon: <Clock size={14} color="#d97706" /> };
-    }
-  };
-
   const formatDate = (dateStr?: string) =>
-    dateStr ? new Date(dateStr).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+    dateStr ? new Date(dateStr).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
 
   // "Pickup · 10:1" or "Reward · Diamond (20:1)" — from the fields captured at submit time.
   const ledgerLabel = (req: any): string | null => {
@@ -61,63 +55,81 @@ export function RedeemHistoryScreen({ navigation }: any) {
             <TouchableOpacity style={styles.backBtnInner} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
               <ChevronLeft size={22} color="white" />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Redeem requests</Text>
+            <Text style={styles.headerTitle}>Withdrawals</Text>
             <View style={{ width: 36 }} />
           </View>
         </SafeAreaView>
       </LinearGradient>
 
-      <ScrollView style={styles.scroll} contentContainerStyle={{ padding: 16, paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
-        {isLoading ? (
-          <View style={{ marginTop: 40, alignItems: 'center' }}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={{ marginTop: 12, color: colors.textMuted }}>Loading your requests...</Text>
-          </View>
-        ) : requests.length === 0 ? (
-          <View style={styles.emptyState}>
-            <History size={56} color={colors.textFaint} />
-            <Text style={styles.emptyText}>No redeem requests yet.</Text>
-          </View>
-        ) : (
-          requests.map((req) => {
-            const sc = getStatusColor(req.status);
-            return (
-              <View key={req._id} style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <View style={styles.amountRow}>
-                    <KarmaCoin size={18} />
-                    <Text style={styles.coinsText}>-{req.coinsRedeemed}</Text>
-                    <Text style={styles.rupeesText}>≈ ₹{req.amountInRupees}</Text>
+      <ScrollView style={styles.scroll} contentContainerStyle={{ flexGrow: 1, paddingBottom: Platform.OS === 'web' ? 0 : 40 }} showsVerticalScrollIndicator={false}>
+        <View style={styles.list}>
+          {isLoading ? (
+            <View style={{ marginTop: 40, alignItems: 'center' }}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={{ marginTop: 12, color: colors.textMuted }}>Loading your withdrawals...</Text>
+            </View>
+          ) : requests.length === 0 ? (
+            <View style={styles.emptyState}>
+              <History size={56} color={colors.textFaint} />
+              <Text style={styles.emptyText}>No withdrawals yet.</Text>
+            </View>
+          ) : (
+            requests.map((req) => {
+              const sc = withdrawalStatusMeta(req.status);
+              const note = refundNote(req);
+              return (
+                <TouchableOpacity
+                  key={req._id}
+                  style={styles.card}
+                  onPress={() => navigation.navigate('Withdrawal', { id: req._id, withdrawal: req })}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                >
+                  <View style={styles.cardHeader}>
+                    <View style={styles.amountRow}>
+                      <KarmaCoin size={18} />
+                      <Text style={styles.coinsText}>-{Number(req.coinsRedeemed || 0).toLocaleString('en-IN')}</Text>
+                      <Text style={styles.rupeesText}>{formatInr(Number(req.amountInRupees) || 0)}</Text>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
+                      {sc.icon}
+                      <Text style={[styles.statusText, { color: sc.text }]}>{sc.label}</Text>
+                    </View>
                   </View>
-                  <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
-                    {sc.icon}
-                    <Text style={[styles.statusText, { color: sc.text }]}>{req.status}</Text>
+
+                  {ledgerLabel(req) && (
+                    <View style={styles.ledgerBadge}>
+                      <Text style={styles.ledgerBadgeText}>{ledgerLabel(req)}</Text>
+                    </View>
+                  )}
+
+                  {!!req.payoutMethod && <Text style={styles.accountText}>To {methodLabel(req.payoutMethod)}</Text>}
+
+                  <Text style={styles.dateText}>Requested {formatDate(req.createdAt)}</Text>
+
+                  {req.status === 'PAID' && req.processedAt && (
+                    <Text style={styles.paidText}>Paid on {formatDate(req.processedAt)}</Text>
+                  )}
+
+                  {req.status === 'PAID' && !!req.utr && (
+                    <Text style={styles.utrText} selectable>UTR {req.utr}</Text>
+                  )}
+
+                  {!!note && (
+                    <View style={styles.rejectionBanner}>
+                      <Text style={styles.rejectionText}>{note}</Text>
+                    </View>
+                  )}
+                  <View style={styles.detailsRow}>
+                    <Text style={styles.detailsText}>View details</Text>
+                    <ChevronRight size={16} color={colors.primary} />
                   </View>
-                </View>
-
-                {ledgerLabel(req) && (
-                  <View style={styles.ledgerBadge}>
-                    <Text style={styles.ledgerBadgeText}>{ledgerLabel(req)}</Text>
-                  </View>
-                )}
-
-                <Text style={styles.dateText}>Requested {formatDate(req.createdAt)}</Text>
-
-                {req.status === 'PAID' && req.processedAt && (
-                  <Text style={styles.paidText}>Paid on {formatDate(req.processedAt)}</Text>
-                )}
-
-                {req.status === 'REJECTED' && (
-                  <View style={styles.rejectionBanner}>
-                    <Text style={styles.rejectionText}>
-                      {req.rejectionReason || 'Request rejected.'} Your coins have been refunded.
-                    </Text>
-                  </View>
-                )}
-              </View>
-            );
-          })
-        )}
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </View>
+        {Platform.OS === 'web' && <WebFooter />}
       </ScrollView>
     </View>
   );
@@ -132,6 +144,9 @@ const useStyles = makeStyles((c) => ({
   backBtnInner: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
   headerTitle: { fontSize: 20, fontWeight: '900', color: 'white', textAlign: 'center' },
 
+  list: { flexGrow: 1, padding: 16, maxWidth: 800, width: '100%', alignSelf: 'center' },
+  detailsRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10, alignSelf: 'flex-end' },
+  detailsText: { fontSize: 13, color: c.primary, fontWeight: '800' },
   emptyState: { alignItems: 'center', paddingVertical: 60 },
   emptyText: { color: c.textFaint, marginTop: 12, fontWeight: '600' },
 
@@ -148,6 +163,8 @@ const useStyles = makeStyles((c) => ({
 
   dateText: { fontSize: 12, color: c.textFaint, fontWeight: '500', marginTop: 8 },
   paidText: { fontSize: 12, color: c.primary, fontWeight: '700', marginTop: 4 },
+  accountText: { fontSize: 13, color: c.text, fontWeight: '700', marginTop: 8 },
+  utrText: { fontSize: 12, color: c.textMuted, fontWeight: '700', marginTop: 4, letterSpacing: 0.3 },
 
   rejectionBanner: { marginTop: 10, backgroundColor: '#fef2f2', borderRadius: 10, padding: 10 },
   rejectionText: { fontSize: 12, color: '#b91c1c', fontWeight: '600', lineHeight: 17 },

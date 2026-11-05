@@ -68,8 +68,10 @@ const QuizScreen = lazyScreen(() => import('../screens/QuizScreen'), (m) => m.Qu
 const ReferralScreen = lazyScreen(() => import('../screens/ReferralScreen'), (m) => m.ReferralScreen);
 const OrderTrackingScreen = withWebAppShell(lazyScreen(() => import('../screens/OrderTrackingScreen'), (m) => m.OrderTrackingScreen), 'Orders');
 const BookingDetailsScreen = withWebAppShell(lazyScreen(() => import('../screens/BookingDetailsScreen'), (m) => m.BookingDetailsScreen), 'Orders');
-const RedeemScreen = lazyScreen(() => import('../screens/RedeemScreen'), (m) => m.RedeemScreen);
-const RedeemHistoryScreen = lazyScreen(() => import('../screens/RedeemHistoryScreen'), (m) => m.RedeemHistoryScreen);
+const RedeemScreen = withWebAppShell(lazyScreen(() => import('../screens/RedeemScreen'), (m) => m.RedeemScreen), 'Wallet');
+const RedeemHistoryScreen = withWebAppShell(lazyScreen(() => import('../screens/RedeemHistoryScreen'), (m) => m.RedeemHistoryScreen), 'Wallet');
+const AddPayoutMethodScreen = withWebAppShell(lazyScreen(() => import('../screens/AddPayoutMethodScreen'), (m) => m.AddPayoutMethodScreen), 'Wallet');
+const WithdrawalDetailScreen = withWebAppShell(lazyScreen(() => import('../screens/WithdrawalDetailScreen'), (m) => m.WithdrawalDetailScreen), 'Wallet');
 const DonationScreen = lazyScreen(() => import('../screens/DonationScreen'), (m) => m.DonationScreen);
 const TransferScreen = lazyScreen(() => import('../screens/TransferScreen'), (m) => m.TransferScreen);
 const ManageAccountScreen = lazyScreen(() => import('../screens/ManageAccountScreen'), (m) => m.ManageAccountScreen);
@@ -167,6 +169,8 @@ export function RootNavigator() {
             BookingDetails: 'BookingDetails',
             Redeem: 'Redeem',
             RedeemHistory: 'RedeemHistory',
+            AddPayoutMethod: 'AddPayoutMethod',
+            Withdrawal: 'Withdrawal',
             Donation: 'Donation',
             Transfer: 'Transfer',
             // Public "delete my account" URL for the Play Store listing:
@@ -238,6 +242,8 @@ export function RootNavigator() {
         <Stack.Screen name="Legal" component={LegalScreen} />
         <Stack.Screen name="Redeem" component={RedeemScreen} />
         <Stack.Screen name="RedeemHistory" component={RedeemHistoryScreen} />
+        <Stack.Screen name="AddPayoutMethod" component={AddPayoutMethodScreen} />
+        <Stack.Screen name="Withdrawal" component={WithdrawalDetailScreen} />
         <Stack.Screen name="Donation" component={DonationScreen} />
         <Stack.Screen name="Transfer" component={TransferScreen} />
         <Stack.Screen name="ManageAccount" component={ManageAccountScreen} />

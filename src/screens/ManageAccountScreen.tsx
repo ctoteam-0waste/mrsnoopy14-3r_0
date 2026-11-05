@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, ScrollView, TouchableOpacity, TextInput, Pressable, StatusBar, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, TextInput, StatusBar, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, CirclePause, Trash2, Lightbulb, Info, Check, CalendarClock } from 'lucide-react-native';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 import { PhoneVerificationModal } from '../components/shared/PhoneVerificationModal';
+import { OtpInput } from '../components/shared/OtpInput';
 import {
   accountService, errorCode, errorData, errorMessage, errorStatus, formatDay,
   AccountAction, DurationKey, ExitSurvey, SurveyAnswer, DeletionEligibility, OtpRequest, ConfirmResult, Ledger,
@@ -68,35 +69,6 @@ function Radio({ selected, danger }: { selected: boolean; danger?: boolean }) {
     <View style={[styles.radio, selected && { borderColor: tint }]}>
       {selected && <View style={[styles.radioDot, { backgroundColor: tint }]} />}
     </View>
-  );
-}
-
-function OtpBoxes({ value, onChange, disabled }: { value: string; onChange: (v: string) => void; disabled?: boolean }) {
-  const styles = useStyles();
-  const inputRef = useRef<TextInput>(null);
-  return (
-    <Pressable style={styles.otpRow} onPress={() => inputRef.current?.focus()}>
-      {Array.from({ length: 6 }).map((_, i) => (
-        <View key={i} style={[styles.otpBox, i === Math.min(value.length, 5) && styles.otpBoxActive]}>
-          <Text style={styles.otpDigit}>{value[i] || ''}</Text>
-        </View>
-      ))}
-      {/* One real input under the boxes, so SMS autofill and paste fill all six. */}
-      <TextInput
-        ref={inputRef}
-        value={value}
-        onChangeText={(v) => onChange(v.replace(/\D/g, '').slice(0, 6))}
-        keyboardType="number-pad"
-        maxLength={6}
-        autoFocus
-        editable={!disabled}
-        textContentType="oneTimeCode"
-        autoComplete={Platform.OS === 'android' ? 'sms-otp' : 'one-time-code'}
-        caretHidden
-        style={styles.otpInput}
-        accessibilityLabel="6-digit code"
-      />
-    </Pressable>
   );
 }
 
@@ -749,7 +721,7 @@ export function ManageAccountScreen({ navigation, route }: any) {
           Enter the code sent to your phone{otpReq?.maskedDestination ? ` ${otpReq.maskedDestination}` : ''}.
         </Text>
 
-        <OtpBoxes value={otp} onChange={(v) => { setOtp(v); if (otpError) setOtpError(''); }} disabled={confirming} />
+        <OtpInput value={otp} onChange={(v) => { setOtp(v); if (otpError) setOtpError(''); }} disabled={confirming} />
         {!!otpError && <Text style={styles.errorText}>{otpError}</Text>}
 
         <TouchableOpacity onPress={resend} disabled={resendIn > 0 || resending} style={styles.resendBtn}>
@@ -929,11 +901,6 @@ const useStyles = makeStyles((c) => ({
   consentText: { fontSize: 14, color: c.text, fontWeight: '600', lineHeight: 20 },
   consentNote: { fontSize: 12.5, color: c.textMuted, marginTop: 6, lineHeight: 18 },
 
-  otpRow: { flexDirection: 'row', gap: 8, marginTop: 24, marginBottom: 8 },
-  otpBox: { flex: 1, maxWidth: 52, height: 56, borderRadius: 14, borderWidth: 1.5, borderColor: c.border, backgroundColor: c.surface, alignItems: 'center', justifyContent: 'center' },
-  otpBoxActive: { borderColor: c.primary },
-  otpDigit: { fontSize: 22, fontWeight: '800', color: c.text },
-  otpInput: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: 0.02, color: 'transparent', fontSize: 1 },
   errorText: { color: c.danger, fontSize: 13.5, fontWeight: '600', marginTop: 6 },
   resendBtn: { alignSelf: 'flex-start', paddingVertical: 10 },
   footerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
