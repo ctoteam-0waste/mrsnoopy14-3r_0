@@ -140,11 +140,15 @@ export function Avatar({ avatarId, size = 48, name, ring }: {
   name?: string;
   ring?: boolean; // subtle white ring (for coloured headers)
 }) {
+  // The ring is a border, which takes its width from inside the box; shrink the
+  // artwork by the same amount or it starts at the border and gets cropped off-centre.
+  const inner = ring ? size - RING_WIDTH * 2 : size;
+
   // Illustrated people avatars (image assets) — rendered as a circular photo.
   if (avatarId && PERSON_IMAGES[avatarId]) {
     return (
       <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && styles.ring]}>
-        <Image source={PERSON_IMAGES[avatarId]} style={{ width: size, height: size }} resizeMode="cover" />
+        <Image source={PERSON_IMAGES[avatarId]} style={{ width: inner, height: inner }} resizeMode="cover" />
       </View>
     );
   }
@@ -165,7 +169,7 @@ export function Avatar({ avatarId, size = 48, name, ring }: {
   const [c1, c2] = GRADS[id];
   return (
     <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && styles.ring]}>
-      <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Svg width={inner} height={inner} viewBox="0 0 100 100">
         <Defs>
           <LinearGradient id={`g-${id}`} x1="0" y1="0" x2="1" y2="1">
             <Stop offset="0" stopColor={c1} />
@@ -183,8 +187,10 @@ export function Avatar({ avatarId, size = 48, name, ring }: {
   );
 }
 
+const RING_WIDTH = 3;
+
 const styles = StyleSheet.create({
   initialsWrap: { backgroundColor: '#10b981', alignItems: 'center', justifyContent: 'center' },
   initialsText: { color: 'white', fontWeight: '800' },
-  ring: { borderWidth: 3, borderColor: 'rgba(255,255,255,0.9)' },
+  ring: { borderWidth: RING_WIDTH, borderColor: 'rgba(255,255,255,0.9)' },
 });
