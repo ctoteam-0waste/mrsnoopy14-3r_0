@@ -6,13 +6,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag, Gift, ArrowRight } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { isDiwaliSeason } from '../utils/festive';
-import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliSparkles } from '../components/festive/Diwali';
-import { makeStyles } from '../theme';
+import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliSparkles, DiwaliBackdrop } from '../components/festive/Diwali';
+import { makeStyles, useTheme } from '../theme';
 import { trackEvent } from '../utils/analytics';
 
 export function StoreScreen({ navigation }: any) {
   const styles = useStyles();
   const { width } = useWindowDimensions();
+  const { isDark } = useTheme();
   const diwali = isDiwaliSeason();
   // Tab screens stay mounted, so count each time the tab is focused rather than on mount.
   useFocusEffect(useCallback(() => {
@@ -21,8 +22,9 @@ export function StoreScreen({ navigation }: any) {
 
   return (
     <View style={styles.rootContainer}>
+      {diwali && <DiwaliBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" />
-      <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
           <View style={styles.headerTop}>
