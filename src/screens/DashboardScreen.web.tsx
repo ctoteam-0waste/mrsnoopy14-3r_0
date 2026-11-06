@@ -535,7 +535,7 @@ const useStyles = makeStyles((c) => ({
   container: { maxWidth: MAX, width: '100%', alignSelf: 'center', paddingHorizontal: 32 },
 
   // Hero — compact
-  hero: { paddingTop: 24, paddingBottom: 28, position: 'relative', overflow: 'hidden' },
+  hero: { paddingTop: 24, paddingBottom: 28, position: 'relative', overflow: 'hidden', borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
   heroDecor1: { position: 'absolute', top: -80, right: -80, width: 200, height: 200, borderRadius: 100, backgroundColor: 'rgba(255,255,255,0.03)' },
   heroDecor2: { position: 'absolute', bottom: -50, left: '25%', width: 150, height: 150, borderRadius: 75, backgroundColor: 'rgba(255,255,255,0.02)' },
   heroGrid: { flexDirection: 'row', gap: 32, alignItems: 'center' },
