@@ -556,12 +556,21 @@ export function SchedulePickupScreen({ navigation }: any) {
       const data = error?.response?.data;
       // 409 means an active pickup already exists for this date, slot and address
       // (often the user's own earlier attempt). The pickup exists, so it's not a failure.
-      if (error?.response?.status === 409 && /already/i.test(data?.message || '')) {
+      // Older backends send no code, only the message.
+      const alreadyBooked = error?.response?.status === 409 &&
+        (data?.code === 'SLOT_ALREADY_BOOKED' || /already/i.test(data?.message || ''));
+      if (alreadyBooked) {
         idempotencyRef.current = null;
+        // bookingId is null if that booking was cancelled at the same moment.
+        const existingId = data?.data?.bookingId;
         showAlert(
           'Already booked',
-          'You already have a pickup booked for this slot. You can see it in Orders.',
-          [{ text: 'View orders', onPress: () => navigation.navigate('App', { screen: 'Orders' }) }],
+          existingId
+            ? 'You already have a pickup booked for this slot.'
+            : 'You already have a pickup booked for this slot. You can see it in Orders.',
+          [existingId
+            ? { text: 'View booking', onPress: () => navigation.replace('OrderTracking', { bookingId: existingId }) }
+            : { text: 'View orders', onPress: () => navigation.navigate('App', { screen: 'Orders' }) }],
         );
         return;
       }
