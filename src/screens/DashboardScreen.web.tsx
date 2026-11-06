@@ -14,7 +14,7 @@ import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { isLaunchDay } from '../utils/launchDay';
 import { isDiwaliSeason } from '../utils/festive';
-import { DiwaliLights, DiwaliCleanupCard } from '../components/festive/Diwali';
+import { DiwaliLights, DiwaliShimmerText, DiwaliCleanupCard } from '../components/festive/Diwali';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
 
@@ -72,7 +72,6 @@ const STATUS_CLR: any = {
 
 // Time-aware greeting based on the user's device clock.
 const getGreeting = () => {
-  if (isDiwaliSeason()) return 'Happy Diwali';
   const h = new Date().getHours();
   if (h < 5) return 'Still awake, night owl? 🦉';
   if (h < 12) return 'Good morning';
@@ -189,7 +188,7 @@ export function DashboardScreen({ navigation, route }: any) {
           <View style={[z.heroGrid, isMobile && { flexDirection: 'column', gap: 20, alignItems: 'stretch' }]}>
             {/* Left: Greeting + Balance */}
             <View style={z.heroLeft}>
-              <Text style={z.heroGreet}>{getGreeting()},</Text>
+              <Text style={z.heroGreet}>{diwali ? <DiwaliShimmerText text="Happy Diwali" /> : getGreeting()},</Text>
               <Text style={[z.heroName, isMobile && { fontSize: 20 }]}>{userName || '...'}</Text>
               <View style={z.heroBalance}>
                 <View style={z.heroCoinGlow}>

@@ -27,7 +27,10 @@ import { EarlyBirdPopup } from '../components/shared/EarlyBirdPopup';
 import { isLaunchDay } from '../utils/launchDay';
 import { getLocalDateStr } from '../utils/quizDate';
 import { isDiwaliSeason } from '../utils/festive';
-import { DiwaliLights, DiwaliDiyas, DiwaliSparkles, DiwaliMarigolds, DiwaliCleanupCard } from '../components/festive/Diwali';
+import {
+  DiwaliLights, DiwaliDiyas, DiwaliEmbers, DiwaliSparkles, DiwaliMarigolds, DiwaliRangoli, DiwaliKandils,
+  DiwaliCursorSparks, DiwaliShimmerText, DiwaliCleanupCard,
+} from '../components/festive/Diwali';
 
 const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
@@ -318,9 +321,12 @@ export function SplashScreen({ navigation, route }: any) {
           <Animated.View style={[s.heroCircle, { bottom: -40, left: -80, width: 250, height: 250, opacity: 0.06, transform: [{ translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [0, 18] }) }] }]} />
           {diwali && (
             <>
-              <DiwaliSparkles count={isMobile ? 8 : 18} from={isMobile ? 0 : 55} />
+              <DiwaliSparkles count={isMobile ? 6 : 14} from={isMobile ? 0 : 55} />
+              {!isMobile && <DiwaliRangoli wide={W >= 1180} />}
               <DiwaliLights />
+              <DiwaliKandils wide={W >= 1180} />
               {W >= 1200 && <DiwaliMarigolds />}
+              <DiwaliEmbers count={isMobile ? 8 : 16} />
               <DiwaliDiyas count={isMobile ? 5 : 9} />
             </>
           )}
@@ -329,7 +335,7 @@ export function SplashScreen({ navigation, route }: any) {
             {/* Badge */}
             <View style={s.heroBadge}>
               <View style={[s.heroBadgeDot, diwali && { backgroundColor: '#fbbf24' }]} />
-              <Text style={s.heroBadgeText}>{diwali ? 'Happy Diwali from KarmaVer$e' : 'AI-Powered Sustainability Platform'}</Text>
+              <Text style={s.heroBadgeText}>{diwali ? <DiwaliShimmerText text="Happy Diwali from KarmaVer$e" /> : 'AI-Powered Sustainability Platform'}</Text>
             </View>
 
             {/* The headline types out character by character. A full-text, invisible
@@ -401,6 +407,7 @@ export function SplashScreen({ navigation, route }: any) {
               ))}
             </View>
           </Animated.View>
+          {diwali && !isMobile && <DiwaliCursorSparks />}
         </LinearGradient>
 
         {diwali && (
