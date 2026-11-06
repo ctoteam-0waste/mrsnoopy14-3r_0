@@ -273,7 +273,7 @@
         try {
           var dq = sessionStorage.getItem('kvDiwaliPreview');
           var dn = Date.now();
-          var diwali = dq ? dq === '1' : dn >= Date.parse('2026-11-07T00:00:00+05:30') && dn < Date.parse('2026-11-12T00:00:00+05:30');
+          var diwali = dq ? dq === '1' : dn >= Date.parse('2026-11-06T00:00:00+05:30') && dn < Date.parse('2026-11-12T00:00:00+05:30');
           var badge = document.getElementById('kv-badge');
           if (diwali && badge) { badge.lastChild.nodeValue = 'Happy Diwali from KarmaVer$e'; badge.firstChild.style.background = '#fbbf24'; }
         } catch (e) {}
