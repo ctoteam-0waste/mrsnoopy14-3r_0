@@ -16,7 +16,7 @@ import { isLaunchDay } from '../utils/launchDay';
 import { isDiwaliSeason } from '../utils/festive';
 import {
   DiwaliLights, DiwaliShimmerText, DiwaliCleanupCard, DiwaliKandils, DiwaliEmbers, DiwaliDiyas, DiwaliCoinRangoli,
-  DiwaliGoldBorder, DiwaliBurst, useDiwaliCountUp, DiwaliDiyaTracker, DiwaliGreetingModal,
+  DiwaliGoldBorder, DiwaliBurst, useDiwaliCountUp, DiwaliDiyaTracker, DiwaliGreetingModal, DiwaliBackdrop,
 } from '../components/festive/Diwali';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
@@ -84,7 +84,7 @@ const getGreeting = () => {
 
 export function DashboardScreen({ navigation, route }: any) {
   const z = useStyles();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const { width } = useWindowDimensions();
   // 900 (not 768) so iPad portrait (~810px) uses the clean stacked layout —
   // the desktop row squeezes the redeem banner into a tall unreadable sliver.
@@ -196,8 +196,9 @@ export function DashboardScreen({ navigation, route }: any) {
   const nav = (screen: string, p?: any) => navigation.navigate(screen, p);
 
   return (
-    <View style={{ flex: 1 }}>
-    <ScrollView style={z.root} showsVerticalScrollIndicator={false}>
+    <View style={[{ flex: 1 }, diwali && { backgroundColor: colors.bg }]}>
+    {diwali && <DiwaliBackdrop dark={isDark} />}
+    <ScrollView style={[z.root, diwali && { backgroundColor: 'transparent' }]} showsVerticalScrollIndicator={false}>
 
       {/* ════════ HERO ════════ */}
       <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[z.hero, diwali && { paddingTop: 44, paddingBottom: 76 }]}>

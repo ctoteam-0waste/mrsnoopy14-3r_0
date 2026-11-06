@@ -18,3 +18,4 @@ export function DiwaliGreetingModal(_: { visible: boolean; name: string; pickups
 export function DiwaliHeaderDecor(_: { wide: boolean }) { return null; }
 export function DiwaliStrip(_: { onPress: () => void }) { return null; }
 export function useDiwaliOncePerTab(_key: string): boolean { return false; }
+export function DiwaliBackdrop(_: { dark: boolean }) { return null; }
