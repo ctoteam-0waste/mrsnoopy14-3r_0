@@ -7,6 +7,9 @@ import { Platform } from 'react-native';
 const START = Date.parse('2026-11-06T00:00:00+05:30');
 const END = Date.parse('2026-11-12T00:00:00+05:30');
 
+// The theme's days, as local dates (the dashboard's Deepotsav tracker has a diya for each).
+export const DIWALI_DAYS = ['2026-11-06', '2026-11-07', '2026-11-08', '2026-11-09', '2026-11-10', '2026-11-11'];
+
 // ?diwali=1 previews the theme outside the dates (for review on staging), ?diwali=0
 // hides it. Kept for the rest of the tab so it survives in-app navigation.
 function previewOverride(): boolean | null {

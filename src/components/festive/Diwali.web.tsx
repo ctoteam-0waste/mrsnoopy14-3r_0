@@ -1,7 +1,9 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight } from 'lucide-react-native';
+import { ArrowRight, Share2, X } from 'lucide-react-native';
+import { getLocalDateStr } from '../../utils/quizDate';
+import { DIWALI_DAYS } from '../../utils/festive';
 
 // Diwali decorations for the website. Plain SVG + CSS animations (no images), so
 // the landing page stays light. All of it is purely decorative: aria-hidden and
@@ -86,11 +88,37 @@ const CSS = `
   80%, 100% { opacity: 0; transform: translate(var(--x), -92px) scale(.9); }
 }
 
+.kvd-wait { transform-box: fill-box; transform-origin: center; animation: kvd-wait 1.8s ease-in-out infinite; }
+@keyframes kvd-wait { 0%, 100% { opacity: .25; transform: scale(.9); } 50% { opacity: .9; transform: scale(1.1); } }
+
+@property --kvd-a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+.kvd-border {
+  position: absolute; top: 0; right: 0; bottom: 0; left: 0; border-radius: inherit; padding: 1.5px; pointer-events: none;
+  background: conic-gradient(from var(--kvd-a), transparent 0deg 250deg, #fbbf24 300deg, #fff7d6 320deg, #fbbf24 340deg, transparent 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: kvd-border 4s linear infinite;
+}
+@keyframes kvd-border { to { --kvd-a: 360deg; } }
+
+.kvd-burst span {
+  position: absolute; left: 0; top: 0; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%;
+  background: #fde68a; box-shadow: 0 0 6px 2px rgba(251,191,36,.7); animation: kvd-burst .9s ease-out forwards;
+}
+@keyframes kvd-burst { from { opacity: 1; transform: rotate(var(--a)) translateX(0); } to { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)); } }
+
+.kvd-env { animation: kvd-env-out .45s ease-in .95s forwards; }
+@keyframes kvd-env-out { to { opacity: 0; transform: translateY(50px) scale(.9); } }
+.kvd-flap { transform-box: fill-box; transform-origin: 50% 0; animation: kvd-flap .55s ease-in-out .3s forwards; }
+@keyframes kvd-flap { to { transform: scaleY(-1); } }
+.kvd-letter { animation: kvd-letter .6s cubic-bezier(.2, 1.3, .4, 1) 1.05s both; }
+@keyframes kvd-letter { from { opacity: 0; transform: translateY(70px) scale(.6); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
+  .kvd-wait, .kvd-border, .kvd-env, .kvd-flap, .kvd-letter,
   .kvd-bulb, .kvd-on, .kvd-flame, .kvd-halo, .kvd-ignite, .kvd-flash, .kvd-spark, .kvd-ember,
   .kvd-strand, .kvd-swing, .kvd-spin, .kvd-shimmer, .kvd-sweep, .kvd-item, .kvd-coin, .kvd-rangoli * { animation: none !important; }
   .kvd-spark { opacity: .6; }
-  .kvd-sweep, .kvd-ember, .kvd-trail, .kvd-item { display: none; }
+  .kvd-sweep, .kvd-ember, .kvd-trail, .kvd-item, .kvd-env, .kvd-burst { display: none; }
   .kvd-coin { opacity: 1; transform: translate(var(--x), -64px); }
 }
 `;
@@ -188,12 +216,15 @@ export function DiwaliLights({ top = 0, compact = false }: { top?: number; compa
 }
 
 // One clay diya. With `ignite` it lights up after `igniteDelay`. Hovering makes the
-// flame jump and throw a few sparks.
-function Diya({ id, delay, scale = 1, ignite = false, igniteDelay = 0 }: { id: string; delay: number; scale?: number; ignite?: boolean; igniteDelay?: number }) {
+// flame jump and throw a few sparks. Unlit (`lit` false) it shows only the wick, with
+// a pulsing ring when `waiting` for today's action.
+function Diya({ id, delay, scale = 1, ignite = false, igniteDelay = 0, lit = true, waiting = false }: {
+  id: string; delay: number; scale?: number; ignite?: boolean; igniteDelay?: number; lit?: boolean; waiting?: boolean;
+}) {
   const anim = { animationDelay: `${delay.toFixed(2)}s` };
   const igniteStyle = { animationDelay: `${igniteDelay.toFixed(2)}s` };
   return (
-    <svg className="kvd-diya" width={46 * scale} height={52 * scale} viewBox="0 0 46 52" style={{ overflow: 'visible' }}>
+    <svg className={lit ? 'kvd-diya' : undefined} width={46 * scale} height={52 * scale} viewBox="0 0 46 52" style={{ overflow: 'visible' }}>
       <defs>
         <radialGradient id={`${id}h`}>
           <stop offset="0" stopColor="#fde68a" stopOpacity="0.9" />
@@ -209,17 +240,22 @@ function Diya({ id, delay, scale = 1, ignite = false, igniteDelay = 0 }: { id: s
           <stop offset="1" stopColor="#7c2d12" />
         </linearGradient>
       </defs>
-      <g className="kvd-grow">
-        <g className={ignite ? 'kvd-ignite' : undefined} style={ignite ? igniteStyle : undefined}>
-          <circle className="kvd-halo" cx="23" cy="17" r="15" fill={`url(#${id}h)`} style={anim} />
-          <path className="kvd-flame" d="M23 5 C27.5 12 29.5 17 23 25 C16.5 17 18.5 12 23 5 Z" fill={`url(#${id}f)`} style={anim} />
-          <path className="kvd-flame" d="M23 13 C25 17 25.5 20 23 24 C20.5 20 21 17 23 13 Z" fill="#fffbeb" opacity="0.85" style={anim} />
-        </g>
-      </g>
-      {ignite && <circle className="kvd-flash" cx="23" cy="16" r="10" fill="#fff7d6" style={igniteStyle} />}
-      {[-8, 0, 8].map((dx) => (
-        <circle key={dx} className="kvd-pop" cx="23" cy="8" r="1.4" fill="#fde68a" style={cssVars({ '--dx': `${dx}px` })} />
-      ))}
+      {lit && (
+        <>
+          <g className="kvd-grow">
+            <g className={ignite ? 'kvd-ignite' : undefined} style={ignite ? igniteStyle : undefined}>
+              <circle className="kvd-halo" cx="23" cy="17" r="15" fill={`url(#${id}h)`} style={anim} />
+              <path className="kvd-flame" d="M23 5 C27.5 12 29.5 17 23 25 C16.5 17 18.5 12 23 5 Z" fill={`url(#${id}f)`} style={anim} />
+              <path className="kvd-flame" d="M23 13 C25 17 25.5 20 23 24 C20.5 20 21 17 23 13 Z" fill="#fffbeb" opacity="0.85" style={anim} />
+            </g>
+          </g>
+          {ignite && <circle className="kvd-flash" cx="23" cy="16" r="10" fill="#fff7d6" style={igniteStyle} />}
+          {[-8, 0, 8].map((dx) => (
+            <circle key={dx} className="kvd-pop" cx="23" cy="8" r="1.4" fill="#fde68a" style={cssVars({ '--dx': `${dx}px` })} />
+          ))}
+        </>
+      )}
+      {waiting && <circle className="kvd-wait" cx="23" cy="16" r="10" fill="none" stroke="#fde68a" strokeWidth="1.5" strokeDasharray="3 3" />}
       <rect x="22.3" y="23" width="1.4" height="4" fill="#44403c" />
       <path d="M4 27 Q23 50 42 27 Z" fill={`url(#${id}b)`} />
       <ellipse cx="23" cy="27" rx="19" ry="3.6" fill="#9a3412" />
@@ -454,11 +490,19 @@ function Kandil({ len, left, delay, scale = 1, id }: { len: number; left: number
   );
 }
 
-// Paper akash kandils hanging from the lights and swinging gently.
-export function DiwaliKandils({ wide }: { wide: boolean }) {
+// Paper akash kandils hanging from the lights and swinging gently. The dashboard
+// variant is a single one in the hero's right corner.
+export function DiwaliKandils({ wide, variant = 'landing' }: { wide: boolean; variant?: 'landing' | 'dashboard' }) {
   ensureCss();
   const base = useUid();
   const ref = usePauseOffscreen();
+  if (variant === 'dashboard' && wide) {
+    return (
+      <div ref={ref} aria-hidden style={{ position: 'absolute', top: 0, right: 18, width: 52, height: 150, pointerEvents: 'none' }}>
+        <Kandil id={`${base}a`} len={40} left={0} delay={0.6} scale={0.85} />
+      </div>
+    );
+  }
   if (!wide) {
     return (
       <div ref={ref} aria-hidden style={{ position: 'absolute', top: 0, right: 14, width: 42, height: 130, pointerEvents: 'none' }}>
@@ -619,4 +663,246 @@ const s = StyleSheet.create({
   body: { color: 'rgba(255,255,255,0.82)', fontSize: 15, lineHeight: 22, maxWidth: 560, marginBottom: 18 },
   cta: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#fbbf24', borderRadius: 12, paddingHorizontal: 20, paddingVertical: 12, overflow: 'hidden' },
   ctaText: { color: '#451a03', fontSize: 15, fontWeight: '900' },
+});
+
+// Rangoli turning slowly behind the balance coin. Goes inside the coin's wrapper,
+// before the coin, so the coin sits at its centre.
+export function DiwaliCoinRangoli({ size }: { size: number }) {
+  ensureCss();
+  const ref = usePauseOffscreen();
+  const intro = playIntro();
+  return (
+    <div ref={ref} aria-hidden style={{ position: 'absolute', left: '50%', top: '50%', width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2, opacity: 0.6, pointerEvents: 'none' }}>
+      <RangoliArt size={size} intro={intro} />
+    </div>
+  );
+}
+
+// A gold light running round the border of the card it's placed in. `delay`
+// staggers neighbouring cards.
+export function DiwaliGoldBorder({ delay = 0 }: { delay?: number }) {
+  ensureCss();
+  return <div aria-hidden className="kvd-border" style={{ animationDelay: `${-delay}s` }} />;
+}
+
+// A one-off burst of gold sparks from the centre of its parent.
+export function DiwaliBurst() {
+  ensureCss();
+  return (
+    <div aria-hidden className="kvd-burst" style={{ position: 'absolute', left: '50%', top: '50%', width: 0, height: 0, pointerEvents: 'none' }}>
+      {Array.from({ length: 14 }, (_, i) => (
+        <span key={i} style={cssVars({ '--a': `${(i * 360) / 14}deg`, '--d': `${36 + (i % 3) * 10}px`, animationDelay: `${(i % 2) * 0.06}s` })} />
+      ))}
+    </div>
+  );
+}
+
+// Counts the balance up from 0 the first time it loads in this tab, then reports a
+// burst. Returns the number to show and whether the burst is playing.
+export function useDiwaliCountUp(value: number, enabled: boolean): [number, boolean] {
+  const [shown, setShown] = useState<number | null>(null);
+  const [burst, setBurst] = useState(false);
+  const done = useRef(false);
+  useEffect(() => {
+    if (!enabled || done.current || value <= 0) return;
+    done.current = true;
+    let seen = true;
+    try {
+      seen = !!sessionStorage.getItem('kvDiwaliCount');
+      sessionStorage.setItem('kvDiwaliCount', '1');
+    } catch { /* storage blocked: skip the effect */ }
+    if (seen || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const start = performance.now();
+    let raf = 0;
+    const step = (t: number) => {
+      const p = Math.min(1, (t - start) / 1400);
+      setShown(Math.round(value * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) { raf = requestAnimationFrame(step); return; }
+      setShown(null);
+      setBurst(true);
+      setTimeout(() => setBurst(false), 1100);
+    };
+    setShown(0);
+    raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); setShown(null); };
+  }, [value, enabled]);
+  return [shown ?? value, burst];
+}
+
+const dayLabel = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return `${new Date(y, m - 1, d).toLocaleDateString('en-IN', { weekday: 'short' })} ${d}`;
+};
+
+// Deepotsav: one diya for each day of the Diwali theme. A day's diya lights when the
+// user played the daily quiz or booked a pickup that day. Diyas lit since the last
+// visit light up with the ignite animation.
+export function DiwaliDiyaTracker({ litDays, seenKey, onQuiz, onPickup, isMobile = false }: {
+  litDays: string[]; seenKey: string; onQuiz: () => void; onPickup: () => void; isMobile?: boolean;
+}) {
+  ensureCss();
+  const base = useUid();
+  const ref = usePauseOffscreen();
+  const today = getLocalDateStr();
+  const lit = useMemo(() => new Set(litDays.filter((d) => DIWALI_DAYS.includes(d))), [litDays]);
+  const seen = useMemo(() => {
+    try { return new Set<string>(JSON.parse(localStorage.getItem(seenKey) || '[]')); } catch { return new Set<string>(); }
+  }, [seenKey]);
+  useEffect(() => {
+    if (seenKey.endsWith('_')) return; // user not known yet
+    try { localStorage.setItem(seenKey, JSON.stringify([...lit])); } catch { /* storage blocked */ }
+  }, [lit, seenKey]);
+
+  const count = lit.size;
+  const complete = count === DIWALI_DAYS.length;
+  const todayIsDiwaliDay = DIWALI_DAYS.includes(today);
+  const scale = isMobile ? 0.92 : 1.35;
+
+  return (
+    <LinearGradient colors={['#0f0a2e', '#1e1b4b', '#3b0764']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[t.card, isMobile && t.cardMobile]}>
+      <DiwaliSparkles count={isMobile ? 8 : 14} />
+      <View style={[t.head, isMobile && { flexDirection: 'column', alignItems: 'flex-start', gap: 10 }]}>
+        <View style={isMobile ? undefined : { flex: 1 }}>
+          <View style={s.chip}><Text style={s.chipText}>DEEPOTSAV</Text></View>
+          <Text style={[t.title, isMobile && { fontSize: 20 }]}>Light a diya every day of Diwali</Text>
+          <Text style={t.sub}>Play the daily quiz or book a pickup, and that day's diya lights up.</Text>
+        </View>
+        <View style={[t.pill, complete && t.pillDone]}>
+          <Text style={[t.pillText, complete && { color: '#451a03' }]}>{complete ? 'Deepotsav complete' : `${count} of ${DIWALI_DAYS.length} lit`}</Text>
+        </View>
+      </View>
+
+      <div ref={ref} style={{ display: 'flex', justifyContent: 'space-between', marginTop: isMobile ? 14 : 22, position: 'relative' }}>
+        {complete && <DiwaliBurst />}
+        {DIWALI_DAYS.map((day, i) => {
+          const isLit = lit.has(day);
+          const isToday = day === today;
+          const faded = !isLit && !isToday;
+          return (
+            <div key={day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+              <div style={faded ? { opacity: day < today ? 0.35 : 0.5, filter: day < today ? 'grayscale(1)' : undefined } : undefined}>
+                <Diya
+                  id={`${base}-${i}`}
+                  delay={(i * 0.31) % 1.6}
+                  scale={scale}
+                  lit={isLit}
+                  waiting={isToday && !isLit}
+                  ignite={isLit && !seen.has(day)}
+                  igniteDelay={0.5 + i * 0.25}
+                />
+              </div>
+              <Text style={[t.day, (isToday || day === '2026-11-08') && { color: '#fcd34d' }]}>
+                {isToday ? 'Today' : day === '2026-11-08' ? 'Diwali' : dayLabel(day)}
+              </Text>
+            </div>
+          );
+        })}
+      </div>
+
+      <View style={[t.foot, isMobile && { flexDirection: 'column', alignItems: 'stretch' }]}>
+        {complete ? (
+          <Text style={t.footText}>Every diya is lit. Thank you for a green Diwali!</Text>
+        ) : !todayIsDiwaliDay || lit.has(today) ? (
+          <Text style={t.footText}>Today's diya is lit. Come back tomorrow to light the next one.</Text>
+        ) : (
+          <>
+            <TouchableOpacity style={s.cta} onPress={onQuiz} activeOpacity={0.85}>
+              <div className="kvd-sweep" />
+              <Text style={s.ctaText}>Play today's quiz</Text>
+              <ArrowRight size={16} color="#451a03" />
+            </TouchableOpacity>
+            <TouchableOpacity style={t.ctaAlt} onPress={onPickup} activeOpacity={0.85}>
+              <Text style={t.ctaAltText}>Schedule a pickup</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+    </LinearGradient>
+  );
+}
+
+// Once-per-user Diwali greeting: an envelope opens and the card rises out of it.
+export function DiwaliGreetingModal({ visible, name, pickups, onClose }: { visible: boolean; name: string; pickups: number; onClose: () => void }) {
+  ensureCss();
+  const base = useUid();
+  const [copied, setCopied] = useState(false);
+  const message = pickups > 0
+    ? `Thank you for ${pickups} eco ${pickups === 1 ? 'action' : 'actions'} with KarmaVer$e. May this Diwali be bright, clean and green.`
+    : 'This Diwali, give your clean-up a second life with KarmaVer$e. Wishing you a bright, clean and green festival.';
+
+  const share = async () => {
+    const text = 'Happy Diwali from KarmaVer$e! Celebrate a green Diwali with me.';
+    const url = 'https://karmaverse.earth';
+    try {
+      if (navigator.share) { await navigator.share({ title: 'Happy Diwali', text, url }); return; }
+      await navigator.clipboard.writeText(`${text} ${url}`);
+      setCopied(true);
+    } catch { /* share sheet dismissed */ }
+  };
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={t.overlay}>
+        <div style={{ position: 'relative', width: '100%', maxWidth: 400 }}>
+          <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, top: '50%', display: 'flex', justifyContent: 'center', pointerEvents: 'none' }}>
+            <svg className="kvd-env" width="220" height="150" viewBox="0 0 220 150" style={{ marginTop: -75, overflow: 'visible' }}>
+              <rect x="0" y="0" width="220" height="150" rx="8" fill="#92400e" />
+              <rect x="20" y="14" width="180" height="110" rx="4" fill="#fef3c7" />
+              <path d="M0 150 L110 70 L220 150 Z" fill="#b45309" />
+              <path d="M0 0 L0 150 L100 78 Z M220 0 L220 150 L120 78 Z" fill="#a16207" />
+              <path className="kvd-flap" d="M0 0 L110 82 L220 0 Z" fill="#d97706" />
+              <circle cx="110" cy="80" r="14" fill="#dc2626" />
+              <text x="110" y="85" textAnchor="middle" fontSize="13" fontWeight="900" fill="#fde68a" fontFamily="system-ui, sans-serif">K</text>
+            </svg>
+          </div>
+          <div className="kvd-letter">
+            <LinearGradient colors={['#450a0a', '#7c2d12', '#b45309']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={t.letter}>
+              <DiwaliLights compact />
+              <DiwaliSparkles count={10} />
+              <TouchableOpacity onPress={onClose} style={t.close} accessibilityLabel="Close">
+                <X size={18} color="rgba(255,255,255,0.8)" />
+              </TouchableOpacity>
+              <div aria-hidden style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+                <Diya id={`${base}-g`} delay={0.3} scale={1.6} ignite igniteDelay={1.5} />
+              </div>
+              <Text style={t.greet}><DiwaliShimmerText text={`Happy Diwali${name ? `, ${name}` : ''}!`} /></Text>
+              <Text style={t.greetSub}>{message}</Text>
+              <View style={t.greetRow}>
+                <TouchableOpacity style={s.cta} onPress={share} activeOpacity={0.85}>
+                  <div className="kvd-sweep" />
+                  <Share2 size={16} color="#451a03" />
+                  <Text style={s.ctaText}>{copied ? 'Link copied' : 'Share greeting'}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={t.ctaAlt} onPress={onClose} activeOpacity={0.85}>
+                  <Text style={t.ctaAltText}>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+          </div>
+        </div>
+      </View>
+    </Modal>
+  );
+}
+
+const t = StyleSheet.create({
+  card: { borderRadius: 20, overflow: 'hidden', padding: 28 },
+  cardMobile: { padding: 20 },
+  head: { flexDirection: 'row', alignItems: 'flex-start', gap: 16 },
+  title: { color: '#ffffff', fontSize: 24, fontWeight: '900', marginBottom: 6 },
+  sub: { color: 'rgba(255,255,255,0.75)', fontSize: 14.5, lineHeight: 21 },
+  pill: { backgroundColor: 'rgba(251,191,36,0.15)', borderWidth: 1, borderColor: 'rgba(251,191,36,0.45)', borderRadius: 100, paddingHorizontal: 14, paddingVertical: 7 },
+  pillDone: { backgroundColor: '#fbbf24', borderColor: '#fbbf24' },
+  pillText: { color: '#fcd34d', fontSize: 13, fontWeight: '900' },
+  day: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontWeight: '700' },
+  foot: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 20 },
+  footText: { color: 'rgba(255,255,255,0.8)', fontSize: 14, fontWeight: '600' },
+  ctaAlt: { alignItems: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.35)', borderRadius: 12, paddingHorizontal: 20, paddingVertical: 11 },
+  ctaAltText: { color: '#ffffff', fontSize: 15, fontWeight: '800' },
+  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.65)', alignItems: 'center', justifyContent: 'center', padding: 20 },
+  letter: { borderRadius: 22, overflow: 'hidden', paddingHorizontal: 24, paddingTop: 44, paddingBottom: 24, alignItems: 'center' },
+  close: { position: 'absolute', top: 30, right: 14, padding: 6 },
+  greet: { fontSize: 26, fontWeight: '900', textAlign: 'center', marginBottom: 10 },
+  greetSub: { color: 'rgba(255,255,255,0.85)', fontSize: 15, lineHeight: 22, textAlign: 'center', marginBottom: 20 },
+  greetRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap', justifyContent: 'center' },
 });
