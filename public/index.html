@@ -233,7 +233,7 @@
       </div>
       <div class="hero">
         <div class="content">
-          <div class="badge"><span class="dot"></span>AI-Powered Sustainability Platform</div>
+          <div class="badge" id="kv-badge"><span class="dot"></span>AI-Powered Sustainability Platform</div>
           <!-- One text block (inline spans + text-less spacers) on purpose: LCP counts
                a block's text as one candidate, so this stays larger than any single
                paragraph React paints later and LCP is credited to this early paint. -->
@@ -255,6 +255,12 @@
     </div>
     <script>
       (function () {
+        // ?diwali=1 / ?diwali=0 previews the Diwali theme (src/utils/festive.ts). Save it
+        // before the router rewrites the URL and drops the query string.
+        try {
+          var dq = (location.search.match(/[?&]diwali=([01])/) || [])[1];
+          if (dq) sessionStorage.setItem('kvDiwaliPreview', dq);
+        } catch (e) {}
         var hero = document.getElementById('kv-hero');
         var path = location.pathname.replace(/\/+$/, '');
         var token = null;
@@ -262,6 +268,15 @@
         var loggedIn = !!token && token !== 'undefined' && token !== 'null';
         if (path !== '' || loggedIn) { hero.parentNode.removeChild(hero); return; }
         window.__KV_STATIC_HERO__ = true;
+        // Diwali theme: same dates and ?diwali= preview as src/utils/festive.ts.
+        // Swaps the badge text here too, so it doesn't change when React takes over.
+        try {
+          var dq = sessionStorage.getItem('kvDiwaliPreview');
+          var dn = Date.now();
+          var diwali = dq ? dq === '1' : dn >= Date.parse('2026-11-07T00:00:00+05:30') && dn < Date.parse('2026-11-12T00:00:00+05:30');
+          var badge = document.getElementById('kv-badge');
+          if (diwali && badge) { badge.lastChild.nodeValue = 'Happy Diwali from KarmaVer$e'; badge.firstChild.style.background = '#fbbf24'; }
+        } catch (e) {}
         window.__kvHideStaticHero = function () {
           var el = document.getElementById('kv-hero');
           if (!el) return;

@@ -26,6 +26,8 @@ import { CoinShower } from '../components/shared/CoinShower';
 import { EarlyBirdPopup } from '../components/shared/EarlyBirdPopup';
 import { isLaunchDay } from '../utils/launchDay';
 import { getLocalDateStr } from '../utils/quizDate';
+import { isDiwaliSeason } from '../utils/festive';
+import { DiwaliLights, DiwaliDiyas, DiwaliSparkles, DiwaliMarigolds, DiwaliCleanupCard } from '../components/festive/Diwali';
 
 const { width: W } = Dimensions.get('window');
 const isMobile = W < 768;
@@ -100,6 +102,7 @@ export function SplashScreen({ navigation, route }: any) {
   const [showHeroConfetti, setShowHeroConfetti] = useState(false);
   const [showRewardsCoinShower, setShowRewardsCoinShower] = useState(false);
   const rewardsSectionRef = useRef<any>(null);
+  const diwali = isDiwaliSeason();
 
   // Launch-day confetti — once per day per browser, guest visitors included.
   useEffect(() => {
@@ -313,12 +316,20 @@ export function SplashScreen({ navigation, route }: any) {
           {/* Decorative circles */}
           <Animated.View style={[s.heroCircle, { top: -80, right: -60, width: 300, height: 300, opacity: 0.08, transform: [{ translateY: floatA.interpolate({ inputRange: [0, 1], outputRange: [0, -22] }) }] }]} />
           <Animated.View style={[s.heroCircle, { bottom: -40, left: -80, width: 250, height: 250, opacity: 0.06, transform: [{ translateY: floatB.interpolate({ inputRange: [0, 1], outputRange: [0, 18] }) }] }]} />
+          {diwali && (
+            <>
+              <DiwaliSparkles count={isMobile ? 8 : 18} from={isMobile ? 0 : 55} />
+              <DiwaliLights />
+              {W >= 1200 && <DiwaliMarigolds />}
+              <DiwaliDiyas count={isMobile ? 5 : 9} />
+            </>
+          )}
 
           <Animated.View style={[s.heroContent, isMobile && { paddingHorizontal: 20 }, { opacity: fadeIn, transform: [{ translateY: slideUp }] }]}>
             {/* Badge */}
             <View style={s.heroBadge}>
-              <View style={s.heroBadgeDot} />
-              <Text style={s.heroBadgeText}>AI-Powered Sustainability Platform</Text>
+              <View style={[s.heroBadgeDot, diwali && { backgroundColor: '#fbbf24' }]} />
+              <Text style={s.heroBadgeText}>{diwali ? 'Happy Diwali from KarmaVer$e' : 'AI-Powered Sustainability Platform'}</Text>
             </View>
 
             {/* The headline types out character by character. A full-text, invisible
@@ -391,6 +402,14 @@ export function SplashScreen({ navigation, route }: any) {
             </View>
           </Animated.View>
         </LinearGradient>
+
+        {diwali && (
+          <View style={{ backgroundColor: '#f8fafc', paddingTop: isMobile ? 32 : 48 }}>
+            <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
+              <DiwaliCleanupCard onPress={() => navigation.navigate('Login')} isMobile={isMobile} />
+            </View>
+          </View>
+        )}
 
         {/* ── ECOSYSTEM ── */}
         <View style={[s.section, { backgroundColor: '#f8fafc' }]}>

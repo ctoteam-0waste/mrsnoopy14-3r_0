@@ -7,6 +7,8 @@ import { NotificationPanel } from './NotificationPanel';
 import { Avatar } from './Avatar';
 import { getStoredAvatarId, subscribeAvatar } from '../../utils/avatar';
 import { navigationRef } from '../../navigation/navRef';
+import { isDiwaliSeason } from '../../utils/festive';
+import { DiwaliLights } from '../festive/Diwali';
 
 // The web app's navigation: a top navbar on desktop, a bottom bar on mobile.
 // Used by the tab navigator and, through WebAppShell, by the stack screens
@@ -190,6 +192,7 @@ export function AppTopBar({ activeName, onNavigate, overlay }: NavProps & { over
           </Pressable>
         </View>
       </View>
+      {isDiwaliSeason() && <DiwaliLights top={NAV_HEIGHT} />}
       {panel}
     </View>
   );
