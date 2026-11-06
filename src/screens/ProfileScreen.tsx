@@ -734,7 +734,7 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={styles.referBannerIconBox}>
                       <Users size={22} color="#2dd4bf" />
                     </View>
-                    <View>
+                    <View style={{ flex: 1 }}>
                       <Text style={styles.referBannerTitle}>Invite friends, earn coins</Text>
                       <Text style={styles.referBannerSub}>Share your code & both get rewards!</Text>
                     </View>
@@ -1396,7 +1396,7 @@ const useStyles = makeStyles((c) => ({
   referBannerIconBox: { width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(255,255,255,0.15)' },
   referBannerTitle: { color: 'white', fontSize: 15, fontWeight: '900', marginBottom: 2 },
   referBannerSub: { color: 'rgba(255,255,255,0.65)', fontSize: 12, fontWeight: '600' },
-  referBannerArrow: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
+  referBannerArrow: { marginLeft: 10, width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.15)', alignItems: 'center', justifyContent: 'center' },
 
   /* Options Sections */
   sectionTitle: { fontSize: 15, fontWeight: '800', color: c.text, marginBottom: 12, marginLeft: 6 },

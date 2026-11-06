@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Modal, useWindowDimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowRight, Share2, X } from 'lucide-react-native';
 import { getLocalDateStr } from '../../utils/quizDate';
@@ -967,8 +967,9 @@ export function DiwaliHeaderDecor({ wide }: { wide: boolean }) {
 export function DiwaliStrip({ onPress }: { onPress: () => void }) {
   ensureCss();
   const base = useUid();
+  const narrow = useWindowDimensions().width < 420;
   return (
-    <LinearGradient colors={['#450a0a', '#7c2d12', '#b45309']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={u.strip}>
+    <LinearGradient colors={['#450a0a', '#7c2d12', '#b45309']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[u.strip, narrow && u.stripNarrow]}>
       <DiwaliSparkles count={5} from={40} />
       <div aria-hidden style={{ flexShrink: 0 }}>
         <Diya id={`${base}-s`} delay={0.4} scale={0.9} />
@@ -977,7 +978,7 @@ export function DiwaliStrip({ onPress }: { onPress: () => void }) {
         <Text style={u.stripTitle}>Diwali clean-up?</Text>
         <Text style={u.stripSub}>Give the clutter a second life and earn KarmaCoins.</Text>
       </View>
-      <TouchableOpacity style={[s.cta, u.stripCta]} onPress={onPress} activeOpacity={0.85}>
+      <TouchableOpacity style={[s.cta, u.stripCta, narrow && u.stripCtaNarrow]} onPress={onPress} activeOpacity={0.85}>
         <div className="kvd-sweep" />
         <Text style={[s.ctaText, { fontSize: 14 }]}>Schedule</Text>
         <ArrowRight size={15} color="#451a03" />
@@ -1004,6 +1005,8 @@ const u = StyleSheet.create({
   stripTitle: { color: '#fde68a', fontSize: 15, fontWeight: '900' },
   stripSub: { color: 'rgba(255,255,255,0.82)', fontSize: 12.5, marginTop: 2 },
   stripCta: { alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 9 },
+  stripNarrow: { flexWrap: 'wrap' },
+  stripCtaNarrow: { width: '100%', justifyContent: 'center', marginTop: 2 },
 });
 
 // A small rangoli, tiled as a faint print across the page background.

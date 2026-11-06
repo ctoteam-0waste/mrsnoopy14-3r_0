@@ -324,7 +324,7 @@ export function SplashScreen({ navigation, route }: any) {
               <DiwaliSparkles count={isMobile ? 6 : 14} from={isMobile ? 0 : 55} />
               {!isMobile && <DiwaliRangoli wide={W >= 1180} />}
               <DiwaliLights />
-              <DiwaliKandils wide={W >= 1180} />
+              {W >= 380 && <DiwaliKandils wide={W >= 1180} />}
               {W >= 1200 && <DiwaliMarigolds />}
               <DiwaliEmbers count={isMobile ? 8 : 16} />
               <DiwaliDiyas count={isMobile ? 5 : 9} />
