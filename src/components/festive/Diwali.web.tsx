@@ -113,7 +113,13 @@ const CSS = `
 .kvd-letter { animation: kvd-letter .6s cubic-bezier(.2, 1.3, .4, 1) 1.05s both; }
 @keyframes kvd-letter { from { opacity: 0; transform: translateY(70px) scale(.6); } to { opacity: 1; transform: none; } }
 
+.kvd-glowblob { position: absolute; border-radius: 50%; animation: kvd-drift 36s ease-in-out infinite alternate; }
+@keyframes kvd-drift { from { transform: translate(0, 0) scale(1); } to { transform: translate(var(--gx), var(--gy)) scale(1.15); } }
+.kvd-bokeh { position: absolute; bottom: -20px; border-radius: 50%; opacity: 0; animation: kvd-float 24s linear infinite; }
+@keyframes kvd-float { 0% { opacity: 0; transform: translate(0, 0); } 10% { opacity: var(--o); } 90% { opacity: var(--o); } 100% { opacity: 0; transform: translate(var(--dx), -105vh); } }
+
 @media (prefers-reduced-motion: reduce) {
+  .kvd-glowblob, .kvd-bokeh,
   .kvd-wait, .kvd-border, .kvd-env, .kvd-flap, .kvd-letter,
   .kvd-bulb, .kvd-on, .kvd-flame, .kvd-halo, .kvd-ignite, .kvd-flash, .kvd-spark, .kvd-ember,
   .kvd-strand, .kvd-swing, .kvd-spin, .kvd-shimmer, .kvd-sweep, .kvd-item, .kvd-coin, .kvd-rangoli * { animation: none !important; }
@@ -999,3 +1005,73 @@ const u = StyleSheet.create({
   stripSub: { color: 'rgba(255,255,255,0.82)', fontSize: 12.5, marginTop: 2 },
   stripCta: { alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 9 },
 });
+
+// A small rangoli, tiled as a faint print across the page background.
+const rangoliTile = (color: string) => {
+  const petals = Array.from({ length: 8 }, (_, i) =>
+    `<path d='M0 -8 C5 -14 5 -22 0 -28 C-5 -22 -5 -14 0 -8 Z' transform='rotate(${i * 45})'/>`).join('');
+  const dots = Array.from({ length: 16 }, (_, i) => {
+    const a = (i / 16) * Math.PI * 2;
+    return `<circle cx='${(Math.sin(a) * 36).toFixed(1)}' cy='${(-Math.cos(a) * 36).toFixed(1)}' r='1.6'/>`;
+  }).join('');
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='-80 -80 160 160'>`
+    + `<g fill='none' stroke='${color}' stroke-width='1.2'>${petals}<circle r='5'/><circle r='31'/></g>`
+    + `<g fill='${color}'>${dots}</g></svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+};
+
+// Page background for the Diwali days: warm glows drifting slowly, a faint rangoli
+// print and a few specks of light floating up. Place it first inside a full-size
+// parent, under a transparent scroll view; it doesn't scroll.
+export function DiwaliBackdrop({ dark }: { dark: boolean }) {
+  ensureCss();
+  const ref = usePauseOffscreen();
+  const specks = useMemo(
+    () => Array.from({ length: 16 }, () => ({
+      left: Math.random() * 100,
+      size: 3 + Math.random() * 6,
+      dx: (Math.random() - 0.5) * 120,
+      o: 0.25 + Math.random() * 0.3,
+      delay: -Math.random() * 24,
+      duration: 20 + Math.random() * 14,
+    })),
+    [],
+  );
+  const glows = dark
+    ? [['#fbbf24', 0.2, '-10%', '10%', '55vw'], ['#be123c', 0.2, '60%', '35%', '60vw'], ['#9333ea', 0.2, '-5%', '70%', '55vw'], ['#f97316', 0.16, '55%', '95%', '50vw']]
+    : [['#fbbf24', 0.16, '-10%', '10%', '55vw'], ['#fb7185', 0.1, '60%', '35%', '60vw'], ['#c084fc', 0.1, '-5%', '70%', '55vw'], ['#fdba74', 0.14, '55%', '95%', '50vw']];
+  return (
+    <div ref={ref} aria-hidden style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+      {!dark && <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(255,237,213,0.35)' }} />}
+      {glows.map(([color, alpha, left, top, size], i) => (
+        <div
+          key={i}
+          className="kvd-glowblob"
+          style={{
+            left: left as string, top: top as string, width: size as string, height: size as string,
+            marginTop: `calc(${size} / -2)`,
+            background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
+            opacity: alpha as number,
+            animationDelay: `${-i * 9}s`,
+            ...cssVars({ '--gx': `${i % 2 ? -6 : 6}vw`, '--gy': `${i < 2 ? 5 : -5}vh` }),
+          }}
+        />
+      ))}
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundImage: rangoliTile(dark ? '#fbbf24' : '#b45309'), backgroundSize: '160px 160px', opacity: dark ? 0.045 : 0.06 }} />
+      {specks.map((sp, i) => (
+        <span
+          key={i}
+          className="kvd-bokeh"
+          style={{
+            left: `${sp.left}%`, width: sp.size, height: sp.size,
+            background: dark ? '#fcd34d' : '#f59e0b',
+            boxShadow: `0 0 ${sp.size * 2}px ${sp.size / 2}px ${dark ? 'rgba(251,191,36,0.45)' : 'rgba(245,158,11,0.35)'}`,
+            filter: 'blur(0.6px)',
+            animationDelay: `${sp.delay.toFixed(1)}s`, animationDuration: `${sp.duration.toFixed(1)}s`,
+            ...cssVars({ '--dx': `${sp.dx.toFixed(0)}px`, '--o': sp.o.toFixed(2) }),
+          }}
+        />
+      ))}
+    </div>
+  );
+}
