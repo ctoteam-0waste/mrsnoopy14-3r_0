@@ -13,6 +13,8 @@ import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { isLaunchDay } from '../utils/launchDay';
+import { isDiwaliSeason } from '../utils/festive';
+import { DiwaliLights, DiwaliCleanupCard } from '../components/festive/Diwali';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
 
@@ -70,6 +72,7 @@ const STATUS_CLR: any = {
 
 // Time-aware greeting based on the user's device clock.
 const getGreeting = () => {
+  if (isDiwaliSeason()) return 'Happy Diwali';
   const h = new Date().getHours();
   if (h < 5) return 'Still awake, night owl? 🦉';
   if (h < 12) return 'Good morning';
@@ -86,6 +89,7 @@ export function DashboardScreen({ navigation, route }: any) {
   const isMobile = width < 900;
   const isTablet = width >= 768 && width < 1024;
   const pad = isMobile ? 16 : 32;
+  const diwali = isDiwaliSeason();
 
   const [userName, setUserName] = useState('');
   const [balance, setBalance] = useState(0);
@@ -174,9 +178,11 @@ export function DashboardScreen({ navigation, route }: any) {
     <ScrollView style={z.root} showsVerticalScrollIndicator={false}>
 
       {/* ════════ HERO ════════ */}
-      <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={z.hero}>
+      <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[z.hero, diwali && { paddingTop: 44 }]}>
         <View style={z.heroDecor1} />
         <View style={z.heroDecor2} />
+        {/* Below 768 there's no top navbar to hang the lights from (see AppTopBar). */}
+        {diwali && width < 768 && <DiwaliLights />}
         <View style={[z.container, { paddingHorizontal: pad }]}>
 
           {/* Hero content */}
@@ -254,6 +260,12 @@ export function DashboardScreen({ navigation, route }: any) {
               <X size={16} color="rgba(255,255,255,0.7)" />
             </LinearGradient>
           </TouchableOpacity>
+        </View>
+      )}
+
+      {diwali && (
+        <View style={[z.container, { marginTop: 24, paddingHorizontal: pad }]}>
+          <DiwaliCleanupCard onPress={() => nav('SchedulePickup')} isMobile={isMobile} />
         </View>
       )}
 
