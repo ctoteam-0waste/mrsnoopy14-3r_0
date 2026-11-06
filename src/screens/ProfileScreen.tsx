@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
 import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera } from 'lucide-react-native';
@@ -24,6 +24,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { getStableUserSuffix } from '../utils/userId';
 import { useTheme, makeStyles } from '../theme';
+import { isDiwaliSeason } from '../utils/festive';
+import { DiwaliHeaderDecor, DiwaliGoldBorder, DiwaliBackdrop } from '../components/festive/Diwali';
 
 // Reusable Components
 function InputField({ placeholder, value, onChange, keyboardType = 'default', maxLength }: any) {
@@ -74,7 +76,9 @@ const isRealPhone = (p?: string) => /^[6-9]\d{9}$/.test(cleanPhone(p));
 
 export function ProfileScreen({ navigation }: any) {
   const styles = useStyles();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
+  const { width } = useWindowDimensions();
+  const diwali = isDiwaliSeason();
   const { pushEnabled, enablePush } = useNotifications();
   // Main Profile State
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -652,10 +656,12 @@ export function ProfileScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
+      {diwali && <DiwaliBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" />
 
-        <ScrollView contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.backgroundGradient}>
+        <ScrollView style={diwali && { backgroundColor: 'transparent' }} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.backgroundGradient, diwali && { overflow: 'hidden' }]}>
+        {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={() => navigation.canGoBack() ? navigation.goBack() : navigation.navigate('App')}>
@@ -696,6 +702,7 @@ export function ProfileScreen({ navigation }: any) {
             <>
               {/* Avatar & Basic Info Card */}
               <View style={styles.profileInfoCard}>
+                {diwali && <DiwaliGoldBorder />}
                 <TouchableOpacity style={styles.avatarMain} onPress={() => setAvatarPickerVisible(true)} activeOpacity={0.85}>
                   {avatarId ? (
                     <Avatar avatarId={avatarId} size={66} />
