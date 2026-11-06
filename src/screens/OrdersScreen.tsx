@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform, useWindowDimensions } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Package, Truck, CheckCircle2, ChevronRight, Clock, Star } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { RatingModal } from '../components/shared/RatingModal';
+import { isDiwaliSeason } from '../utils/festive';
+import { DiwaliHeaderDecor, DiwaliStrip } from '../components/festive/Diwali';
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
 
 export function OrdersScreen({ navigation, route }: any) {
   const styles = useStyles();
+  const { width } = useWindowDimensions();
+  const diwali = isDiwaliSeason();
   const { colors } = useTheme();
   const [activeTab, setActiveTab] = useState<'Active' | 'History'>(route?.params?.tab === 'History' ? 'History' : 'Active');
   const [orders, setOrders] = useState<any[]>([]);
@@ -108,7 +112,8 @@ export function OrdersScreen({ navigation, route }: any) {
       <StatusBar barStyle="light-content" />
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
+          {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
           <View style={styles.headerTop}>
             <Text style={styles.headerSubtitle}>Track your impact</Text>
             <Text style={styles.headerTitle}>My sustainable pickups</Text>
@@ -132,6 +137,7 @@ export function OrdersScreen({ navigation, route }: any) {
         </LinearGradient>
 
         <View style={styles.scrollContent}>
+          {diwali && <DiwaliStrip onPress={() => navigation.navigate('SchedulePickup')} />}
 
           {isLoading ? (
              <View style={{ marginTop: 40, alignItems: 'center' }}>

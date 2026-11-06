@@ -665,14 +665,14 @@ const s = StyleSheet.create({
   ctaText: { color: '#451a03', fontSize: 15, fontWeight: '900' },
 });
 
-// Rangoli turning slowly behind the balance coin. Goes inside the coin's wrapper,
-// before the coin, so the coin sits at its centre.
-export function DiwaliCoinRangoli({ size }: { size: number }) {
+// Rangoli turning slowly behind a coin. Goes inside the coin's wrapper, before the
+// coin, so the coin sits at its centre.
+export function DiwaliCoinRangoli({ size, opacity = 0.6 }: { size: number; opacity?: number }) {
   ensureCss();
   const ref = usePauseOffscreen();
   const intro = playIntro();
   return (
-    <div ref={ref} aria-hidden style={{ position: 'absolute', left: '50%', top: '50%', width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2, opacity: 0.6, pointerEvents: 'none' }}>
+    <div ref={ref} aria-hidden style={{ position: 'absolute', left: '50%', top: '50%', width: size, height: size, marginLeft: -size / 2, marginTop: -size / 2, opacity, pointerEvents: 'none' }}>
       <RangoliArt size={size} intro={intro} />
     </div>
   );
@@ -905,4 +905,97 @@ const t = StyleSheet.create({
   greet: { fontSize: 26, fontWeight: '900', textAlign: 'center', marginBottom: 10 },
   greetSub: { color: 'rgba(255,255,255,0.85)', fontSize: 15, lineHeight: 22, textAlign: 'center', marginBottom: 20 },
   greetRow: { flexDirection: 'row', gap: 10, flexWrap: 'wrap', justifyContent: 'center' },
+});
+
+const TORAN_SEG = 80;
+
+// A toran across the top: a string of mango leaves with marigolds between them,
+// the leaves swaying a little.
+function DiwaliToran() {
+  return (
+    <div aria-hidden style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 48, overflow: 'hidden', pointerEvents: 'none', display: 'flex' }}>
+      {Array.from({ length: 24 }, (_, seg) => (
+        <svg key={seg} width={TORAN_SEG} height={48} viewBox={`0 0 ${TORAN_SEG} 48`} style={{ flexShrink: 0, overflow: 'visible' }}>
+          <path d="M0 4 Q40 12 80 4" fill="none" stroke="#a16207" strokeWidth="1.4" />
+          {[18, 62].map((x, k) => (
+            <g key={x} className="kvd-strand" style={{ transformBox: 'fill-box', transformOrigin: '50% 0', animationDelay: `${((seg * 2 + k) * 0.37) % 4}s` } as React.CSSProperties}>
+              <path d={`M${x} 7 C${x + 7} 16 ${x + 7} 30 ${x} 40 C${x - 7} 30 ${x - 7} 16 ${x} 7 Z`} fill={k ? '#16a34a' : '#15803d'} />
+              <path d={`M${x} 9 L${x} 37`} stroke="#86efac" strokeWidth="0.8" opacity="0.7" />
+            </g>
+          ))}
+          <line x1="40" y1="8" x2="40" y2="14" stroke="#a16207" strokeWidth="1" />
+          <circle cx="40" cy="20" r="6.5" fill={seg % 2 ? '#facc15' : '#f97316'} />
+          <circle cx="40" cy="20" r="6.5" fill="none" stroke={seg % 2 ? '#eab308' : '#ea580c'} strokeWidth="2" strokeDasharray="2 1.6" />
+          <circle cx="40" cy="20" r="1.8" fill={seg % 2 ? '#ca8a04' : '#c2410c'} />
+          <circle cx="0" cy="5" r="2.5" fill="#fbbf24" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+// Decoration for a page's green header: a large rangoli turning half out of the
+// corner(s) and a few sparkles; on phones (no navbar lights above) a toran too.
+// The header needs overflow hidden.
+export function DiwaliHeaderDecor({ wide }: { wide: boolean }) {
+  ensureCss();
+  const ref = usePauseOffscreen();
+  const intro = playIntro();
+  return (
+    <div ref={ref} aria-hidden style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, pointerEvents: 'none' }}>
+      <div style={{ position: 'absolute', top: wide ? -90 : -70, right: wide ? -70 : -110, opacity: 0.32 }}>
+        <RangoliArt size={wide ? 280 : 240} intro={intro} />
+      </div>
+      {wide && (
+        <div style={{ position: 'absolute', bottom: -140, left: -90, opacity: 0.22 }}>
+          <RangoliArt size={260} intro={false} />
+        </div>
+      )}
+      <DiwaliSparkles count={wide ? 10 : 6} from={wide ? 60 : 50} />
+      {!wide && <DiwaliToran />}
+    </div>
+  );
+}
+
+// A slim festive bar under a page header, leading to a pickup.
+export function DiwaliStrip({ onPress }: { onPress: () => void }) {
+  ensureCss();
+  const base = useUid();
+  return (
+    <LinearGradient colors={['#450a0a', '#7c2d12', '#b45309']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={u.strip}>
+      <DiwaliSparkles count={5} from={40} />
+      <div aria-hidden style={{ flexShrink: 0 }}>
+        <Diya id={`${base}-s`} delay={0.4} scale={0.9} />
+      </div>
+      <View style={{ flex: 1 }}>
+        <Text style={u.stripTitle}>Diwali clean-up?</Text>
+        <Text style={u.stripSub}>Give the clutter a second life and earn KarmaCoins.</Text>
+      </View>
+      <TouchableOpacity style={[s.cta, u.stripCta]} onPress={onPress} activeOpacity={0.85}>
+        <div className="kvd-sweep" />
+        <Text style={[s.ctaText, { fontSize: 14 }]}>Schedule</Text>
+        <ArrowRight size={15} color="#451a03" />
+      </TouchableOpacity>
+    </LinearGradient>
+  );
+}
+
+// True only the first time `key` is asked for in this browser tab.
+export function useDiwaliOncePerTab(key: string): boolean {
+  return useMemo(() => {
+    try {
+      if (sessionStorage.getItem(key)) return false;
+      sessionStorage.setItem(key, '1');
+      return !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    } catch {
+      return false;
+    }
+  }, [key]);
+}
+
+const u = StyleSheet.create({
+  strip: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 16, overflow: 'hidden', paddingHorizontal: 14, paddingVertical: 12 },
+  stripTitle: { color: '#fde68a', fontSize: 15, fontWeight: '900' },
+  stripSub: { color: 'rgba(255,255,255,0.82)', fontSize: 12.5, marginTop: 2 },
+  stripCta: { alignSelf: 'center', paddingHorizontal: 14, paddingVertical: 9 },
 });

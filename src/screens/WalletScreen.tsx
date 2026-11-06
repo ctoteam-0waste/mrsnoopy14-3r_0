@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform, Modal, useWindowDimensions } from 'react-native';
 import { useTheme, makeStyles } from '../theme';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Flame, Snowflake, Recycle, Gift, Award, X, ChevronRight, Banknote, Undo2 } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { CoinShower } from '../components/shared/CoinShower';
+import { isDiwaliSeason } from '../utils/festive';
+import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliGoldBorder, DiwaliShimmerText, useDiwaliOncePerTab } from '../components/festive/Diwali';
 import { profileService } from '../services/profile';
 import { streakService, StreakStatus } from '../services/streak';
 import { showRedeemInfoNow, isRedeemLive } from '../utils/redeemInfo';
@@ -29,6 +32,11 @@ function txSourceIcon(source?: string, isCredit?: boolean) {
 
 export function WalletScreen({ navigation }: any) {
   const styles = useStyles();
+  const { width } = useWindowDimensions();
+  const diwali = isDiwaliSeason();
+  // Diwali: gold coins shower down the first time the wallet opens in a tab.
+  const diwaliShower = useDiwaliOncePerTab('kvDiwaliWalletShower') && diwali;
+  const [showShower, setShowShower] = useState(diwaliShower);
   const { colors } = useTheme();
   const [pickupCoins, setPickupCoins] = useState(0);
   const [rewardCoins, setRewardCoins] = useState(0);
@@ -126,10 +134,16 @@ export function WalletScreen({ navigation }: any) {
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <StatusBar barStyle="light-content" />
+      {showShower && (
+        <View style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, zIndex: 50, pointerEvents: 'none' }}>
+          <CoinShower onDone={() => setShowShower(false)} />
+        </View>
+      )}
       <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
+          {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
           <View style={styles.titleRow}>
             <Text style={styles.headerTitle}>My wallet</Text>
             <View style={{ flexDirection: 'row', gap: 10 }}>
@@ -145,6 +159,7 @@ export function WalletScreen({ navigation }: any) {
 
           {/* Balance card */}
           <View style={styles.balanceCard}>
+            {diwali && <DiwaliGoldBorder />}
             <View style={styles.cardTopRow}>
               <Text style={styles.cardLabel}>Total earned</Text>
               <TouchableOpacity style={styles.tierPill} onPress={() => setTierModalVisible(true)} activeOpacity={0.8}>
@@ -152,13 +167,19 @@ export function WalletScreen({ navigation }: any) {
                 <Text style={styles.activeText}>{tierMeta.name} · {rewardRate}:1</Text>
               </TouchableOpacity>
             </View>
-            <View style={styles.balanceRow}>
-              <KarmaCoin size={44} glow animated />
+            <View style={[styles.balanceRow, diwali && { gap: 24 }]}>
+              <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+                {diwali && <DiwaliCoinRangoli size={80} opacity={0.65} />}
+                <KarmaCoin size={44} glow animated />
+              </View>
               <View>
                 <Text style={styles.balanceText}>{lifetime.toLocaleString()}</Text>
                 <Text style={styles.unitTag} numberOfLines={1}>KarmaCoins XP</Text>
               </View>
             </View>
+            {diwali && (
+              <Text style={styles.diwaliWish}><DiwaliShimmerText text="Shubh Deepavali! May your KarmaCoins keep growing." /></Text>
+            )}
 
             <View style={styles.cardDivider} />
 
@@ -384,6 +405,7 @@ const useStyles = makeStyles((c) => ({
   activeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: '#86efac' },
   activeText: { color: 'white', fontSize: 11, fontWeight: '800' },
   balanceRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  diwaliWish: { fontSize: 13.5, fontWeight: '800', marginTop: 12 },
   balanceText: { fontSize: 44, fontWeight: '900', color: 'white', letterSpacing: -1 },
   cardDivider: { height: 1, backgroundColor: 'rgba(255,255,255,0.12)', marginVertical: 16 },
 
