@@ -1,15 +1,19 @@
 import React, { useCallback } from 'react';
-import { View, Text, TouchableOpacity, StatusBar, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StatusBar, ScrollView, Platform, useWindowDimensions } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ShoppingBag, Gift, ArrowRight } from 'lucide-react-native';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
+import { isDiwaliSeason } from '../utils/festive';
+import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliSparkles } from '../components/festive/Diwali';
 import { makeStyles } from '../theme';
 import { trackEvent } from '../utils/analytics';
 
 export function StoreScreen({ navigation }: any) {
   const styles = useStyles();
+  const { width } = useWindowDimensions();
+  const diwali = isDiwaliSeason();
   // Tab screens stay mounted, so count each time the tab is focused rather than on mount.
   useFocusEffect(useCallback(() => {
     trackEvent('reward_view', { reward_context: 'store' });
@@ -19,7 +23,8 @@ export function StoreScreen({ navigation }: any) {
     <View style={styles.rootContainer}>
       <StatusBar barStyle="light-content" />
       <ScrollView style={styles.container} contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={styles.header}>
+        <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
+          {diwali && <DiwaliHeaderDecor wide={width >= 768} />}
           <View style={styles.headerTop}>
             <View>
               <Text style={styles.headerSubtitle}>Spend your rewards</Text>
@@ -33,7 +38,9 @@ export function StoreScreen({ navigation }: any) {
 
         <View style={styles.content}>
 
-          <View style={styles.coinWrap}>
+          <View style={[styles.coinWrap, diwali && { marginTop: 48, marginBottom: 64 }]}>
+            {diwali && <DiwaliSparkles count={8} />}
+            {diwali && <DiwaliCoinRangoli size={240} opacity={0.9} />}
             <KarmaCoin size={110} glow animated />
             <View style={styles.giftBadge}>
               <Gift size={20} color="#15803d" />
