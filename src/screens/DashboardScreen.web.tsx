@@ -14,7 +14,10 @@ import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { isLaunchDay } from '../utils/launchDay';
 import { isDiwaliSeason } from '../utils/festive';
-import { DiwaliLights, DiwaliShimmerText, DiwaliCleanupCard } from '../components/festive/Diwali';
+import {
+  DiwaliLights, DiwaliShimmerText, DiwaliCleanupCard, DiwaliKandils, DiwaliEmbers, DiwaliDiyas, DiwaliCoinRangoli,
+  DiwaliGoldBorder, DiwaliBurst, useDiwaliCountUp, DiwaliDiyaTracker, DiwaliGreetingModal,
+} from '../components/festive/Diwali';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
 
@@ -86,9 +89,9 @@ export function DashboardScreen({ navigation, route }: any) {
   // 900 (not 768) so iPad portrait (~810px) uses the clean stacked layout —
   // the desktop row squeezes the redeem banner into a tall unreadable sliver.
   const isMobile = width < 900;
+  const diwali = isDiwaliSeason();
   const isTablet = width >= 768 && width < 1024;
   const pad = isMobile ? 16 : 32;
-  const diwali = isDiwaliSeason();
 
   const [userName, setUserName] = useState('');
   const [balance, setBalance] = useState(0);
@@ -99,6 +102,12 @@ export function DashboardScreen({ navigation, route }: any) {
   const [selectedFeature, setSelectedFeature] = useState<typeof FEATURE_DETAILS[0] | null>(null);
   const [showLaunchPopup, setShowLaunchPopup] = useState(false);
   const [showWelcomeBonusBanner, setShowWelcomeBonusBanner] = useState(false);
+  // Diwali: days with a quiz or a pickup light the Deepotsav diyas.
+  const [quizDays, setQuizDays] = useState<string[]>([]);
+  const [pickupDays, setPickupDays] = useState<string[]>([]);
+  const [userSuffix, setUserSuffix] = useState('');
+  const [showDiwaliGreeting, setShowDiwaliGreeting] = useState(false);
+  const [shownBalance, balanceBurst] = useDiwaliCountUp(balance, diwali);
 
   // New signup arriving straight from the Welcome Celebration scratch card —
   // show the "coins added" banner once, then clear the param so it doesn't
@@ -119,6 +128,7 @@ export function DashboardScreen({ navigation, route }: any) {
       if (prof.name) { const first = prof.name.trim().split(/\s+/)[0]; setUserName(first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()); }
       setBalance(prof.karmaCoins || prof.coins || 0);
       if (Array.isArray(orders)) {
+        setPickupDays(orders.filter((o: any) => o.status !== 'CANCELLED' && o.createdAt).map((o: any) => getLocalDateStr(new Date(o.createdAt))));
         setTotalPickups(orders.filter((o: any) => o.status === 'COMPLETED').length);
         setRecentOrders(orders.slice(0, 6).map((o: any) => {
           let st = 'Scheduled';
@@ -138,6 +148,11 @@ export function DashboardScreen({ navigation, route }: any) {
       const today = getLocalDateStr();
       const yest = getLocalYesterdayStr();
       setQuizStreak(!sd ? 0 : (sd === today || sd === yest ? Number(ss) || 0 : 0));
+      setUserSuffix(sfx);
+      try {
+        const hist = JSON.parse((await AsyncStorage.getItem(`quizHistory_${sfx}`)) || '[]');
+        setQuizDays([...(Array.isArray(hist) ? hist : []), ...(sd ? [sd] : [])]);
+      } catch { setQuizDays(sd ? [sd] : []); }
 
       // Day streak = consecutive days the app was opened (frontend-tracked, no backend dependency)
       const [lad, ds] = await Promise.all([AsyncStorage.getItem(`lastActiveDate_${sfx}`), AsyncStorage.getItem(`dayStreak_${sfx}`)]);
@@ -153,7 +168,15 @@ export function DashboardScreen({ navigation, route }: any) {
 
     (async () => {
       const token = await getToken();
-      showRedeemInfoOnce(`firstHomeRedeemInfo_${getStableUserSuffix(token)}`);
+      const sfx = getStableUserSuffix(token);
+      // A first-ever visit already gets the redeem info popup; the Diwali greeting
+      // waits for the next visit rather than stacking on top of it.
+      const returning = !!(await AsyncStorage.getItem(`firstHomeRedeemInfo_${sfx}`));
+      showRedeemInfoOnce(`firstHomeRedeemInfo_${sfx}`);
+      if (isDiwaliSeason() && returning && !(await AsyncStorage.getItem(`diwaliGreeting2026_${sfx}`))) {
+        await AsyncStorage.setItem(`diwaliGreeting2026_${sfx}`, '1');
+        setTimeout(() => setShowDiwaliGreeting(true), 1200);
+      }
 
       if (isLaunchDay()) {
         const suffix = getStableUserSuffix(token);
@@ -177,11 +200,14 @@ export function DashboardScreen({ navigation, route }: any) {
     <ScrollView style={z.root} showsVerticalScrollIndicator={false}>
 
       {/* ════════ HERO ════════ */}
-      <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[z.hero, diwali && { paddingTop: 44 }]}>
+      <LinearGradient colors={['#052e16', '#064e3b', '#0f766e']} style={[z.hero, diwali && { paddingTop: 44, paddingBottom: 76 }]}>
         <View style={z.heroDecor1} />
         <View style={z.heroDecor2} />
         {/* Below 768 there's no top navbar to hang the lights from (see AppTopBar). */}
         {diwali && width < 768 && <DiwaliLights />}
+        {diwali && (width < 768 || width >= 1360) && <DiwaliKandils wide={width >= 1360} variant="dashboard" />}
+        {diwali && <DiwaliEmbers count={isMobile ? 6 : 12} />}
+        {diwali && <DiwaliDiyas count={isMobile ? 5 : 9} />}
         <View style={[z.container, { paddingHorizontal: pad }]}>
 
           {/* Hero content */}
@@ -190,12 +216,14 @@ export function DashboardScreen({ navigation, route }: any) {
             <View style={z.heroLeft}>
               <Text style={z.heroGreet}>{diwali ? <DiwaliShimmerText text="Happy Diwali" /> : getGreeting()},</Text>
               <Text style={[z.heroName, isMobile && { fontSize: 20 }]}>{userName || '...'}</Text>
-              <View style={z.heroBalance}>
+              <View style={[z.heroBalance, diwali && { gap: 28 }]}>
                 <View style={z.heroCoinGlow}>
+                  {diwali && <DiwaliCoinRangoli size={isMobile ? 84 : 100} />}
                   <KarmaCoin size={isMobile ? 52 : 64} glow animated />
                 </View>
                 <View>
-                  <Text style={[z.heroBalNum, isMobile && { fontSize: 32 }]}>{balance.toLocaleString()}</Text>
+                  <Text style={[z.heroBalNum, isMobile && { fontSize: 32 }]}>{shownBalance.toLocaleString()}</Text>
+                  {balanceBurst && <DiwaliBurst />}
                   <Text style={z.heroBalLabel}>KarmaCoins XP</Text>
                 </View>
               </View>
@@ -215,6 +243,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+                    {diwali && <DiwaliGoldBorder delay={i * 1} />}
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                       <View style={{ width: 26, height: 26, borderRadius: 8, backgroundColor: st.color + '20', alignItems: 'center', justifyContent: 'center' }}>
                         <st.icon size={14} color={st.color} />
@@ -234,6 +263,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={z.statCard}>
+                    {diwali && <DiwaliGoldBorder delay={i * 1} />}
                     <View style={z.statTop}>
                       <View style={[z.statIconBg, { backgroundColor: st.color + '20' }]}>
                         <st.icon size={18} color={st.color} />
@@ -263,9 +293,19 @@ export function DashboardScreen({ navigation, route }: any) {
       )}
 
       {diwali && (
-        <View style={[z.container, { marginTop: 24, paddingHorizontal: pad }]}>
+        <View style={[z.container, { marginTop: 24, paddingHorizontal: pad, gap: 20 }]}>
+          <DiwaliDiyaTracker
+            litDays={[...quizDays, ...pickupDays]}
+            seenKey={`diwaliDiyasSeen_${userSuffix}`}
+            onQuiz={() => nav('Quiz')}
+            onPickup={() => nav('SchedulePickup')}
+            isMobile={isMobile}
+          />
           <DiwaliCleanupCard onPress={() => nav('SchedulePickup')} isMobile={isMobile} />
         </View>
+      )}
+      {diwali && (
+        <DiwaliGreetingModal visible={showDiwaliGreeting} name={userName} pickups={totalPickups} onClose={() => setShowDiwaliGreeting(false)} />
       )}
 
       {/* ════════ TWO ACTION CARDS: Schedule + Quiz ════════ */}
