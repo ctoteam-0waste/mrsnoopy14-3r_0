@@ -7,7 +7,7 @@ import { Package, Truck, CheckCircle2, ChevronRight, Clock, Star } from 'lucide-
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { RatingModal } from '../components/shared/RatingModal';
 import { isDiwaliSeason } from '../utils/festive';
-import { DiwaliHeaderDecor, DiwaliStrip } from '../components/festive/Diwali';
+import { DiwaliHeaderDecor, DiwaliStrip, DiwaliBackdrop } from '../components/festive/Diwali';
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
 
@@ -15,7 +15,7 @@ export function OrdersScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { width } = useWindowDimensions();
   const diwali = isDiwaliSeason();
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<'Active' | 'History'>(route?.params?.tab === 'History' ? 'History' : 'Active');
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,8 +109,9 @@ export function OrdersScreen({ navigation, route }: any) {
 
   return (
     <View style={styles.rootContainer}>
+      {diwali && <DiwaliBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" />
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
           {diwali && <DiwaliHeaderDecor wide={width >= 768} />}

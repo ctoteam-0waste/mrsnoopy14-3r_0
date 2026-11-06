@@ -7,7 +7,7 @@ import { ArrowDownLeft, ArrowUpRight, Heart, History, Clock, Flame, Snowflake, R
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { CoinShower } from '../components/shared/CoinShower';
 import { isDiwaliSeason } from '../utils/festive';
-import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliGoldBorder, DiwaliShimmerText, useDiwaliOncePerTab } from '../components/festive/Diwali';
+import { DiwaliHeaderDecor, DiwaliCoinRangoli, DiwaliGoldBorder, DiwaliShimmerText, useDiwaliOncePerTab, DiwaliBackdrop } from '../components/festive/Diwali';
 import { profileService } from '../services/profile';
 import { streakService, StreakStatus } from '../services/streak';
 import { showRedeemInfoNow, isRedeemLive } from '../utils/redeemInfo';
@@ -37,7 +37,7 @@ export function WalletScreen({ navigation }: any) {
   // Diwali: gold coins shower down the first time the wallet opens in a tab.
   const diwaliShower = useDiwaliOncePerTab('kvDiwaliWalletShower') && diwali;
   const [showShower, setShowShower] = useState(diwaliShower);
-  const { colors } = useTheme();
+  const { colors, isDark } = useTheme();
   const [pickupCoins, setPickupCoins] = useState(0);
   const [rewardCoins, setRewardCoins] = useState(0);
   // lifetime = totalCoinsEarned — never decreases on redeem
@@ -139,7 +139,8 @@ export function WalletScreen({ navigation }: any) {
           <CoinShower onDone={() => setShowShower(false)} />
         </View>
       )}
-      <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
+      {diwali && <DiwaliBackdrop dark={isDark} />}
+      <ScrollView style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>

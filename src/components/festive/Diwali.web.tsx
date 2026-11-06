@@ -1039,10 +1039,10 @@ export function DiwaliBackdrop({ dark }: { dark: boolean }) {
   );
   const glows = dark
     ? [['#fbbf24', 0.2, '-10%', '10%', '55vw'], ['#be123c', 0.2, '60%', '35%', '60vw'], ['#9333ea', 0.2, '-5%', '70%', '55vw'], ['#f97316', 0.16, '55%', '95%', '50vw']]
-    : [['#fbbf24', 0.16, '-10%', '10%', '55vw'], ['#fb7185', 0.1, '60%', '35%', '60vw'], ['#c084fc', 0.1, '-5%', '70%', '55vw'], ['#fdba74', 0.14, '55%', '95%', '50vw']];
+    : [['#fbbf24', 0.3, '-10%', '10%', '55vw'], ['#fb7185', 0.18, '60%', '35%', '60vw'], ['#f0abfc', 0.16, '-5%', '70%', '55vw'], ['#fb923c', 0.22, '55%', '95%', '50vw']];
   return (
     <div ref={ref} aria-hidden style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-      {!dark && <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, background: 'rgba(255,237,213,0.35)' }} />}
+      {!dark && <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, background: 'linear-gradient(180deg, #fff7ed 0%, #fffbeb 45%, #fff1f2 100%)' }} />}
       {glows.map(([color, alpha, left, top, size], i) => (
         <div
           key={i}
@@ -1057,7 +1057,7 @@ export function DiwaliBackdrop({ dark }: { dark: boolean }) {
           }}
         />
       ))}
-      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundImage: rangoliTile(dark ? '#fbbf24' : '#b45309'), backgroundSize: '160px 160px', opacity: dark ? 0.045 : 0.06 }} />
+      <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundImage: rangoliTile(dark ? '#fbbf24' : '#f59e0b'), backgroundSize: '160px 160px', opacity: dark ? 0.045 : 0.14 }} />
       {specks.map((sp, i) => (
         <span
           key={i}
