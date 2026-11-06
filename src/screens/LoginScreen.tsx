@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing, PanResponder } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, StatusBar, ScrollView, Platform, KeyboardAvoidingView, Image, Animated, Easing, PanResponder, useWindowDimensions } from 'react-native';
 import { showAlert } from '../utils/alert';
 import { consumePendingDeepLink } from '../utils/deepLink';
 import { trackEvent } from '../utils/analytics';
@@ -20,6 +20,8 @@ import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 import { ScheduledDeletionModal } from '../components/shared/ScheduledDeletionModal';
+import { isDiwaliSeason } from '../utils/festive';
+import { DiwaliHeaderDecor, DiwaliBackdrop } from '../components/festive/Diwali';
 
 // Why the user was signed out (forceLogout passes the backend code as `reason`).
 const SIGNED_OUT_REASONS: Record<string, [string, string]> = {
@@ -285,6 +287,8 @@ function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
 export function LoginScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
+  const diwali = isDiwaliSeason();
+  const { width: winWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets(); // bottom inset so "Skip for now" clears the Android gesture pill
   const { reconnect } = useUserSocket();
   const [step, setStep] = useState<Step>('entry');
@@ -1040,6 +1044,11 @@ export function LoginScreen({ navigation, route }: any) {
       return (
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.stepContent}>
           <View>
+            {diwali && (
+              <LinearGradient colors={['#450a0a', '#9a3412']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.diwaliChip}>
+                <Text style={styles.diwaliChipText}>🪔  Happy Diwali</Text>
+              </LinearGradient>
+            )}
             <Text style={styles.title}>Welcome 👋</Text>
             <Text style={styles.subtitle}>Enter your email or mobile number to get started</Text>
           </View>
@@ -1795,11 +1804,13 @@ export function LoginScreen({ navigation, route }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
+      {diwali && !(step === 'demographics' || step === 'referral_bonus' || step === 'welcome_celebration') && <DiwaliBackdrop dark={isDark} />}
       <StatusBar barStyle="light-content" backgroundColor="#064e3b" />
       <StatusBarFiller color="#064e3b" />
 
       <SafeAreaView style={{ flex: 1 }}>
-        <LinearGradient colors={['#064e3b', '#15803d']} style={styles.header}>
+        <LinearGradient colors={['#064e3b', '#15803d']} style={[styles.header, diwali && winWidth < 768 && { paddingTop: 44 }]}>
+          {diwali && <DiwaliHeaderDecor wide={winWidth >= 768} />}
           {/* Decorative shapes so the header reads as a designed panel, not a flat block */}
           <View style={[styles.headerCircle, { top: -50, right: -40, width: 160, height: 160, opacity: 0.08 }]} />
           <View style={[styles.headerCircle, { bottom: -60, left: -50, width: 140, height: 140, opacity: 0.06 }]} />
@@ -1886,6 +1897,8 @@ const useStyles = makeStyles((c) => ({
   body: { flex: 1, paddingHorizontal: 24, paddingTop: 24, width: '100%', maxWidth: 460, alignSelf: 'center' },
 
   stepContent: { gap: 14 },
+  diwaliChip: { alignSelf: 'center', borderRadius: 100, paddingHorizontal: 12, paddingVertical: 5, marginBottom: 10, borderWidth: 1, borderColor: 'rgba(251,191,36,0.55)' },
+  diwaliChipText: { color: '#fde68a', fontSize: 12, fontWeight: '900', letterSpacing: 0.6 },
   scrollStepContent: { paddingHorizontal: 24, paddingBottom: 50, gap: 16 },
   
   title: { fontSize: 24, fontWeight: '900', color: c.text },
