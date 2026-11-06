@@ -495,22 +495,27 @@ export function SchedulePickupScreen({ navigation }: any) {
     }
     const idempotencyKey = idempotencyRef.current.key;
 
-    const onBookingCreated = async (createdBooking: any) => {
+    // The booking is saved by now, so nothing in here may throw: an error would land
+    // in the catch below and show "Scheduling failed", and the user would book again.
+    const onBookingCreated = (createdBooking: any) => {
       console.log('[Confirm Pickup] Created booking:', createdBooking);
       idempotencyRef.current = null;
-      // Counts only — never the address, date, instructions or booking ID.
-      trackEvent('schedule_pickup', {
-        category_count: new Set(payloadCategories.map((c) => c.category)).size,
-        item_quantity: payloadCategories.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0),
-      });
-
       setIsSubmitted(true);
-      const token = await getToken();
-      showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
       setTimeout(() => navigation.replace('OrderTracking', {
         booking: createdBooking,
         estimatedCoins: createdBooking?.estimatedKarmaCoins ?? cartCalculations.totalCoins,
       }), 2500);
+
+      try {
+        // Counts only — never the address, date, instructions or booking ID.
+        trackEvent('schedule_pickup', {
+          category_count: new Set(payloadCategories.map((c) => c.category)).size,
+          item_quantity: payloadCategories.reduce((sum, c) => sum + (Number(c.quantity) || 0), 0),
+        });
+      } catch { /* analytics must not block the booking */ }
+      getToken()
+        .then((token) => showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`))
+        .catch(() => {});
     };
 
     // With no response (timeout, dropped connection) the booking may still have been
@@ -531,7 +536,7 @@ export function SchedulePickupScreen({ navigation }: any) {
 
     try {
       const res = await bookingService.createBooking(payload, idempotencyKey);
-      await onBookingCreated(res?.data || res);
+      onBookingCreated(res?.data || res);
     } catch (error: any) {
       // OAuth users with no verified phone are blocked with a 403 before any other
       // validation. Route them to phone verification instead of a dead-end error;
@@ -544,12 +549,23 @@ export function SchedulePickupScreen({ navigation }: any) {
       if (!error?.response) {
         const placed = await findJustPlacedBooking();
         if (placed) {
-          await onBookingCreated(placed);
+          onBookingCreated(placed);
           return;
         }
       }
-      // Surface the real reason so scheduling failures aren't a dead end.
       const data = error?.response?.data;
+      // 409 means an active pickup already exists for this date, slot and address
+      // (often the user's own earlier attempt). The pickup exists, so it's not a failure.
+      if (error?.response?.status === 409 && /already/i.test(data?.message || '')) {
+        idempotencyRef.current = null;
+        showAlert(
+          'Already booked',
+          'You already have a pickup booked for this slot. You can see it in Orders.',
+          [{ text: 'View orders', onPress: () => navigation.navigate('App', { screen: 'Orders' }) }],
+        );
+        return;
+      }
+      // Surface the real reason so scheduling failures aren't a dead end.
       const validationMsg = Array.isArray(data?.errors)
         ? data.errors.map((e: any) => e?.message || e?.msg).filter(Boolean).join('\n')
         : '';
