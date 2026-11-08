@@ -72,7 +72,7 @@ export function WebFooter() {
         <Phone size={small ? 13 : 14} color="#94a3b8" />
         <Text style={[s.contactText, small && { fontSize: 12 }]}>+91 70931 98828</Text>
       </View>
-      <TouchableOpacity style={s.contactRow} onPress={() => openExternal(MAPS_URL)} activeOpacity={0.7}>
+      <TouchableOpacity style={[s.contactRow, s.fitTap]} onPress={() => openExternal(MAPS_URL)} activeOpacity={0.7}>
         <MapPin size={small ? 13 : 14} color="#94a3b8" />
         <Text style={[s.contactText, s.addressLink]}>{ADDRESS}</Text>
       </TouchableOpacity>
@@ -101,7 +101,7 @@ export function WebFooter() {
               <View style={{ flex: 1 }}>
                 <Text style={s.colTitle}>Quick links</Text>
                 {QUICK_LINKS.map(link => (
-                  <TouchableOpacity key={link.label} onPress={link.onPress}>
+                  <TouchableOpacity key={link.label} onPress={link.onPress} style={s.fitTap}>
                     <Text style={s.link}>{link.label}</Text>
                   </TouchableOpacity>
                 ))}
@@ -115,7 +115,7 @@ export function WebFooter() {
               <View style={s.col}>
                 <Text style={s.colTitle}>Quick links</Text>
                 {QUICK_LINKS.map(link => (
-                  <TouchableOpacity key={link.label} onPress={link.onPress}>
+                  <TouchableOpacity key={link.label} onPress={link.onPress} style={s.fitTap}>
                     <Text style={s.link}>{link.label}</Text>
                   </TouchableOpacity>
                 ))}
@@ -196,7 +196,11 @@ const s = StyleSheet.create({
 
   contactRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 },
   contactText: { color: '#94a3b8', fontSize: 13, fontWeight: '500', flex: 1 },
-  addressLink: { textDecorationLine: 'underline' },
+  // Only the address text itself is tappable: it shrinks and wraps instead of stretching.
+  addressLink: { textDecorationLine: 'underline', flexGrow: 0, flexShrink: 1, flexBasis: 'auto' },
+  // Tap targets as wide as their text, not the whole column (a column stretches its
+  // children by default, so the empty space beside a link used to open it too).
+  fitTap: { alignSelf: 'flex-start', maxWidth: '100%' },
 
   storeBtn: { minWidth: 130, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#1e293b', borderRadius: 10, paddingHorizontal: 14, paddingVertical: 10, marginBottom: 10, borderWidth: 1, borderColor: '#334155' },
   storeBtnDisabled: { opacity: 0.5 },
