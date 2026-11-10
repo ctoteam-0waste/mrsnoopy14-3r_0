@@ -47,7 +47,7 @@
     "leaflet": "^1.9.4",
     "lucide-react": "^1.23.0",
     "lucide-react-native": "^0.378.0",
-    "mappls-map-react-native": "^2.0.2",
+    "mappls-map-react-native": "^2.0.3",
     "mappls-web-maps": "^3.8.1",
     "nativewind": "^4.0.1",
     "react": "19.1.0",
