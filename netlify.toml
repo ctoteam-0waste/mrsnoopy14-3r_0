@@ -32,6 +32,13 @@
   [headers.values]
     Content-Type = "application/json"
 
+# iOS fetches this (through Apple's CDN) to verify the app may open karmaverse.earth
+# links (Universal Links). It has no file extension, so the type is set here.
+[[headers]]
+  for = "/.well-known/apple-app-site-association"
+  [headers.values]
+    Content-Type = "application/json"
+
 # Legacy URLs from an earlier version of the site — still hold external backlinks and
 # Search Console referrals, so redirect them to their current equivalents instead of
 # silently serving the homepage shell (which the old catch-all below did).
