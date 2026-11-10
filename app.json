@@ -18,6 +18,7 @@
       "bundleIdentifier": "com.karmacredits.app",
       "buildNumber": "4",
       "usesAppleSignIn": true,
+      "associatedDomains": ["applinks:karmaverse.earth"],
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "KarmaVerse uses your location to auto-fill your pickup address and show pickup partners near you on the map.",

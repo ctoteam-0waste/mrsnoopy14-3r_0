@@ -1,0 +1,81 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "CV8MF74KTR.com.karmacredits.app"
+        ],
+        "components": [
+          {
+            "/": "/OrderTracking*",
+            "comment": "Opens OrderTracking"
+          },
+          {
+            "/": "/Orders*",
+            "comment": "Opens Orders"
+          },
+          {
+            "/": "/Wallet*",
+            "comment": "Opens Wallet"
+          },
+          {
+            "/": "/Store*",
+            "comment": "Opens Store"
+          },
+          {
+            "/": "/Dashboard*",
+            "comment": "Opens Dashboard"
+          },
+          {
+            "/": "/Profile*",
+            "comment": "Opens Profile"
+          },
+          {
+            "/": "/SchedulePickup*",
+            "comment": "Opens SchedulePickup"
+          },
+          {
+            "/": "/KnowledgeHub*",
+            "comment": "Opens KnowledgeHub"
+          },
+          {
+            "/": "/Quiz*",
+            "comment": "Opens Quiz"
+          },
+          {
+            "/": "/Referral*",
+            "comment": "Opens Referral"
+          },
+          {
+            "/": "/Redeem*",
+            "comment": "Opens Redeem"
+          },
+          {
+            "/": "/Donation*",
+            "comment": "Opens Donation"
+          },
+          {
+            "/": "/Transfer*",
+            "comment": "Opens Transfer"
+          }
+        ],
+        "appID": "CV8MF74KTR.com.karmacredits.app",
+        "paths": [
+          "/OrderTracking*",
+          "/Orders*",
+          "/Wallet*",
+          "/Store*",
+          "/Dashboard*",
+          "/Profile*",
+          "/SchedulePickup*",
+          "/KnowledgeHub*",
+          "/Quiz*",
+          "/Referral*",
+          "/Redeem*",
+          "/Donation*",
+          "/Transfer*"
+        ]
+      }
+    ]
+  }
+}
