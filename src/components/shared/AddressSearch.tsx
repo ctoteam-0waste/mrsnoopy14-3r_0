@@ -96,25 +96,44 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   const geocodeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<TextInput>(null);
 
+  // On a slow network replies can arrive out of order. Each request takes a
+  // sequence number and only the newest one may touch state, so a late reply
+  // for an old pin / old query can't overwrite the current one.
+  const geocodeSeqRef = useRef(0);
+  const searchSeqRef = useRef(0);
+  const [geocodeFailed, setGeocodeFailed] = useState(false);
+  const lastGeocodeCoordsRef = useRef<[number, number] | null>(null);
+
   const reverseGeocodeCenter = useCallback((coords: [number, number]) => {
     if (geocodeDebounceRef.current) clearTimeout(geocodeDebounceRef.current);
+    lastGeocodeCoordsRef.current = coords;
+    const seq = ++geocodeSeqRef.current;
+    setGeocodeFailed(false);
     geocodeDebounceRef.current = setTimeout(async () => {
       setIsGeocoding(true);
       try {
         const result = await mapService.reverseGeocode(coords[1], coords[0]);
+        if (seq !== geocodeSeqRef.current) return;
         const address = result.formattedAddress || [result.locality, result.city, result.state].filter(Boolean).join(', ');
         setResolvedAddress(address);
         setResolvedCoords(coords);
         setIsOutOfServiceArea(!isWithinServiceArea(coords[1], coords[0]));
-      } catch (e) {
+      } catch (e: any) {
+        if (seq !== geocodeSeqRef.current) return;
+        console.error('[AddressSearch] Reverse geocode error:', e?.response?.status, e?.code || e?.message);
         setResolvedAddress('');
         setResolvedCoords(null);
         setIsOutOfServiceArea(false);
+        setGeocodeFailed(true);
       } finally {
-        setIsGeocoding(false);
+        if (seq === geocodeSeqRef.current) setIsGeocoding(false);
       }
     }, 350);
   }, []);
+
+  const retryGeocode = () => {
+    if (lastGeocodeCoordsRef.current) reverseGeocodeCenter(lastGeocodeCoordsRef.current);
+  };
 
   // Reset state whenever modal opens
   useEffect(() => {
@@ -145,9 +164,11 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const trimmed = query.trim();
+    const seq = ++searchSeqRef.current;
     if (trimmed.length < 2) {
       setSuggestions([]);
       setError(null);
+      setIsSearching(false);
       return;
     }
     setIsSearching(true);
@@ -156,14 +177,18 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
         const lat = center[1];
         const lng = center[0];
         const results = await mapService.autosuggest(trimmed, lat, lng);
+        if (seq !== searchSeqRef.current) return; // a newer search is in flight
         setSuggestions(results);
         setError(results.length === 0 ? 'No results found. Try a different keyword.' : null);
       } catch (e: any) {
-        console.error('[AddressSearch] Autosuggest error:', e?.response?.status, e?.response?.data, e?.message);
+        if (seq !== searchSeqRef.current) return;
+        console.error('[AddressSearch] Autosuggest error:', e?.response?.status, e?.response?.data, e?.code || e?.message);
         setSuggestions([]);
-        setError('Search failed. Check your connection and try again.');
+        setError(!e?.response
+          ? 'Weak connection — search could not reach the server. Please try again.'
+          : 'Search failed. Check your connection and try again.');
       } finally {
-        setIsSearching(false);
+        if (seq === searchSeqRef.current) setIsSearching(false);
       }
     }, 300);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
@@ -178,7 +203,18 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
         setError('Location permission denied.');
         return;
       }
-      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+      // A GPS fix can hang indoors / on weak signal; cap it and fall back to the
+      // last known position rather than spinning forever.
+      let loc: Location.LocationObject | null = null;
+      try {
+        loc = await Promise.race([
+          Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('GPS timeout')), 15000)),
+        ]);
+      } catch (gpsErr) {
+        loc = await Location.getLastKnownPositionAsync().catch(() => null);
+        if (!loc) throw gpsErr;
+      }
       const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
       setCenter(coords);
       reverseGeocodeCenter(coords);
@@ -442,8 +478,13 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
             <View style={styles.addressRow}>
               <MapPin size={18} color="#16a34a" />
               <Text style={styles.addressText} numberOfLines={2}>
-                {isGeocoding ? 'Locating address...' : (resolvedAddress || 'Move the map to select a location')}
+                {isGeocoding ? 'Locating address...' : (resolvedAddress || (geocodeFailed ? 'Couldn’t load the address — weak connection.' : 'Move the map to select a location'))}
               </Text>
+              {geocodeFailed && !isGeocoding && (
+                <TouchableOpacity onPress={retryGeocode} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Text style={styles.retryText}>Retry</Text>
+                </TouchableOpacity>
+              )}
             </View>
             {isOutOfServiceArea && !isGeocoding && (
               <View style={styles.outOfAreaBanner}>
@@ -570,6 +611,7 @@ const useStyles = makeStyles((c) => ({
   },
   addressRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 14 },
   addressText: { flex: 1, fontSize: 14, fontWeight: '600', color: c.text, lineHeight: 20 },
+  retryText: { fontSize: 13, fontWeight: '800', color: '#16a34a', lineHeight: 20 },
   outOfAreaBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 14 },
   outOfAreaText: { fontSize: 13, fontWeight: '600', color: '#dc2626', lineHeight: 18 },
   confirmBtn: { backgroundColor: '#16a34a', borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
