@@ -49,12 +49,25 @@ export const mapService = {
 
   autosuggest: async (query: string, lat?: number, lng?: number): Promise<MapSuggestion[]> => {
     const params: Record<string, any> = { query };
-    if (lat !== undefined) params.lat = lat;
-    if (lng !== undefined) params.lng = lng;
+    // GPS fixes carry 15+ decimals; the location bias only needs ~10 m, and an
+    // over-precise or non-finite value can make the provider reject the search.
+    const hasBias = Number.isFinite(lat) && Number.isFinite(lng);
+    if (hasBias) {
+      params.lat = Number((lat as number).toFixed(6));
+      params.lng = Number((lng as number).toFixed(6));
+    }
     console.log('[mapService] autosuggest →', query);
-    const response = await api.get('/api/v1/map/autosuggest', { params });
-    console.log('[mapService] autosuggest results:', response.data.data?.length ?? 0);
-    return response.data.data || [];
+    try {
+      const response = await api.get('/api/v1/map/autosuggest', { params });
+      console.log('[mapService] autosuggest results:', response.data.data?.length ?? 0);
+      return response.data.data || [];
+    } catch (e: any) {
+      // Auth errors aren't a bias problem — let them surface.
+      if (!hasBias || e?.response?.status === 401) throw e;
+      console.warn('[mapService] autosuggest with location failed, retrying without it:', e?.response?.status, e?.message);
+      const response = await api.get('/api/v1/map/autosuggest', { params: { query } });
+      return response.data.data || [];
+    }
   },
 
   placeDetail: async (eLoc: string): Promise<PlaceDetail> => {
