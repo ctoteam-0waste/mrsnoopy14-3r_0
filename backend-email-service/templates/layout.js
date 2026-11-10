@@ -16,7 +16,7 @@ const BRAND = {
   iosUrl: 'https://karmaverse.earth/', // TODO: point to the App Store listing once iOS is live
 
   supportEmail: 'info@0waste.co.in',
-  phone: '+91 70931 98828',
+  phone: '+91 70931 98828 / +91 99071 91928',
   address: 'Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051',
   colors: {
     deep: '#052e16', green: '#15803d', mint: '#4ade80', mintText: '#052e16',

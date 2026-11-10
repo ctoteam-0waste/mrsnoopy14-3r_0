@@ -131,7 +131,7 @@ In accordance with the Information Technology Act, 2000 and rules made thereunde
 For any questions or complaints about these terms or the service:
 
 - **Email**: info@0waste.co.in
-- **Phone**: 070931 98828
+- **Phone**: 070931 98828 / 099071 91928
 - **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
 - **In-app**: use the "Need help?" option
 

@@ -73,6 +73,10 @@ export function WebFooter() {
         <Phone size={small ? 13 : 14} color="#94a3b8" />
         <Text style={[s.contactText, small && { fontSize: 12 }]}>+91 70931 98828</Text>
       </View>
+      <View style={s.contactRow}>
+        <Phone size={small ? 13 : 14} color="#94a3b8" />
+        <Text style={[s.contactText, small && { fontSize: 12 }]}>+91 99071 91928</Text>
+      </View>
       <TouchableOpacity style={s.contactRow} onPress={() => openExternal(MAPS_URL)} activeOpacity={0.7}>
         <MapPin size={small ? 13 : 14} color="#94a3b8" />
         <Text style={[s.contactText, s.addressLink]}>{ADDRESS}</Text>

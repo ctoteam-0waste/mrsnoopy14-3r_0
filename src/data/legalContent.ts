@@ -277,7 +277,7 @@ export const TERMS: LegalDoc = {
       heading: 'Contact us',
       bullets: [
         'General support — in-app "Need help?"',
-        'General enquiries — info@karmaverse.earth · 070931 98828',
+        'General enquiries — info@karmaverse.earth · 070931 98828 / 099071 91928',
         'Grievance Officer (Terms, content, and platform complaints) — grievance@karmaverse.earth',
         'Data protection / privacy requests — see the Privacy Policy, Contact section',
         'Registered office — 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010',
@@ -437,7 +437,7 @@ export const PRIVACY: LegalDoc = {
       bullets: [
         'Data Protection Officer / privacy requests — privacy@karmaverse.earth',
         'Privacy grievances and escalations — Grievance Officer, grievance@karmaverse.earth',
-        'General enquiries — info@karmaverse.earth · 070931 98828',
+        'General enquiries — info@karmaverse.earth · 070931 98828 / 099071 91928',
         'In-app — "Need help?" → Privacy',
         'Postal address — 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051 (registered office: 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010)',
         'Regulator — the Data Protection Board of India, if you are not satisfied with our response.',
@@ -577,7 +577,7 @@ export const TERMS_OF_USE: LegalDoc = {
         'We may update these Terms of Use for changes to the Platform, our practices, or legal requirements. Material changes are notified at least 30 days before they take effect; non-material changes take effect on publication. Continued use after a change constitutes acceptance.',
         'These Terms of Use, with the Terms & Conditions and Privacy Policy, form the entire agreement about the Platform. If any provision is invalid it is severed; our failure to enforce a right is not a waiver. You may not assign your rights; we may, provided your rights are not reduced.',
         'These Terms of Use are made in English (the English version prevails) and are governed by the laws of India. Subject to your consumer rights, the courts at Gurugram, Haryana have exclusive jurisdiction. We attempt informal resolution for at least 30 days before legal proceedings, without preventing urgent interim relief.',
-        'Contact — general support in-app "Need help?"; Grievance Officer (content reports, platform complaints, IP notices) grievance@karmaverse.earth; security reports security@karmaverse.earth; privacy requests privacy@karmaverse.earth; general enquiries info@karmaverse.earth · 070931 98828; registered office 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010; operating office Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051.',
+        'Contact — general support in-app "Need help?"; Grievance Officer (content reports, platform complaints, IP notices) grievance@karmaverse.earth; security reports security@karmaverse.earth; privacy requests privacy@karmaverse.earth; general enquiries info@karmaverse.earth · 070931 98828 / 099071 91928; registered office 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010; operating office Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051.',
       ],
     },
     {

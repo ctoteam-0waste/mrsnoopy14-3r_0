@@ -650,6 +650,10 @@ export function SplashScreen({ navigation, route }: any) {
                   <Phone size={14} color="#4ade80" />
                   <Text style={s.footerLink}>+91 70931 98828</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('tel:+919907191928')}>
+                  <Phone size={14} color="#4ade80" />
+                  <Text style={s.footerLink}>+91 99071 91928</Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   style={s.footerContactRow}
                   onPress={() => Linking.openURL('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'))}
