@@ -8,17 +8,29 @@ interface MapPickerProps {
   onCenterChange: (coords: [number, number]) => void; // fired after the user stops panning
 }
 
-const EPS = 1e-7;
-// About a metre. Smaller moves are layout noise, not the user moving the pin.
-const MOVE_EPS = 1e-5;
+// ~1 m. GPS / SDK round-trips shift the last decimals, so an exact compare
+// mistook the map's own report for a new outside recenter.
+const EPS = 1e-5;
+const REPORT_DEBOUNCE_MS = 400;
+const RECENTER_MS = 600;
+
+const near = (a: [number, number] | null, b: [number, number]) =>
+  !!a && Math.abs(a[0] - b[0]) < EPS && Math.abs(a[1] - b[1]) < EPS;
 
 export function MapPicker({ center, onCenterChange }: MapPickerProps) {
-  const mapRef = useRef<any>(null);
   const cameraRef = useRef<any>(null);
   const lastInternalCenter = useRef<[number, number] | null>(null);
   const latestCenter = useRef(center);
   const mapLoaded = useRef(false);
+  const onChangeRef = useRef(onCenterChange);
+  const reportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // While our own recenter animation runs, the map's intermediate positions
+  // must not be reported back — that echo flew the camera back and forth.
+  const animatingUntil = useRef(0);
   latestCenter.current = center;
+  onChangeRef.current = onCenterChange;
+
+  useEffect(() => () => { if (reportTimer.current) clearTimeout(reportTimer.current); }, []);
 
   // A camera move sent while the map is still loading is dropped, so the map
   // stayed on its first center. Apply the latest one once it has loaded.
@@ -27,39 +39,53 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
     cameraRef.current?.setCamera({ centerCoordinate: latestCenter.current, animationDuration: 0 });
   };
 
-  // Only a pan by the user picks a new spot. On iOS the map also reports a region
-  // change when its view is resized (the address sheet below growing from one line
-  // to two), which fed a loop: resize -> new lookup -> sheet resizes -> ...
-  const handleRegionDidChange = async (feature?: any) => {
-    if (!mapRef.current) return;
+  // The SDK's own regionDidChange debounce is rebuilt on every render, so
+  // stale timers fired extra, out-of-order reports. We take events raw
+  // (regionDidChangeDebounceTime=0), read the center from the event payload
+  // (no async getCenter race) and debounce here with one stable timer.
+  const handleRegionDidChange = (feature: any) => {
+    // Only a pan by the user picks a new spot. On iOS the map also reports a
+    // region change when its view is resized (the address sheet growing from
+    // one line to two), which fed a lookup -> resize -> lookup loop.
     if (feature?.properties?.isUserInteraction === false) return;
-    try {
-      const c: [number, number] = await mapRef.current.getCenter();
-      const last = lastInternalCenter.current;
-      if (last && Math.abs(last[0] - c[0]) < MOVE_EPS && Math.abs(last[1] - c[1]) < MOVE_EPS) return;
+    const coords = feature?.geometry?.coordinates;
+    if (!Array.isArray(coords) || typeof coords[0] !== 'number' || typeof coords[1] !== 'number') return;
+    const c: [number, number] = [coords[0], coords[1]];
+    if (reportTimer.current) clearTimeout(reportTimer.current);
+    const wait = Math.max(REPORT_DEBOUNCE_MS, animatingUntil.current - Date.now());
+    reportTimer.current = setTimeout(() => {
+      reportTimer.current = null;
+      if (near(lastInternalCenter.current, c)) return; // nothing moved
       lastInternalCenter.current = c;
-      onCenterChange(c);
-    } catch {}
+      onChangeRef.current(c);
+    }, wait);
   };
 
-  // Fly the camera only when `center` changes from outside (search select / GPS) —
-  // not when it's just an echo of the user's own drag reported via onCenterChange.
+  // Move the camera only when `center` changes from outside (search select /
+  // GPS) — not when it's the echo of a position this map just reported.
   useEffect(() => {
-    const last = lastInternalCenter.current;
-    const isEcho = !!last && Math.abs(last[0] - center[0]) < EPS && Math.abs(last[1] - center[1]) < EPS;
-    if (!isEcho && mapLoaded.current && cameraRef.current) {
-      cameraRef.current.flyTo(center, 500);
-    }
+    if (near(lastInternalCenter.current, center)) return;
+    if (!mapLoaded.current || !cameraRef.current) return;
+    // Treat the target as already reported so its arrival isn't echoed back.
+    lastInternalCenter.current = center;
+    if (reportTimer.current) { clearTimeout(reportTimer.current); reportTimer.current = null; }
+    animatingUntil.current = Date.now() + RECENTER_MS + 100;
+    // easeTo + fixed street zoom: flyTo's zoom-out/zoom-in arc read as a glitch.
+    cameraRef.current.setCamera({
+      centerCoordinate: center,
+      zoomLevel: 16,
+      animationDuration: RECENTER_MS,
+      animationMode: 'easeTo',
+    });
   }, [center]);
 
   return (
     <View style={styles.container}>
       <MapplsGL.MapView
-        ref={mapRef}
         style={styles.map}
         onDidFinishLoadingMap={handleMapLoaded}
         onRegionDidChange={handleRegionDidChange}
-        regionDidChangeDebounceTime={400}
+        regionDidChangeDebounceTime={0}
         logoEnabled={false}
         compassEnabled={false}
       >

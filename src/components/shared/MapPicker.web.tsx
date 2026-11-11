@@ -9,7 +9,9 @@ interface MapPickerProps {
   onCenterChange: (coords: [number, number]) => void; // fired after the user stops panning
 }
 
-const EPS = 1e-7;
+// ~1 m — SDK round-trips shift the last decimals; an exact compare mistook the
+// map's own report for a new outside recenter.
+const EPS = 1e-5;
 // One SDK instance for the whole app — initialize() loads the Mappls script once.
 const mapplsObj = new mappls();
 
@@ -58,10 +60,12 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
             setStatus('ready');
             map.on('moveend', () => {
               const coords = readCenter(map.getCenter());
-              if (coords) {
-                lastInternalCenter.current = coords;
-                onChangeRef.current(coords);
-              }
+              if (!coords) return;
+              const last = lastInternalCenter.current;
+              // Zoom-only moves and the arrival of our own recenter: nothing to report.
+              if (last && Math.abs(last[0] - coords[0]) < EPS && Math.abs(last[1] - coords[1]) < EPS) return;
+              lastInternalCenter.current = coords;
+              onChangeRef.current(coords);
             });
             // A recenter (GPS / search) that came in while the SDK was still
             // loading was skipped by the effect below; apply it now.
@@ -93,7 +97,11 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
     const last = lastInternalCenter.current;
     const isEcho = !!last && Math.abs(last[0] - center[0]) < EPS && Math.abs(last[1] - center[1]) < EPS;
     if (!isEcho && mapRef.current) {
+      // Mark the target as already reported so its moveend isn't echoed back.
+      lastInternalCenter.current = center;
       try { mapRef.current.setCenter([center[0], center[1]]); } catch {}
+      // Street level, so a recenter from a zoomed-out view is actually visible.
+      try { if ((mapRef.current.getZoom?.() ?? 16) < 15) mapRef.current.setZoom?.(16); } catch {}
     }
   }, [center]);
 
