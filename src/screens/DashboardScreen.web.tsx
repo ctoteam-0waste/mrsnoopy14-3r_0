@@ -9,6 +9,7 @@ import { WebFooter } from '../components/shared/WebFooter';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { profileService } from '../services/profile';
 import { bookingService } from '../services/booking';
+import { streakService } from '../services/streak';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
@@ -160,14 +161,16 @@ export function DashboardScreen({ navigation, route }: any) {
         setQuizDays([...(Array.isArray(hist) ? hist : []), ...(sd ? [sd] : [])]);
       } catch { setQuizDays(sd ? [sd] : []); }
 
-      // Day streak = consecutive days the app was opened (frontend-tracked, no backend dependency)
+      // Day streak from the backend (same as the wallet); the on-device count is only a fallback.
+      const live = streakService.getStatus().catch(() => null);
       const [lad, ds] = await Promise.all([AsyncStorage.getItem(`lastActiveDate_${sfx}`), AsyncStorage.getItem(`dayStreak_${sfx}`)]);
       let dayStreak: number;
       if (lad === today) dayStreak = Number(ds) || 1;
       else if (lad === yest) dayStreak = (Number(ds) || 0) + 1;
       else dayStreak = 1;
       await AsyncStorage.multiSet([[`lastActiveDate_${sfx}`, today], [`dayStreak_${sfx}`, String(dayStreak)]]);
-      setStreak(dayStreak);
+      const status = await live;
+      setStreak(status ? status.currentStreak : dayStreak);
     };
     const unsub = navigation.addListener('focus', () => { load(); loadQuiz(); });
     load(); loadQuiz();

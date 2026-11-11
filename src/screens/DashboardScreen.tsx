@@ -24,6 +24,7 @@ import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { bookingService } from '../services/booking';
+import { streakService } from '../services/streak';
 import { BACKEND_BASE } from '../services/api';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
@@ -323,7 +324,6 @@ export function DashboardScreen({ navigation, route }: any) {
           if (profileData.avatarId) setStoredAvatarId(profileData.avatarId);
         }
         setBalance(profileData.karmaCoins || profileData.coins || 0);
-        // Day streak is tracked on-device from app visits (see computeVisitStreak), not the backend.
 
         if (ordersData && Array.isArray(ordersData)) {
           const formattedOrders = ordersData.slice(0, 2).map((order: any) => {
@@ -381,9 +381,11 @@ export function DashboardScreen({ navigation, route }: any) {
       }
     };
 
-    // Day streak (on-device): +1 for each consecutive day the app is opened.
-    // Same day = no change; a missed day resets to 1. No backend involved.
+    // Day streak: the backend's /streak/status, the same number the wallet shows and
+    // the reward rate uses. The on-device visit count is only a fallback for when the
+    // backend can't be reached (it restarts at 1 on a reinstall or a new device).
     const computeVisitStreak = async () => {
+      const live = streakService.getStatus().catch(() => null);
       const token = await getToken();
       const suffix = getStableUserSuffix(token);
       const todayStr = getLocalDateStr();
@@ -402,7 +404,8 @@ export function DashboardScreen({ navigation, route }: any) {
           [`lastVisitDate_${suffix}`, todayStr],
         ]);
       }
-      setStreak(streakVal);
+      const status = await live;
+      setStreak(status ? status.currentStreak : streakVal);
     };
 
     const unsubscribe = navigation.addListener('focus', () => {

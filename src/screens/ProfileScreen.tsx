@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
-import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera } from 'lucide-react-native';
+import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
 import { UserAvatar } from '../components/shared/UserAvatar';
@@ -16,13 +16,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { StateCityFields } from '../components/shared/StateCityFields';
 import { profileService } from '../services/profile';
+import { streakService } from '../services/streak';
 import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
-import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { authService } from '../services/auth';
 import * as Location from 'expo-location';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getToken } from '../utils/tokenStore';
-import { getStableUserSuffix } from '../utils/userId';
 import { useTheme, makeStyles } from '../theme';
 import { isDiwaliSeason } from '../utils/festive';
 import { DiwaliHeaderDecor, DiwaliGoldBorder, DiwaliBackdrop } from '../components/festive/Diwali';
@@ -94,27 +91,18 @@ export function ProfileScreen({ navigation }: any) {
   useFocusEffect(useCallback(() => {
     const fetchProfile = async () => {
       try {
-        const data = await profileService.getProfile();
-        // Read quiz streak from AsyncStorage (same as Dashboard)
-        const token = await getToken();
-        const sfx = getStableUserSuffix(token);
-        const [storedDate, storedStreak] = await Promise.all([
-          AsyncStorage.getItem(`lastQuizDate_${sfx}`),
-          AsyncStorage.getItem(`quizStreak_${sfx}`),
+        // Day streak from the backend, the same number Home and the wallet show.
+        const [data, streakStatus] = await Promise.all([
+          profileService.getProfile(),
+          streakService.getStatus().catch(() => null),
         ]);
-        let quizStreak = 0;
-        if (storedDate) {
-          const todayStr = getLocalDateStr();
-          const yestStr = getLocalYesterdayStr();
-          if (storedDate === todayStr || storedDate === yestStr) quizStreak = Number(storedStreak) || 0;
-        }
         setUserProfile({
           name: data.name || 'User',
           phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : '',
           email: data.email || '',
           coins: data.karmaCoins || data.coins || 0,
           totalEarned: data.totalCoinsEarned ?? (data.karmaCoins || data.coins || 0),
-          streak: quizStreak,
+          streak: streakStatus?.currentStreak ?? 0,
           address: data.address
             ? (typeof data.address === 'object' ? data.address.fullAddress : data.address)
             : '',
@@ -762,7 +750,7 @@ export function ProfileScreen({ navigation }: any) {
                 {/* Mini Stats Row */}
                 <View style={styles.statsRow}>
                   <View style={styles.statPill}>
-                    <Trophy size={14} color="#d97706" />
+                    <Flame size={14} color="#fb923c" />
                     <Text style={styles.statText}>{userProfile?.streak || 0} day streak</Text>
                   </View>
                   <View style={styles.statDivider} />
