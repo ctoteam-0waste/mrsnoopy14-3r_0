@@ -327,8 +327,16 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
             <Field label="House / Flat / Block No." required value={houseNo} onChangeText={setHouseNo} placeholder="e.g. 42, Flat 3B" autoFocus />
             <Field label="Apartment / Building / Society" value={building} onChangeText={setBuilding} placeholder="e.g. Green Valley Apartments" />
             <Field label="Landmark (optional)" value={landmark} onChangeText={setLandmark} placeholder="e.g. near IIT main gate" />
-            <Field label="Receiver's name" value={receiverName} onChangeText={setReceiverName} placeholder="Who should the agent ask for?" />
-            <Field label="Receiver's mobile number" value={receiverPhone} onChangeText={(t) => setReceiverPhone(t.replace(/[^0-9]/g, '').slice(0, 10))} placeholder="10-digit mobile number" keyboardType="phone-pad" />
+            <Field label="Receiver's name" required value={receiverName} onChangeText={setReceiverName} placeholder="Who should the agent ask for?" />
+            <Field
+              label="Receiver's mobile number"
+              required
+              value={receiverPhone}
+              onChangeText={(t) => setReceiverPhone(t.replace(/[^0-9]/g, '').slice(0, 10))}
+              placeholder="10-digit mobile number"
+              keyboardType="phone-pad"
+              error={receiverPhone.length === 10 && !/^[6-9]/.test(receiverPhone) ? 'Enter a valid mobile number starting with 6, 7, 8 or 9' : undefined}
+            />
 
             <Text style={styles.fieldLabel}>Save address as</Text>
             <View style={styles.labelRow}>
@@ -509,10 +517,10 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
 }
 
 function Field({
-  label, value, onChangeText, placeholder, required, autoFocus, keyboardType,
+  label, value, onChangeText, placeholder, required, autoFocus, keyboardType, error,
 }: {
   label: string; value: string; onChangeText: (t: string) => void; placeholder?: string;
-  required?: boolean; autoFocus?: boolean; keyboardType?: any;
+  required?: boolean; autoFocus?: boolean; keyboardType?: any; error?: string;
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -522,7 +530,7 @@ function Field({
         {label}{required ? <Text style={styles.required}> *</Text> : null}
       </Text>
       <TextInput
-        style={styles.fieldInput}
+        style={[styles.fieldInput, !!error && styles.fieldInputError]}
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
@@ -530,6 +538,7 @@ function Field({
         autoFocus={autoFocus}
         keyboardType={keyboardType}
       />
+      {!!error && <Text style={styles.fieldError}>{error}</Text>}
     </View>
   );
 }
@@ -641,6 +650,8 @@ const useStyles = makeStyles((c) => ({
   fieldWrap: { marginBottom: 16 },
   fieldLabel: { fontSize: 13, fontWeight: '700', color: c.textMuted, marginBottom: 7 },
   required: { color: '#ef4444' },
+  fieldInputError: { borderColor: '#ef4444' },
+  fieldError: { color: '#dc2626', fontSize: 12, fontWeight: '600', marginTop: 6 },
   fieldInput: {
     backgroundColor: c.inputBg, borderRadius: 12, borderWidth: 1, borderColor: c.border,
     paddingHorizontal: 14, paddingVertical: Platform.OS === 'ios' ? 14 : 11,
