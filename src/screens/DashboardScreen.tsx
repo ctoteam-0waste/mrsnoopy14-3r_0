@@ -34,6 +34,8 @@ import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 const STATUS_COLOR: any = {
   Completed: { bg: "rgba(22,163,74,0.1)", text: "#16a34a", dot: "#16a34a" },
   "In Transit": { bg: "rgba(245,158,11,0.1)", text: "#d97706", dot: "#f59e0b" },
+  Scheduled: { bg: "rgba(2,132,199,0.1)", text: "#0284c7", dot: "#0284c7" },
+  Cancelled: { bg: "rgba(220,38,38,0.1)", text: "#dc2626", dot: "#dc2626" },
 };
 
 const CARD_WIDTH = Math.round(Dimensions.get('window').width * 0.42);
@@ -322,6 +324,7 @@ export function DashboardScreen({ navigation, route }: any) {
             let uiStatus = 'Scheduled';
             if (order.status === 'COMPLETED') uiStatus = 'Completed';
             if (order.status === 'IN_TRANSIT' || order.status === 'ACCEPTED') uiStatus = 'In Transit';
+            if (order.status === 'CANCELLED') uiStatus = 'Cancelled';
 
             const dateObj = new Date(order.pickupDate);
             const dateStr = dateObj.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -746,7 +749,7 @@ export function DashboardScreen({ navigation, route }: any) {
               <Text style={{ color: colors.textFaint }}>No recent orders.</Text>
             </View>
           ) : recentOrders.map((order) => {
-            const sc = STATUS_COLOR[order.status] || STATUS_COLOR['Completed'];
+            const sc = STATUS_COLOR[order.status] || STATUS_COLOR['Scheduled'];
             return (
               <TouchableOpacity key={order.id} style={styles.orderCard} activeOpacity={0.7}
                 onPress={() => navigation.navigate('Orders')}>
