@@ -397,6 +397,13 @@ export function ProfileScreen({ navigation }: any) {
     }
   };
 
+  // Personal details: show missing State / City under the fields once the user has
+  // changed them, and keep Update & Save disabled until the form is complete.
+  const [demoTouched, setDemoTouched] = useState(false);
+  const demoAge = parseInt(demoEditForm.age);
+  const demoComplete = !!demoEditForm.age && !isNaN(demoAge) && demoAge >= 13 && demoAge <= 100
+    && !!demoEditForm.state?.trim() && !!demoEditForm.city?.trim();
+
   const openDemoModal = () => {
     setDemoEditForm({
       age: userProfile?.demographics?.age?.toString() || '25',
@@ -407,6 +414,7 @@ export function ProfileScreen({ navigation }: any) {
       city: userProfile?.demographics?.city || userProfile?.city || ''
     });
     setIsDemoEditing(false);
+    setDemoTouched(false);
     setDemoModalVisible(true);
   };
   
@@ -953,19 +961,19 @@ export function ProfileScreen({ navigation }: any) {
                   <StateCityFields
                     state={demoEditForm.state}
                     city={demoEditForm.city}
-                    setState={(v) => setDemoEditForm(f => ({ ...f, state: v }))}
-                    setCity={(v) => setDemoEditForm(f => ({ ...f, city: v }))}
+                    setState={(v) => { setDemoTouched(true); setDemoEditForm(f => ({ ...f, state: v })); }}
+                    setCity={(v) => { setDemoTouched(true); setDemoEditForm(f => ({ ...f, city: v })); }}
+                    showErrors={demoTouched}
                   />
-                  <TouchableOpacity style={[styles.primaryActionBtn, { marginTop: 12 }]} onPress={async () => {
-                      const parsedAge = parseInt(demoEditForm.age);
-                      if (!demoEditForm.age || isNaN(parsedAge) || parsedAge < 13 || parsedAge > 100) {
-                        showAlert('Invalid age', 'You must be at least 13 years old to use KarmaVerse.');
-                        return;
-                      }
-                      if (!demoEditForm.state?.trim() || !demoEditForm.city?.trim()) {
-                        showAlert('State and city required', 'Please select or enter your state and city.');
-                        return;
-                      }
+                  <TouchableOpacity
+                    style={[styles.primaryActionBtn, { marginTop: 12 }, !demoComplete && styles.primaryActionBtnDisabled]}
+                    disabled={!demoComplete}
+                    onPress={async () => {
+                      // The button is disabled until the form is complete; a pop-up from
+                      // inside this sheet can open behind it on iOS and freeze the screen.
+                      setDemoTouched(true);
+                      if (!demoComplete) return;
+                      const parsedAge = demoAge;
                       try {
                         const payload: any = { ...demoEditForm, age: parsedAge, state: demoEditForm.state.trim(), city: demoEditForm.city.trim() };
                         await profileService.updateDemographics(payload);

@@ -83,8 +83,10 @@ function Dropdown({ value, placeholder, options, onSelect, disabled }: {
 // State -> City cascading fields, both required. Picking "Other" (or typing a state
 // not in the list) swaps the dropdown for a free-text input. Edit-mode values that
 // aren't in the static list are shown via the "Other" input, not a blank dropdown.
-export function StateCityFields({ state, city, setState, setCity }: {
-  state: string; city: string; setState: (v: string) => void; setCity: (v: string) => void;
+// `showErrors`: flag an empty State or City under the field (the caller turns it on
+// once the user has touched the fields), instead of a pop-up on Save.
+export function StateCityFields({ state, city, setState, setCity, showErrors = false }: {
+  state: string; city: string; setState: (v: string) => void; setCity: (v: string) => void; showErrors?: boolean;
 }) {
   const s = useStyles();
   const { colors } = useTheme();
@@ -118,16 +120,17 @@ export function StateCityFields({ state, city, setState, setCity }: {
       <View style={s.section}>
         <View style={s.labelRow}><MapPin size={18} color={colors.text} /><Text style={s.label}>State</Text></View>
         {stateOther ? (
-          <TextInput style={s.input} placeholder="Enter your state" placeholderTextColor={colors.textFaint} value={state} onChangeText={setState} autoCapitalize="words" />
+          <TextInput style={[s.input, showErrors && !state.trim() && s.inputError]} placeholder="Enter your state" placeholderTextColor={colors.textFaint} value={state} onChangeText={setState} autoCapitalize="words" />
         ) : (
           <Dropdown value={state} placeholder="Select state" options={stateOptions} onSelect={onStateSelect} />
         )}
+        {showErrors && !state.trim() && <Text style={s.errorText}>Please {stateOther ? 'enter' : 'select'} your state</Text>}
       </View>
 
       <View style={s.section}>
         <View style={s.labelRow}><MapPin size={18} color={colors.text} /><Text style={s.label}>City</Text></View>
         {cityOther ? (
-          <TextInput style={s.input} placeholder="Enter your city" placeholderTextColor={colors.textFaint} value={city} onChangeText={setCity} autoCapitalize="words" />
+          <TextInput style={[s.input, showErrors && !city.trim() && s.inputError]} placeholder="Enter your city" placeholderTextColor={colors.textFaint} value={city} onChangeText={setCity} autoCapitalize="words" />
         ) : (
           <Dropdown
             value={city}
@@ -137,6 +140,7 @@ export function StateCityFields({ state, city, setState, setCity }: {
             disabled={!state}
           />
         )}
+        {showErrors && !city.trim() && <Text style={s.errorText}>Please {cityOther ? 'enter' : 'select'} your city</Text>}
       </View>
     </>
   );
@@ -144,6 +148,8 @@ export function StateCityFields({ state, city, setState, setCity }: {
 
 const useStyles = makeStyles((c) => ({
   section: { marginBottom: 4 },
+  inputError: { borderColor: c.danger },
+  errorText: { fontSize: 12, color: c.danger, fontWeight: '600', marginTop: 6, marginLeft: 2 },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   label: { fontSize: 15, fontWeight: '700', color: c.text },
 
