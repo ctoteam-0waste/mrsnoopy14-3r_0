@@ -43,15 +43,34 @@ function holePath(screenW: number, screenH: number, r: Rect) {
   );
 }
 
-function measure(step: CoachMarkStep): Promise<Rect | null> {
-  if (step.getRect) return Promise.resolve(step.getRect());
+function measureView(node: View | null | undefined): Promise<Rect | null> {
   return new Promise((resolve) => {
-    const node = step.targetRef?.current;
     if (!node) return resolve(null);
     node.measureInWindow((x, y, width, height) => {
       resolve(width > 0 && height > 0 ? { x, y, width, height } : null);
     });
   });
+}
+
+const nextFrame = () => new Promise<void>((r) => requestAnimationFrame(() => r()));
+
+// Where this overlay's own top-left sits in measureInWindow coordinates. On Android
+// measureInWindow leaves out the status bar while this modal (statusBarTranslucent)
+// starts at the very top of the screen, so the overlay reads as -statusBarHeight;
+// on iOS it is 0. Subtracting it puts the spotlight exactly over the target.
+async function overlayOrigin(root: RefObject<View | null>): Promise<{ x: number; y: number }> {
+  for (let i = 0; i < 10; i++) {
+    const r = await measureView(root.current);
+    if (r) return { x: r.x, y: r.y };
+    await nextFrame();
+  }
+  return { x: 0, y: 0 };
+}
+
+async function measure(step: CoachMarkStep, root: RefObject<View | null>): Promise<Rect | null> {
+  if (step.getRect) return step.getRect();
+  const [r, origin] = await Promise.all([measureView(step.targetRef?.current), overlayOrigin(root)]);
+  return r ? { ...r, x: r.x - origin.x, y: r.y - origin.y } : null;
 }
 
 export function CoachMarkTour({ visible, steps, onBeforeStep, onFinish }: Props) {
@@ -62,6 +81,7 @@ export function CoachMarkTour({ visible, steps, onBeforeStep, onFinish }: Props)
   const [rect, setRect] = useState<Rect | null>(null);
   const [cardH, setCardH] = useState(0);
   const fade = useRef(new Animated.Value(0)).current;
+  const rootRef = useRef<View>(null);
 
   useEffect(() => {
     if (visible) setIndex(0);
@@ -74,7 +94,7 @@ export function CoachMarkTour({ visible, steps, onBeforeStep, onFinish }: Props)
     setRect(null);
     (async () => {
       await onBeforeStep?.(index);
-      const r = await measure(steps[index]);
+      const r = await measure(steps[index], rootRef);
       if (!active) return;
       if (!r) {
         // Target isn't on screen (e.g. hidden for this user) — skip it.
@@ -108,7 +128,7 @@ export function CoachMarkTour({ visible, steps, onBeforeStep, onFinish }: Props)
     // ignored, and the full-screen layer swallows taps so nothing behind it
     // (including the highlighted element) can be pressed until "Got it".
     <Modal visible transparent animationType="fade" statusBarTranslucent onRequestClose={() => {}}>
-      <View style={styles.root} onStartShouldSetResponder={() => true}>
+      <View ref={rootRef} collapsable={false} style={styles.root} onStartShouldSetResponder={() => true}>
         {rect ? (
           <Svg width={screenW} height={screenH} style={styles.fill} pointerEvents="none">
             <Path d={holePath(screenW, screenH, rect)} fill={colors.overlay} fillRule="evenodd" />
