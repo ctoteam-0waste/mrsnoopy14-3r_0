@@ -125,6 +125,12 @@ export function DashboardScreen({ navigation, route }: any) {
         profileService.getProfile().catch(() => ({})),
         bookingService.getMyBookings().catch(() => []),
       ]);
+        // A signed-in user without a verified phone (social sign-in) must verify it
+        // first; this also catches the app being reopened on the OTP page.
+        if (prof?.isPhoneVerified === false) {
+          (navigation.getParent() ?? navigation).reset({ index: 0, routes: [{ name: 'Login', params: { verifyPhone: true } }] });
+          return;
+        }
       if (prof.name) { const first = prof.name.trim().split(/\s+/)[0]; setUserName(first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()); }
       setBalance(prof.karmaCoins || prof.coins || 0);
       if (Array.isArray(orders)) {
@@ -167,6 +173,9 @@ export function DashboardScreen({ navigation, route }: any) {
     load(); loadQuiz();
 
     (async () => {
+      // Home redirects a user without a verified phone to the OTP page; don't start
+      // its pop-ups (redeem info, tour, greetings) over that page.
+      if ((await profileService.getProfile().catch(() => null))?.isPhoneVerified === false) return;
       const token = await getToken();
       const sfx = getStableUserSuffix(token);
       // A first-ever visit already gets the redeem info popup; the Diwali greeting

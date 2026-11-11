@@ -304,6 +304,12 @@ export function DashboardScreen({ navigation, route }: any) {
           bookingService.getMyBookings().catch(() => [])
         ]);
 
+        // A signed-in user without a verified phone (social sign-in) must verify it
+        // first; this also catches the app being reopened on the OTP page.
+        if (profileData?.isPhoneVerified === false) {
+          (navigation.getParent() ?? navigation).reset({ index: 0, routes: [{ name: 'Login', params: { verifyPhone: true } }] });
+          return;
+        }
         if (profileData.name) setUserName(
           profileData.name
             .split(' ')
@@ -409,6 +415,9 @@ export function DashboardScreen({ navigation, route }: any) {
     computeVisitStreak();
 
     (async () => {
+      // Home redirects a user without a verified phone to the OTP page; don't start
+      // its pop-ups (redeem info, tour, greetings) over that page.
+      if ((await profileService.getProfile().catch(() => null))?.isPhoneVerified === false) return;
       const token = await getToken();
       let launchPopup = false;
 

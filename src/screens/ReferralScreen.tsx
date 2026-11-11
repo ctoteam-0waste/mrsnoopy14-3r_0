@@ -138,7 +138,7 @@ export function ReferralScreen({ navigation }: any) {
               <Gift size={48} color="white" style={styles.heroIcon} />
               <Text style={styles.heroTitle}>Invite friends, get rewarded</Text>
               <Text style={styles.heroSub}>
-                Share your code. When a friend joins, you both get 1,000 KarmaCoins XP.
+                Share your code. You both get 1,000 KarmaCoins XP once your friend signs up and verifies their phone number.
               </Text>
 
               {loading ? (
@@ -204,7 +204,7 @@ export function ReferralScreen({ navigation }: any) {
               <View style={styles.emptyState}>
                 <Users size={40} color={colors.textFaint} />
                 <Text style={styles.emptyTitle}>No referrals yet</Text>
-                <Text style={styles.emptyText}>Share your code — when a friend signs up with it, you both get 1,000 KarmaCoins XP.</Text>
+                <Text style={styles.emptyText}>Share your code. You both get 1,000 KarmaCoins XP once your friend signs up and verifies their phone number.</Text>
                 <TouchableOpacity style={styles.emptyShareBtn} onPress={handleShare} disabled={!referralCode}>
                   <Share2 size={16} color="white" />
                   <Text style={styles.emptyShareText}>Share now</Text>

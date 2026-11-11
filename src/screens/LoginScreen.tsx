@@ -19,6 +19,7 @@ import { LaunchConfetti } from '../components/shared/LaunchConfetti';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
+import { PhoneVerifyForm } from '../components/shared/PhoneVerifyForm';
 import { isDiwaliSeason } from '../utils/festive';
 import { DiwaliHeaderDecor, DiwaliBackdrop } from '../components/festive/Diwali';
 let GoogleSignin: any = null;
@@ -157,7 +158,7 @@ function loadAppleJsScript(): Promise<void> {
   return appleJsScriptPromise;
 }
 
-type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'welcome_celebration' | 'referral_bonus' | 'demographics' | 'reset_password';
+type Step = 'entry' | 'checking' | 'login' | 'signup' | 'verify_signup_otp' | 'welcome_celebration' | 'referral_bonus' | 'demographics' | 'reset_password' | 'verify_phone';
 
 // Covers the common emoji Unicode blocks — used to reject emojis in email fields.
 // Two copies: EMOJI_REGEX (no 'g') for .test(), EMOJI_REGEX_GLOBAL for .replace() —
@@ -273,14 +274,16 @@ function SignupJourneyProgress({ stage }: { stage: 0 | 1 | 2 }) {
   );
 }
 
-export function LoginScreen({ navigation }: any) {
+export function LoginScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
   const diwali = isDiwaliSeason();
   const { width: winWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets(); // bottom inset so "Skip for now" clears the Android gesture pill
   const { reconnect } = useUserSocket();
-  const [step, setStep] = useState<Step>('entry');
+  // verifyPhone: sent here by the home screen when a signed-in user still has no
+  // verified phone (e.g. the app was closed on the OTP page).
+  const [step, setStep] = useState<Step>(route?.params?.verifyPhone ? 'verify_phone' : 'entry');
   const [checkingSlow, setCheckingSlow] = useState(false);
 
   // Backend runs on a free-tier host that cold-starts after inactivity — if the
@@ -312,6 +315,8 @@ export function LoginScreen({ navigation }: any) {
       // web linking) steps the local flow backward instead.
       const actionType = e?.data?.action?.type;
       if (actionType === 'REPLACE' || actionType === 'NAVIGATE') return;
+      // The phone step can't be skipped: back does nothing there.
+      if (step === 'verify_phone') { e.preventDefault(); return; }
       const prevStep = backStep[step];
       if (!prevStep) return;
       e.preventDefault();
@@ -454,16 +459,23 @@ export function LoginScreen({ navigation }: any) {
     return code && referralStatus !== 'invalid' ? code : undefined;
   };
 
+  // Social sign-in: a user without a verified phone (new, or an older account that
+  // never added one) must verify it before reaching home. The referral, if any,
+  // is credited by the backend at that point.
+  const needsPhone = (res: any) => (res?.user ?? res?.data?.user)?.isPhoneVerified === false;
+  const goHomeAfterSocial = (res: any) => {
+    reconnect();
+    if (needsPhone(res)) { setStep('verify_phone'); return; }
+    navigation.replace('App');
+    consumePendingDeepLink(navigation);
+  };
+
   const finishGoogleLogin = async (idToken: string) => {
     setGoogleLoading(true);
     try {
-      await authService.googleLogin(idToken, socialReferralCode());
+      const res = await authService.googleLogin(idToken, socialReferralCode());
       trackEvent('login', { method: 'google' });
-      reconnect();
-      navigation.replace('App');
-      // If they arrived from a protected email/share link while logged out, send
-      // them on to it now (e.g. the specific booking's tracking page).
-      consumePendingDeepLink(navigation);
+      goHomeAfterSocial(res);
     } catch (error: any) {
       showAlert('Google sign-in failed', error?.response?.data?.message || 'Please try again.');
     } finally {
@@ -478,10 +490,8 @@ export function LoginScreen({ navigation }: any) {
   ) => {
     setAppleLoading(true);
     try {
-      await authService.appleLogin(identityToken, authorizationCode, fullName, socialReferralCode());
-      reconnect();
-      navigation.replace('App');
-      consumePendingDeepLink(navigation);
+      const res = await authService.appleLogin(identityToken, authorizationCode, fullName, socialReferralCode());
+      goHomeAfterSocial(res);
     } catch (error: any) {
       showAlert('Apple sign-in failed', error?.response?.data?.message || 'Please try again.');
     } finally {
@@ -620,13 +630,9 @@ export function LoginScreen({ navigation }: any) {
     if (__DEV__) console.log('[Facebook Login] accessToken:', accessToken);
     setFacebookLoading(true);
     try {
-      await authService.facebookLogin(accessToken, socialReferralCode());
+      const res = await authService.facebookLogin(accessToken, socialReferralCode());
       trackEvent('login', { method: 'facebook' });
-      reconnect();
-      navigation.replace('App');
-      // If they arrived from a protected email/share link while logged out, send
-      // them on to it now (e.g. the specific booking's tracking page).
-      consumePendingDeepLink(navigation);
+      goHomeAfterSocial(res);
     } catch (error: any) {
       const isNetworkError = !error?.response;
       showAlert(
@@ -1000,6 +1006,37 @@ export function LoginScreen({ navigation }: any) {
   };
 
   const renderStep = () => {
+    if (step === 'verify_phone') {
+      return (
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+          <View style={styles.otpContainer}>
+            <View style={styles.otpIconBg}>
+              <Lock size={28} color={colors.primary} />
+            </View>
+            <Text style={styles.otpTitle}>Verify your mobile number</Text>
+            <Text style={[styles.otpSubtitle, { marginBottom: 24 }]}>Our pickup partner calls this number to reach you. We'll send a 6-digit OTP to confirm it.</Text>
+            <View style={{ width: '100%', maxWidth: 420 }}>
+              <PhoneVerifyForm
+                onVerified={async () => {
+                  // The new coin balance (referral credit) isn't in the change-phone
+                  // response, so reload the profile before home.
+                  await profileService.getProfile().catch(() => {});
+                  navigation.replace('App');
+                  consumePendingDeepLink(navigation);
+                }}
+              />
+            </View>
+            <TouchableOpacity
+              style={{ marginTop: 28 }}
+              onPress={async () => { await authService.logout(); setIdentifier(''); setStep('entry'); }}
+            >
+              <Text style={{ color: colors.textMuted, fontWeight: '600', fontSize: 14, textAlign: 'center' }}>Use a different account? Sign out</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      );
+    }
+
     if (step === 'entry') {
       return (
         <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={styles.stepContent}>
