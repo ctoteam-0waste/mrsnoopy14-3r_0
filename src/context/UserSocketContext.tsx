@@ -90,39 +90,39 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
       const agentObj = data.agent || data.booking?.agent || null;
       const msg = data.message || 'Agent accepted your booking and is on the way!';
       setLatestUpdate({ event: 'BOOKING_ACCEPTED', bookingId: data.bookingId || data.booking?._id, message: msg, agentId: data.agentId, agent: agentObj });
-      addNotification({ type: 'BOOKING_ACCEPTED', title: 'Agent assigned', message: msg, bookingId: data.bookingId });
+      addNotification({ type: 'BOOKING_ACCEPTED', title: 'Agent assigned', message: msg, bookingId: data.bookingId, notificationId: data.notificationId });
     });
 
     socket.on('AGENT_REACHED', (data: any) => {
       const msg = data.message || 'Agent has reached your location!';
       setLatestUpdate({ event: 'AGENT_REACHED', bookingId: data.bookingId, message: msg });
-      addNotification({ type: 'AGENT_REACHED', title: 'Agent arrived', message: msg, bookingId: data.bookingId });
+      addNotification({ type: 'AGENT_REACHED', title: 'Agent arrived', message: msg, bookingId: data.bookingId, notificationId: data.notificationId });
     });
 
     socket.on('BOOKING_PICKED_UP', (data: any) => {
       const coins = data.totalKarmaCoins || 0;
       const msg = data.message || `${coins} KarmaCoins credited to your wallet!`;
       setLatestUpdate({ event: 'BOOKING_PICKED_UP', bookingId: data.bookingId, message: msg, totalKarmaCoins: coins });
-      addNotification({ type: 'BOOKING_PICKED_UP', title: `+${coins} KarmaCoins XP`, message: msg, bookingId: data.bookingId });
+      addNotification({ type: 'BOOKING_PICKED_UP', title: `+${coins} KarmaCoins XP`, message: msg, bookingId: data.bookingId, notificationId: data.notificationId });
     });
 
     socket.on('BOOKING_COMPLETED', (data: any) => {
       const msg = data.message || 'Your booking is completed. Thank you!';
       setLatestUpdate({ event: 'BOOKING_COMPLETED', bookingId: data.bookingId, message: msg });
-      addNotification({ type: 'BOOKING_COMPLETED', title: 'Pickup complete', message: msg, bookingId: data.bookingId });
+      addNotification({ type: 'BOOKING_COMPLETED', title: 'Pickup complete', message: msg, bookingId: data.bookingId, notificationId: data.notificationId });
       trackPickupCompleted(data.bookingId);
     });
 
     socket.on('BOOKING_CANCEL_SUCCESS', (data: any) => {
       const msg = data.message || 'Booking cancelled successfully.';
       setLatestUpdate({ event: 'BOOKING_CANCEL_SUCCESS', bookingId: data.bookingId, message: msg });
-      addNotification({ type: 'BOOKING_CANCEL_SUCCESS', title: 'Booking cancelled', message: msg, bookingId: data.bookingId });
+      addNotification({ type: 'BOOKING_CANCEL_SUCCESS', title: 'Booking cancelled', message: msg, bookingId: data.bookingId, notificationId: data.notificationId });
     });
 
     socket.on('BOOKING_IN_POOL', (data: any) => {
       const msg = data.message || 'High demand in your area. Your booking is in our priority pool.';
       setLatestUpdate({ event: 'BOOKING_IN_POOL', bookingId: data.bookingId, message: msg });
-      addNotification({ type: 'BOOKING_IN_POOL', title: 'Added to priority queue', message: msg, bookingId: data.bookingId });
+      addNotification({ type: 'BOOKING_IN_POOL', title: 'Added to priority queue', message: msg, bookingId: data.bookingId, notificationId: data.notificationId });
     });
 
     // Backend emits 'agent:location' with flat payload: { bookingId, lat, lng, timestamp }

@@ -6,7 +6,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X, Trash2, Truck, MapPin, Coins, CheckCircle2, Clock, XCircle, Brain, Bell } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { AppNotification } from '../../context/NotificationContext';
+import { AppNotification, useNotifications } from '../../context/NotificationContext';
 import { routeNotification } from '../../utils/notificationRoute';
 import { SCREEN_WIDTH } from '../../utils/layout';
 import { useTheme, makeStyles } from '../../theme';
@@ -126,6 +126,11 @@ export function NotificationPanel({ visible, onClose, notifications, unreadCount
   const styles = useStyles();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const { refreshNotifications } = useNotifications();
+
+  // Opening the bell reads the latest list from the backend (other devices may
+  // have added, read or cleared items).
+  useEffect(() => { if (visible) refreshNotifications(); }, [visible, refreshNotifications]);
 
   // Tapping a card deep-links to the right screen (same router as a push tap),
   // marks it read, and closes the panel.

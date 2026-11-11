@@ -3,6 +3,7 @@ import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getToken } from '../utils/tokenStore';
 import { getStableUserSuffix } from '../utils/userId';
+import api from '../services/api';
 import {
   isPushSupported,
   getPushPermission,
@@ -22,10 +23,14 @@ export interface AppNotification {
   read: boolean;
 }
 
+type NewNotification = Omit<AppNotification, 'id' | 'timestamp' | 'read'> & { notificationId?: string };
+
 interface NotificationContextType {
   notifications: AppNotification[];
   unreadCount: number;
-  addNotification: (data: Omit<AppNotification, 'id' | 'timestamp' | 'read'>) => void;
+  addNotification: (data: NewNotification) => void;
+  // Re-read the list from the backend (bell opened, app back in the foreground).
+  refreshNotifications: () => void;
   markRead: (id: string) => void;
   markAllRead: () => void;
   clearAll: () => void;
@@ -41,6 +46,7 @@ const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
   unreadCount: 0,
   addNotification: () => {},
+  refreshNotifications: () => {},
   markRead: () => {},
   markAllRead: () => {},
   clearAll: () => {},
@@ -56,8 +62,34 @@ const LEGACY_SHARED_KEY = 'appNotifications';
 const keyFor = (userSuffix: string) => `appNotifications_${userSuffix}`;
 const MAX_NOTIFICATIONS = 50;
 
+// The bell list lives on the backend (GET /notifications), so every device shows
+// the same items, read state and badge. Until that endpoint answers (older
+// backend: 404), the list falls back to the old per-device copy in AsyncStorage.
+const EVENT_LABELS: Record<string, string> = {
+  BOOKING_ACCEPTED: 'Agent assigned',
+  AGENT_REACHED: 'Agent arrived',
+  BOOKING_PICKED_UP: 'Coins credited',
+  BOOKING_COMPLETED: 'Pickup complete',
+  BOOKING_CANCEL_SUCCESS: 'Booking cancelled',
+  BOOKING_IN_POOL: 'Added to priority queue',
+  QUIZ_COMPLETED: 'Daily quiz complete!',
+};
+
+const fromServer = (n: any): AppNotification => ({
+  id: String(n._id ?? n.id),
+  type: n.event || n.type || '',
+  title: n.title || EVENT_LABELS[n.event] || 'Notification',
+  message: n.body || n.data?.message || '',
+  bookingId: n.data?.bookingId,
+  timestamp: Date.parse(n.createdAt) || Date.now(),
+  read: !!n.read,
+});
+
 export function NotificationProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [serverUnread, setServerUnread] = useState<number | null>(null);
+  // null = not known yet, true = backend list in use, false = old per-device list.
+  const serverMode = useRef<boolean | null>(null);
   // Ref (not state) because persist() runs inside setState updaters, which must
   // read the current user synchronously without re-creating the callbacks.
   const userKeyRef = useRef<string | null>(null);
@@ -80,7 +112,14 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
       userKeyRef.current = next;
       if (!next) {
+        serverMode.current = null;
+        setServerUnread(null);
         setNotifications([]); // logged out — show nothing
+        return;
+      }
+      if (await loadFromServer()) {
+        // The old device copy is no longer the source; drop it.
+        AsyncStorage.removeItem(keyFor(next)).catch(() => {});
         return;
       }
       try {
@@ -96,25 +135,65 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
+  // Reads the list from the backend. Returns false when the backend has no list
+  // endpoint yet (404), so the caller keeps the per-device copy.
+  async function loadFromServer(): Promise<boolean> {
+    if (serverMode.current === false) return false;
+    try {
+      const res = await api.get('/api/v1/notifications', { params: { limit: MAX_NOTIFICATIONS, page: 1 } });
+      const body = res.data?.items ? res.data : (res.data?.data ?? res.data);
+      const items: any[] = Array.isArray(body?.items) ? body.items : [];
+      serverMode.current = true;
+      setNotifications(items.map(fromServer));
+      setServerUnread(typeof body?.unreadCount === 'number' ? body.unreadCount : null);
+      return true;
+    } catch (e: any) {
+      if (e?.response?.status === 404) serverMode.current = false;
+      return serverMode.current === true; // keep the last list on a network blip
+    }
+  }
+
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshNotifications = useCallback(() => {
+    if (!userKeyRef.current || serverMode.current === false) return;
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    // A short delay so a burst of socket events (or a write just sent) is read once.
+    refreshTimer.current = setTimeout(() => { loadFromServer(); }, 600);
+  }, []);
+
+  // Back in the foreground: other devices may have changed the list.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (st) => { if (st === 'active') refreshNotifications(); });
+    return () => sub.remove();
+  }, [refreshNotifications]);
+
   const persist = (items: AppNotification[]) => {
     const key = userKeyRef.current;
-    if (!key) return; // never write notifications while logged out
+    if (!key || serverMode.current) return; // per-device copy only without the backend list
     AsyncStorage.setItem(keyFor(key), JSON.stringify(items));
   };
 
-  const addNotification = useCallback((data: Omit<AppNotification, 'id' | 'timestamp' | 'read'>) => {
+  const addNotification = useCallback((data: NewNotification) => {
+    // With the backend list, the backend creates the quiz item itself: adding it
+    // here too would show it twice.
+    if (serverMode.current && data.type === 'QUIZ_COMPLETED') { refreshNotifications(); return; }
+    const { notificationId, ...rest } = data;
     const notif: AppNotification = {
-      ...data,
-      id: `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      ...rest,
+      id: notificationId || `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
       timestamp: Date.now(),
       read: false,
     };
     setNotifications(prev => {
-      const updated = [notif, ...prev].slice(0, MAX_NOTIFICATIONS);
+      const updated = [notif, ...prev.filter(n => n.id !== notif.id)].slice(0, MAX_NOTIFICATIONS);
       persist(updated);
       return updated;
     });
-  }, []);
+    if (serverMode.current) {
+      setServerUnread(c => (c === null ? null : c + 1));
+      refreshNotifications();
+    }
+  }, [refreshNotifications]);
 
   const markRead = useCallback((id: string) => {
     setNotifications(prev => {
@@ -122,7 +201,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       persist(updated);
       return updated;
     });
-  }, []);
+    if (serverMode.current) {
+      setServerUnread(c => (c ? c - 1 : c));
+      api.patch(`/api/v1/notifications/${id}/read`).catch(() => {}).finally(refreshNotifications);
+    }
+  }, [refreshNotifications]);
 
   const markAllRead = useCallback(() => {
     setNotifications(prev => {
@@ -130,15 +213,24 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       persist(updated);
       return updated;
     });
-  }, []);
+    if (serverMode.current) {
+      setServerUnread(0);
+      api.patch('/api/v1/notifications/read-all').catch(() => {}).finally(refreshNotifications);
+    }
+  }, [refreshNotifications]);
 
   const clearAll = useCallback(() => {
     setNotifications([]);
     const key = userKeyRef.current;
-    if (key) AsyncStorage.removeItem(keyFor(key));
-  }, []);
+    if (serverMode.current) {
+      setServerUnread(0);
+      api.delete('/api/v1/notifications').catch(() => {}).finally(refreshNotifications);
+    } else if (key) {
+      AsyncStorage.removeItem(keyFor(key));
+    }
+  }, [refreshNotifications]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = serverUnread ?? notifications.filter(n => !n.read).length;
 
   // ── OS push permission (re-enable flow) ──────────────────────────────────
   // null until the first read; stays null on builds where push isn't supported
@@ -187,7 +279,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   }, [refreshPushPermission]);
 
   return (
-    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, markRead, markAllRead, clearAll, pushEnabled, enablePush, refreshPushPermission }}>
+    <NotificationContext.Provider value={{ notifications, unreadCount, addNotification, refreshNotifications, markRead, markAllRead, clearAll, pushEnabled, enablePush, refreshPushPermission }}>
       {children}
     </NotificationContext.Provider>
   );
