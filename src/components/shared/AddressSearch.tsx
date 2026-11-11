@@ -445,7 +445,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
                 {isGeocoding ? 'Locating address...' : (resolvedAddress || 'Move the map to select a location')}
               </Text>
             </View>
-            {isOutOfServiceArea && !isGeocoding && (
+            {isOutOfServiceArea && (
               <View style={styles.outOfAreaBanner}>
                 <Text style={styles.outOfAreaText}>
                   Sorry, we currently operate only in Gurugram and nearby areas within 50km. This location is outside our service area.
@@ -569,7 +569,9 @@ const useStyles = makeStyles((c) => ({
     paddingBottom: 12,
   },
   addressRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, marginBottom: 14 },
-  addressText: { flex: 1, fontSize: 14, fontWeight: '600', color: c.text, lineHeight: 20 },
+  // Always two lines tall, so the sheet (and the map above it) keeps its size while
+  // the text switches between "Locating address..." and the address.
+  addressText: { flex: 1, fontSize: 14, fontWeight: '600', color: c.text, lineHeight: 20, minHeight: 40 },
   outOfAreaBanner: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 12, padding: 12, marginBottom: 14 },
   outOfAreaText: { fontSize: 13, fontWeight: '600', color: '#dc2626', lineHeight: 18 },
   confirmBtn: { backgroundColor: '#16a34a', borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
