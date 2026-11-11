@@ -54,13 +54,14 @@ const LABELS = [
 
 interface AddressSearchProps {
   visible: boolean;
+  onDismiss?: () => void;
   onSelect: (address: string, coords: [number, number], details?: AddressDetails) => void;
   onCancel: () => void;
   userCoords?: [number, number] | null;
   initialDetails?: Partial<AddressDetails>;
 }
 
-export function AddressSearch({ visible, onSelect, onCancel, userCoords, initialDetails }: AddressSearchProps) {
+export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoords, initialDetails }: AddressSearchProps) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
   const [step, setStep] = useState<'map' | 'details'>('map');
@@ -301,7 +302,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
   // ────────────────────────────── DETAILS STEP ──────────────────────────────
   if (step === 'details') {
     return (
-      <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleCancel}>
+      <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleCancel} onDismiss={onDismiss}>
         <StatusBar backgroundColor={colors.bg} barStyle={isDark ? 'light-content' : 'dark-content'} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
           <View style={styles.topBar}>
@@ -382,7 +383,7 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
 
   // ────────────────────────────── MAP STEP ──────────────────────────────
   return (
-    <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleCancel}>
+    <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleCancel} onDismiss={onDismiss}>
       <StatusBar backgroundColor={colors.bg} barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.screen}>
         {/* ── Top bar ── */}

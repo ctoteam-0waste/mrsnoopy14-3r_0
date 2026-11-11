@@ -256,22 +256,44 @@ export function ProfileScreen({ navigation }: any) {
   // Delete confirmation renders INSIDE the address-manager modal (as a second
   // layer) so it can never sit behind it — the global showAlert modal did (KV-014).
   const [deleteTarget, setDeleteTarget] = useState<SavedAddress | null>(null);
+  // Errors show inside the manager card: a root alert would open behind this modal on iOS.
+  const [mgrError, setMgrError] = useState('');
+  // iOS can't present a modal while another is on screen or still closing, so the
+  // manager and the map picker take turns: close one, open the next from onDismiss.
+  const nextAddrModal = useRef<'search' | 'mgr' | null>(null);
+
+  const showNextAddrModal = () => {
+    const next = nextAddrModal.current;
+    nextAddrModal.current = null;
+    if (next === 'search') setShowAddressSearch(true);
+    else if (next === 'mgr') setAddrMgrVisible(true);
+  };
+
+  const switchAddrModal = (next: 'search' | 'mgr') => {
+    nextAddrModal.current = next;
+    if (next === 'search') setAddrMgrVisible(false);
+    else setShowAddressSearch(false);
+    if (Platform.OS !== 'ios') showNextAddrModal();
+    else setTimeout(() => { if (nextAddrModal.current === next) showNextAddrModal(); }, 1000);
+  };
 
   const openAddrMgr = () => {
+    setMgrError('');
     setAddrMgrVisible(true);
     setMgrLoading(true);
     addressService.list()
       .then(setMgrAddresses)
-      .catch(() => showAlert('Could not load addresses', 'Please check your connection and try again.'))
+      .catch(() => setMgrError('Could not load your addresses. Please check your connection and try again.'))
       .finally(() => setMgrLoading(false));
   };
 
   // AddressSearch's own "Add address details" step collects and validates every
   // field — save directly from its result, no second form.
   const handleAddressSelected = async (_address: string, _coords: [number, number], details?: AddressDetails) => {
-    setShowAddressSearch(false);
+    switchAddrModal('mgr');
     if (!details || mgrBusy) return;
     setMgrBusy(true);
+    setMgrError('');
     try {
       const list = await addressService.add({
         label: (details.label as AddressLabel) || 'Home',
@@ -286,7 +308,7 @@ export function ProfileScreen({ navigation }: any) {
       });
       setMgrAddresses(list);
     } catch (e: any) {
-      showAlert('Could not save address', e?.response?.data?.message || 'Please try again.');
+      setMgrError(e?.response?.data?.message || 'Could not save the address. Please try again.');
     } finally {
       setMgrBusy(false);
     }
@@ -298,19 +320,21 @@ export function ProfileScreen({ navigation }: any) {
     const target = deleteTarget;
     if (!target) return;
     setDeleteTarget(null);
+    setMgrError('');
     try {
       setMgrAddresses(await addressService.remove(target._id));
     } catch {
-      showAlert('Could not delete address', 'Please try again.');
+      setMgrError('Could not delete the address. Please try again.');
     }
   };
 
   const makeDefault = async (addr: SavedAddress) => {
     if (addr.isDefault) return;
+    setMgrError('');
     try {
       setMgrAddresses(await addressService.setDefault(addr._id));
     } catch {
-      showAlert('Could not update default address', 'Please try again.');
+      setMgrError('Could not change the default address. Please try again.');
     }
   };
 
@@ -471,6 +495,7 @@ export function ProfileScreen({ navigation }: any) {
       setModalVisible(false);
       setDemoModalVisible(false);
       setAddressModalVisible(false);
+      nextAddrModal.current = null;
       setAddrMgrVisible(false);
       setShowAddressSearch(false);
     });
@@ -1264,7 +1289,7 @@ export function ProfileScreen({ navigation }: any) {
       </Modal>
 
       {/* Saved addresses manager */}
-      <Modal visible={addrMgrVisible} transparent animationType="fade" onRequestClose={() => setAddrMgrVisible(false)}>
+      <Modal visible={addrMgrVisible} transparent animationType="fade" onRequestClose={() => setAddrMgrVisible(false)} onDismiss={showNextAddrModal}>
         <View style={styles.addrMgrBackdrop}>
           <View style={styles.addrMgrCard}>
             <View style={styles.addrMgrHeader}>
@@ -1309,13 +1334,15 @@ export function ProfileScreen({ navigation }: any) {
 
             </ScrollView>
 
+            {!!mgrError && <Text style={styles.addrMgrError}>{mgrError}</Text>}
+
             {!mgrLoading && (
               mgrBusy ? (
                 <View style={styles.addrMgrAddBtn}>
                   <ActivityIndicator size="small" color="#16a34a" />
                 </View>
               ) : (
-                <TouchableOpacity style={styles.addrMgrAddBtn} onPress={() => setShowAddressSearch(true)} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.addrMgrAddBtn} onPress={() => switchAddrModal('search')} activeOpacity={0.8}>
                   <Text style={styles.addrMgrAddText}>+ Add new address</Text>
                 </TouchableOpacity>
               )
@@ -1350,7 +1377,8 @@ export function ProfileScreen({ navigation }: any) {
         visible={showAddressSearch}
         userCoords={null}
         onSelect={handleAddressSelected}
-        onCancel={() => setShowAddressSearch(false)}
+        onCancel={() => switchAddrModal('mgr')}
+        onDismiss={showNextAddrModal}
       />
 
     </View>
@@ -1507,6 +1535,7 @@ const useStyles = makeStyles((c) => ({
   addrMgrHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 },
   addrMgrTitle: { fontSize: 19, fontWeight: '900', color: c.text },
   addrMgrClose: { width: 34, height: 34, borderRadius: 17, backgroundColor: c.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  addrMgrError: { fontSize: 12.5, color: c.danger, fontWeight: '600', lineHeight: 18, marginTop: 10 },
   addrMgrEmpty: { fontSize: 13.5, color: c.textFaint, fontWeight: '500', textAlign: 'center', paddingVertical: 24 },
   addrMgrRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: c.border },
   addrMgrLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 3 },
