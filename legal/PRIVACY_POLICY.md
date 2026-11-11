@@ -10,7 +10,7 @@ This policy explains what information KarmaVer$e (by 3R ZeroWaste) collects, how
 To provide and improve our services, we collect:
 
 - **Account details**: your name, email address, and phone number. You may also register or sign in using Google Sign-In.
-- **Profile details (optional)**: age, gender, marital status, and employment status, if you choose to complete your profile.
+- **Profile details (optional)**: age, gender, marital status, and employment status, if you choose to complete your profile. We do not ask about sexual orientation; an optional question about it in earlier app versions has been removed, any answers are not used, and stored answers are being deleted.
 - **Pickup details**: your address and the waste categories you schedule.
 - **Location data**: your device location to assign the nearest available Agent and to show live pickup tracking.
 - **Usage data**: app activity such as quizzes played, coins earned, and bookings made.

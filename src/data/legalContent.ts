@@ -74,12 +74,13 @@ export const TERMS: LegalDoc = {
         'You are responsible for keeping your credentials, device, and registered mobile number secure, and for all activity under your account.',
         'Notify us promptly through in-app support if you believe your account has been accessed without authorisation. Until you do, activity under your account is treated as yours.',
         'We may require verification of your mobile number, email, or identity before enabling certain features, including redemption payouts.',
+        'Optional profile questions — age, gender, marital status, and employment — are never required to book a Pickup or earn coins, and you can leave them blank. We do not ask about your sexual orientation.',
       ],
     },
     {
       heading: 'Service areas and pickup serviceability',
       body: [
-        'Pickups are currently available only within the Gurgaon / Gurugram, Haryana Service Area. If your Pickup Address falls outside an active Service Area, the app will not permit a booking. This is an operational limit, not a fault in the app.',
+        'Pickups are currently available only within our active Service Area: Gurugram, Haryana and nearby areas within 50 km of central Gurugram (see Active service areas below). If your Pickup Address falls outside an active Service Area, the app will not permit a booking. This is an operational limit, not a fault in the app.',
         'When you schedule a Pickup you select or confirm a Pickup Address; we derive its coordinates, locality, city, state, and PIN code and run a Serviceability Check against our active Service Areas. If the address is inside an active area you may choose a slot; if not, you cannot complete the booking there.',
       ],
       bullets: [
@@ -335,13 +336,13 @@ export const PRIVACY: LegalDoc = {
         'Account details (required) — name, email, mobile number; or basic Google profile if you sign in with Google.',
         'Pickup address (required to book) — full address, locality, city, state, PIN code, coordinates, and any landmarks or notes.',
         'Pickup details (required to book) — waste categories, estimated quantity, hazardous-waste declarations, and chosen slot.',
-        'Profile details (optional, never needed for pickups or rewards) — age, gender, marital status, employment status.',
+        'Profile details (optional, never needed for pickups or rewards) — age, gender, marital status, employment status. We do not ask about sexual orientation. Earlier versions of the app had an optional sexual-orientation question; it has been removed, we do not use any answer given, and stored answers are being deleted.',
         'Redemption details (only if you request a payout) — bank account or UPI ID and any KYC documents our Payment Partner requires.',
         'Communications — support tickets, ratings, reviews, photographs, and dispute details, as you provide them.',
         'Quiz and referral activity — answers, scores, referral-code usage, and the referral relationship between accounts.',
         'Collected automatically — device and app data, usage data, approximate or precise location, and network data (IP, connection info) for security and fraud prevention. Cookies are used on the website only.',
         'Generated through the Service — Agent-verified category and weight of material, verification photographs, your Wallet and transaction history, and serviceability results.',
-        'What we do not collect — government identity numbers (except KYC required by our Payment Partner for a payout), health or biometric data, and no data knowingly from anyone under 13.',
+        'What we do not collect — government identity numbers (except KYC required by our Payment Partner for a payout), sexual orientation, health or biometric data, and no data knowingly from anyone under 13.',
       ],
     },
     {
@@ -350,7 +351,7 @@ export const PRIVACY: LegalDoc = {
         'Location is the most sensitive category of data the Service routinely handles, so we set out our practices separately.',
       ],
       bullets: [
-        'Why — to help you find and confirm the Pickup address, to check serviceability (Pickups are offered only in Gurgaon / Gurugram), and to route the assigned Agent and confirm collection at the booked address.',
+        'Why — to help you find and confirm the Pickup address, to check serviceability (Pickups are offered only within 50 km of central Gurugram), and to route the assigned Agent and confirm collection at the booked address.',
         'We access device location only while you are actively scheduling a Pickup or during fulfilment of a booked Pickup. We do not collect background location and do not build a movement history.',
         'We ask at the point of need, with an explanation. If you decline, you can still search and confirm a Pickup address manually — only convenience features are affected. Permission can be revoked anytime in device settings.',
         'The coordinates stored against a booking are those of the Pickup Address you confirmed, not a live device position.',

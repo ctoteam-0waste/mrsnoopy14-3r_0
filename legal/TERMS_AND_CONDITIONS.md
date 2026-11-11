@@ -25,6 +25,7 @@ Welcome to KarmaVer$e, operated by 3R ZeroWaste. By downloading, installing, or 
 - One account per person. Duplicate or fraudulent accounts may be terminated without notice.
 - You are solely responsible for all activity under your account.
 - We may suspend or terminate accounts that violate these terms.
+- Optional profile questions (age, gender, marital status, employment) are never required to book a pickup or earn coins. We do not ask about your sexual orientation.
 
 ## 4. Services provided
 
@@ -34,23 +35,25 @@ KarmaVer$e provides the following services:
 - **KarmaCoins XP rewards**: earn coins based on the type and verified weight of waste collected.
 - **Daily eco-quiz**: play daily quizzes to earn additional KarmaCoins XP.
 - **Referral program**: invite others and earn bonus coins on their first successful pickup.
-- **Redemption**: redeem coins for rewards, eco-friendly products, or donations as available.
+- **Redemption**: redeem coins in the app for rewards, eco-friendly products, donations, or a cash payout through our payment partner (RazorpayX, KYC required), as available. Cash is never paid at the doorstep.
 
 ## 5. Pickup terms
 
+- **Service area**: pickups are currently available only in Gurugram, Haryana and nearby areas within 50 km of central Gurugram. The app checks your exact address when you book; addresses outside this area cannot be booked.
 - Pickups are subject to availability in your area and time slot.
 - We may cancel, reschedule, or decline a pickup due to operational, weather, or safety reasons.
 - Ensure waste is properly segregated and accessible at the scheduled time.
 - Hazardous waste must be declared at booking. Failure to do so may cause cancellation and suspension.
 - The Agent verifies and weighs the waste at pickup. Final coins are based on the Agent's verification, not your estimate.
+- **No cash at pickup.** Agents do not pay cash for your material. Every pickup is rewarded only in KarmaCoins XP, credited to your Wallet, which you can later redeem in the app.
 - Do not include prohibited items such as medical/biomedical waste, explosives, radioactive materials, or anything banned under law.
 
 ## 6. KarmaCoins XP policy
 
-- Coins are earned based on the type and verified weight of recyclable materials collected.
+- Coins are earned based on the type and verified weight of recyclable materials collected. Pickups are rewarded only in KarmaCoins XP. Agents do not pay cash at the doorstep.
 - Coin values are set by the company and may change without prior notice.
-- Coins have no cash value and cannot be exchanged for cash, cryptocurrency, or legal tender.
-- Coins are non-transferable between accounts.
+- Coins are loyalty reward points, not legal tender, e-money, or cryptocurrency. They cannot be bought or sold. Any cash payout is made only through in-app redemption via our payment partner, never by an Agent.
+- Coins can be sent to another registered user only through the in-app "Send coins" feature. Buying or selling coins for money is not permitted.
 - We may adjust, revoke, or expire coins in cases of fraud, abuse, system errors, or policy violations.
 - Coins may have an expiry period as determined from time to time.
 - Bonus coins from referrals, quizzes, or promotions are subject to their specific terms.
