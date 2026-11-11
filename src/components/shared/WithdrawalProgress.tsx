@@ -21,10 +21,11 @@ export function withdrawalStatusMeta(status: string) {
   }
 }
 
-export function refundNote(w: { status: string; failureReason?: string; rejectionReason?: string }) {
+export function refundNote(w: { status: string; rejectionReason?: string | null }) {
   switch (w.status) {
-    case 'FAILED': return `${w.failureReason || 'The bank could not complete this transfer.'} Your coins have been refunded.`;
-    case 'REVERSED': return `${w.failureReason || 'The bank sent this money back.'} Your coins have been refunded.`;
+    // failureReason is a support code (e.g. beneficiary_bank_down), not user text.
+    case 'FAILED': return 'The bank could not complete this transfer. Your coins have been refunded.';
+    case 'REVERSED': return 'The bank sent this money back. Your coins have been refunded.';
     case 'REJECTED': return `${w.rejectionReason || 'Request rejected.'} Your coins have been refunded.`;
     default: return null;
   }

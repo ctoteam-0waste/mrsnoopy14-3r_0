@@ -130,7 +130,7 @@ export function AddPayoutMethodScreen({ navigation }: any) {
 
   const buildMethod = (): NewPayoutMethod => kind === 'bank'
     ? { type: 'bank', accountHolderName: holder.trim(), accountNumber, ifsc }
-    : { type: 'upi', upiId: upiId.trim().toLowerCase() };
+    : { type: 'upi', vpa: upiId.trim().toLowerCase() };
 
   const sendOtp = async () => {
     if (!phone) { setPhoneModal(true); return; }
@@ -369,16 +369,17 @@ export function AddPayoutMethodScreen({ navigation }: any) {
       );
     }
     const mismatch = method.status === 'NAME_MISMATCH';
+    const rejected = method.status === 'REJECTED';
     return (
       <View style={styles.center}>
         <View style={[styles.resultIcon, { backgroundColor: mismatch ? colors.warning + '22' : colors.dangerSoft }]}>
           {mismatch ? <CircleAlert size={34} color={colors.warning} /> : <CircleX size={34} color={colors.danger} />}
         </View>
-        <Text style={styles.resultTitle}>{mismatch ? "Name doesn't match" : "Couldn't verify this account"}</Text>
+        <Text style={styles.resultTitle}>{mismatch ? 'Under review' : rejected ? 'Account not approved' : "Couldn't verify this account"}</Text>
         <Text style={styles.resultText}>
           {mismatch
-            ? `The name on ${label} doesn't match your KarmaVerse profile. Please contact support at ${SUPPORT_EMAIL} and we'll help you sort it out.`
-            : `Please check the details of ${label} and try again, or add a different account.`}
+            ? `${method.failureReason ? `${method.failureReason} ` : ''}The name on ${label} doesn't match your KarmaVerse profile, so our team will review it. We'll notify you when it's done. Questions? ${SUPPORT_EMAIL}`
+            : `${method.failureReason ? `${method.failureReason} ` : ''}${rejected ? `You can't withdraw to ${label}. Please add a different account.` : `Please check the details of ${label} and try again, or add a different account.`}`}
         </Text>
         <View style={[styles.actions, { alignSelf: 'stretch' }]}>
           {mismatch

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, History, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
-import { payoutService, methodLabel, formatInr } from '../services/payout';
+import { payoutService, withdrawalAccountLabel, formatInr, type PayoutMethod } from '../services/payout';
 import { withdrawalStatusMeta, refundNote } from '../components/shared/WithdrawalProgress';
 import { WebFooter } from '../components/shared/WebFooter';
 import { useTheme, makeStyles } from '../theme';
@@ -15,13 +15,18 @@ export function RedeemHistoryScreen({ navigation }: any) {
   const { colors } = useTheme();
   const [requests, setRequests] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [methods, setMethods] = useState<PayoutMethod[]>([]);
 
   useEffect(() => {
     const fetchRequests = async () => {
       try {
         setIsLoading(true);
-        const data = await payoutService.getMyWithdrawals();
+        const [data, saved] = await Promise.all([
+          payoutService.getMyWithdrawals(),
+          payoutService.listMethods().catch(() => null),
+        ]);
         setRequests(Array.isArray(data) ? data : []);
+        if (saved) setMethods(saved);
       } catch (error) {
         console.error('Failed to fetch redeem requests', error);
       } finally {
@@ -103,7 +108,7 @@ export function RedeemHistoryScreen({ navigation }: any) {
                     </View>
                   )}
 
-                  {!!req.payoutMethod && <Text style={styles.accountText}>To {methodLabel(req.payoutMethod)}</Text>}
+                  {!!withdrawalAccountLabel(req, methods) && <Text style={styles.accountText}>To {withdrawalAccountLabel(req, methods)}</Text>}
 
                   <Text style={styles.dateText}>Requested {formatDate(req.createdAt)}</Text>
 
