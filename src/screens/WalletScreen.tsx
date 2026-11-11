@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, ActivityIndicator, Platform, Modal, useWindowDimensions } from 'react-native';
 import { useTheme, makeStyles } from '../theme';
 import { WebFooter } from '../components/shared/WebFooter';
@@ -28,7 +28,7 @@ function txSourceIcon(source?: string, isCredit?: boolean) {
   }
 }
 
-export function WalletScreen({ navigation }: any) {
+export function WalletScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { width } = useWindowDimensions();
   const diwali = isDiwaliSeason();
@@ -72,6 +72,15 @@ export function WalletScreen({ navigation }: any) {
     fetchWalletData();
     return unsubscribe;
   }, [navigation]);
+
+  // Tabs stay mounted, so the wallet kept its scroll position. Go back to the top
+  // when the user switches to another tab, but not when a screen such as
+  // Withdrawals is opened on top (coming back from it keeps the place).
+  const scrollRef = useRef<ScrollView>(null);
+  useEffect(() => navigation.addListener('blur', () => {
+    const state = navigation.getState?.();
+    if (state?.routes?.[state.index]?.name !== route?.name) scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }), [navigation, route?.name]);
 
   const rewardRate = streak?.rewardRate ?? 100;
   const tierMeta = tierByName(streak?.tier);
@@ -138,7 +147,7 @@ export function WalletScreen({ navigation }: any) {
         </View>
       )}
       {diwali && <DiwaliBackdrop dark={isDark} />}
-      <ScrollView style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
+      <ScrollView ref={scrollRef} style={[styles.container, diwali && { backgroundColor: 'transparent' }]} contentContainerStyle={{ paddingBottom: Platform.OS === 'web' ? 0 : 100 }} showsVerticalScrollIndicator={false}>
 
         {/* Header — same as home screen: paddingTop 60, same gradient, same radius */}
         <LinearGradient colors={['#052e16', '#166534', '#15803d']} style={[styles.header, diwali && { overflow: 'hidden' }]}>
