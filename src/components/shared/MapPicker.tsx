@@ -9,6 +9,8 @@ interface MapPickerProps {
 }
 
 const EPS = 1e-7;
+// About a metre. Smaller moves are layout noise, not the user moving the pin.
+const MOVE_EPS = 1e-5;
 
 export function MapPicker({ center, onCenterChange }: MapPickerProps) {
   const mapRef = useRef<any>(null);
@@ -25,10 +27,16 @@ export function MapPicker({ center, onCenterChange }: MapPickerProps) {
     cameraRef.current?.setCamera({ centerCoordinate: latestCenter.current, animationDuration: 0 });
   };
 
-  const handleRegionDidChange = async () => {
+  // Only a pan by the user picks a new spot. On iOS the map also reports a region
+  // change when its view is resized (the address sheet below growing from one line
+  // to two), which fed a loop: resize -> new lookup -> sheet resizes -> ...
+  const handleRegionDidChange = async (feature?: any) => {
     if (!mapRef.current) return;
+    if (feature?.properties?.isUserInteraction === false) return;
     try {
       const c: [number, number] = await mapRef.current.getCenter();
+      const last = lastInternalCenter.current;
+      if (last && Math.abs(last[0] - c[0]) < MOVE_EPS && Math.abs(last[1] - c[1]) < MOVE_EPS) return;
       lastInternalCenter.current = c;
       onCenterChange(c);
     } catch {}
