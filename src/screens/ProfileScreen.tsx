@@ -110,7 +110,7 @@ export function ProfileScreen({ navigation }: any) {
         }
         setUserProfile({
           name: data.name || 'User',
-          phone: isRealPhone(data.phone) ? `+91 ${cleanPhone(data.phone)}` : '',
+          phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : '',
           email: data.email || '',
           coins: data.karmaCoins || data.coins || 0,
           totalEarned: data.totalCoinsEarned ?? (data.karmaCoins || data.coins || 0),
@@ -581,7 +581,7 @@ export function ProfileScreen({ navigation }: any) {
       setUserProfile((prev: any) => ({
         ...prev,
         name: data.name || prev?.name,
-        phone: data.phone || prev?.phone,
+        phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : prev?.phone,
         email: data.email || prev?.email,
         coins: data.karmaCoins || data.coins || prev?.coins,
       }));
@@ -685,7 +685,7 @@ export function ProfileScreen({ navigation }: any) {
                <Text style={{ color: colors.textFaint, fontSize: 13, textAlign: 'center' }}>Check your internet connection and try again.</Text>
                <TouchableOpacity
                  style={{ backgroundColor: '#16a34a', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
-                 onPress={() => { setIsLoadingProfile(true); profileService.getProfile().then(data => { setUserProfile({ name: data.name || 'User', phone: data.phone || '', email: data.email || '', coins: data.karmaCoins || data.coins || 0, address: data.address ? (typeof data.address === 'object' ? data.address.fullAddress : data.address) : '', demographics: { age: data.demographics?.age || data.age || 25, gender: data.demographics?.gender || data.gender || 'Not Specified', maritalStatus: data.demographics?.maritalStatus || 'Not Specified', employment: data.demographics?.employment || 'Not Specified' } }); }).catch(() => {}).finally(() => setIsLoadingProfile(false)); }}
+                 onPress={() => { setIsLoadingProfile(true); profileService.getProfile().then(data => { setUserProfile({ name: data.name || 'User', phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : '', email: data.email || '', coins: data.karmaCoins || data.coins || 0, address: data.address ? (typeof data.address === 'object' ? data.address.fullAddress : data.address) : '', demographics: { age: data.demographics?.age || data.age || 25, gender: data.demographics?.gender || data.gender || 'Not Specified', maritalStatus: data.demographics?.maritalStatus || 'Not Specified', employment: data.demographics?.employment || 'Not Specified' } }); }).catch(() => {}).finally(() => setIsLoadingProfile(false)); }}
                >
                  <Text style={{ color: 'white', fontWeight: '800' }}>Retry</Text>
                </TouchableOpacity>
@@ -718,7 +718,7 @@ export function ProfileScreen({ navigation }: any) {
                   {userProfile?.name}
                 </Text>
                 {userProfile?.phone ? (
-                  <Text style={styles.userPhone}>{userProfile.phone}</Text>
+                  <Text style={styles.userPhone}>+91 {userProfile.phone}</Text>
                 ) : (
                   <TouchableOpacity onPress={openEditModal} activeOpacity={0.7}>
                     <Text style={styles.addPhoneLink}>+ Add mobile number</Text>
@@ -767,7 +767,7 @@ export function ProfileScreen({ navigation }: any) {
               <View style={styles.optionsBlock}>
                 <OptionRow onPress={openDemoModal} icon={<UserSquare2 size={18} color="#8b5cf6" />} bg="#f3e8ff" title="Personal details" sub="Age, gender, marital status..." />
                 <View style={styles.divider} />
-                <OptionRow icon={<MapPin size={18} color="#0284c7" />} bg="#f0f9ff" title="Saved addresses" sub="Manage home, office & other locations" onPress={openAddrMgr} />
+                <OptionRow icon={<MapPin size={18} color="#0284c7" />} bg="#f0f9ff" title="Saved addresses" sub="Manage home, work & other locations" onPress={openAddrMgr} />
                 <View style={styles.divider} />
                 <OptionRow
                   icon={<Flame size={18} color="#ea580c" />}
