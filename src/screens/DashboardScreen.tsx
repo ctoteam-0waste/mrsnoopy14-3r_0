@@ -102,7 +102,7 @@ const FEATURES = [
     emoji: '👥',
     tag: 'REFER',
     title: 'Invite friends',
-    desc: 'Share your referral code. When your friend signs up with it, you both get 1,000 bonus KarmaCoins XP!',
+    desc: 'Share your referral code. When your friend signs up with it and verifies their phone number, you both get 1,000 bonus KarmaCoins XP!',
     benefit: 'Bonus for Every Friend',
     benefitIcon: <Coins size={16} color="#fb923c" />,
     bg: ['#134e4a', '#0f766e'] as [string, string],

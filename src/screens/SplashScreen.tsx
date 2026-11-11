@@ -227,7 +227,7 @@ export function SplashScreen({ navigation }: any) {
           </View>
           <View style={{ backgroundColor: 'rgba(74,222,128,0.08)', paddingVertical: 14, paddingHorizontal: 16, borderRadius: 16, marginTop: 20, flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: 'rgba(74,222,128,0.2)' }}>
             <Text style={{ fontSize: 20 }}>🤝</Text>
-            <Text style={{ color: '#4ade80', fontWeight: '700', fontSize: 13, flex: 1 }}>Refer a friend — you both get 1,000 KarmaCoins XP when they sign up!</Text>
+            <Text style={{ color: '#4ade80', fontWeight: '700', fontSize: 13, flex: 1 }}>Refer a friend: you both get 1,000 KarmaCoins XP when they sign up and verify their phone number.</Text>
           </View>
         </View>
       );
