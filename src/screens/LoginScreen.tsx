@@ -445,10 +445,19 @@ export function LoginScreen({ navigation }: any) {
     }
   }, [resetSubStep]);
 
+  // A referral code from a referral link (or typed in), sent with Google / Apple /
+  // Facebook sign-in so a new account made that way also gets the referral. An
+  // existing account signing in ignores it on the backend. Skipped once it's known
+  // to be invalid.
+  const socialReferralCode = () => {
+    const code = referralCode.trim().toUpperCase();
+    return code && referralStatus !== 'invalid' ? code : undefined;
+  };
+
   const finishGoogleLogin = async (idToken: string) => {
     setGoogleLoading(true);
     try {
-      await authService.googleLogin(idToken);
+      await authService.googleLogin(idToken, socialReferralCode());
       trackEvent('login', { method: 'google' });
       reconnect();
       navigation.replace('App');
@@ -469,7 +478,7 @@ export function LoginScreen({ navigation }: any) {
   ) => {
     setAppleLoading(true);
     try {
-      await authService.appleLogin(identityToken, authorizationCode, fullName);
+      await authService.appleLogin(identityToken, authorizationCode, fullName, socialReferralCode());
       reconnect();
       navigation.replace('App');
       consumePendingDeepLink(navigation);
@@ -611,7 +620,7 @@ export function LoginScreen({ navigation }: any) {
     if (__DEV__) console.log('[Facebook Login] accessToken:', accessToken);
     setFacebookLoading(true);
     try {
-      await authService.facebookLogin(accessToken);
+      await authService.facebookLogin(accessToken, socialReferralCode());
       trackEvent('login', { method: 'facebook' });
       reconnect();
       navigation.replace('App');

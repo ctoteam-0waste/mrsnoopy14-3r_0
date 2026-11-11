@@ -95,9 +95,11 @@ export const authService = {
   },
 
   // Google Sign-In — send idToken to backend, receive our JWT
-  googleLogin: async (idToken: string) => {
+  // referralCode: from a referral link, so a new account made by social sign-in gets
+  // the same referral as one made by the signup form. Omitted when there is none.
+  googleLogin: async (idToken: string, referralCode?: string) => {
     try {
-      const response = await api.post('/api/v1/auth/google-login', { idToken });
+      const response = await api.post('/api/v1/auth/google-login', { idToken, ...(referralCode ? { referralCode } : {}) });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
       await setToken(token);
@@ -114,9 +116,9 @@ export const authService = {
   },
 
   // Facebook Login — send accessToken to backend, receive our JWT (mirrors googleLogin above).
-  facebookLogin: async (accessToken: string) => {
+  facebookLogin: async (accessToken: string, referralCode?: string) => {
     try {
-      const response = await api.post('/api/v1/auth/facebook-login', { accessToken });
+      const response = await api.post('/api/v1/auth/facebook-login', { accessToken, ...(referralCode ? { referralCode } : {}) });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
       await setToken(token);
@@ -137,9 +139,9 @@ export const authService = {
   // authorizationCode lets the backend get a refresh token, which Apple requires it
   // to revoke when the user deletes their account.
   // Backend TODO: POST /api/v1/auth/apple-login — see IOS_AUTH_BACKEND_SPEC.md.
-  appleLogin: async (identityToken: string, authorizationCode?: string | null, fullName?: string | null) => {
+  appleLogin: async (identityToken: string, authorizationCode?: string | null, fullName?: string | null, referralCode?: string) => {
     try {
-      const response = await api.post('/api/v1/auth/apple-login', { identityToken, authorizationCode, fullName });
+      const response = await api.post('/api/v1/auth/apple-login', { identityToken, authorizationCode, fullName, ...(referralCode ? { referralCode } : {}) });
       const token = extractToken(response.data);
       if (!token) throw new Error('No token received');
       await setToken(token);
