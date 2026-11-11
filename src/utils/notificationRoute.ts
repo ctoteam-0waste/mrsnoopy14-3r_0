@@ -98,6 +98,7 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
     case 'PAYOUT_METHOD_VERIFIED':
     case 'PAYOUT_METHOD_NAME_MISMATCH':
     case 'PAYOUT_METHOD_FAILED':
+    case 'PAYOUT_METHOD_REJECTED':
       nav.navigate('Redeem');
       return;
   }

@@ -13,7 +13,7 @@ import { profileService } from '../services/profile';
 import { streakService } from '../services/streak';
 import {
   payoutService, PayoutMethod, WithdrawQuote, MAX_PAYOUT_METHODS, OTP_PURPOSE_WITHDRAW,
-  methodLabel, isUsable, formatDateTime, formatInr, payoutErrorMessage, newIdempotencyKey,
+  methodLabel, withdrawalAccountLabel, isUsable, formatDateTime, formatInr, payoutErrorMessage, newIdempotencyKey,
 } from '../services/payout';
 import { LedgerType, PICKUP_RATE } from '../utils/streakTiers';
 import { showAlert } from '../utils/alert';
@@ -57,7 +57,7 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
   const [now, setNow] = useState(Date.now());
 
   const [coinsInput, setCoinsInput] = useState('');
-  const [quote, setQuote] = useState<(WithdrawQuote & { coins: number; ledger: LedgerType }) | null>(null);
+  const [quote, setQuote] = useState<WithdrawQuote | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState('');
   const [quoteNonce, setQuoteNonce] = useState(0);
@@ -129,8 +129,10 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
   }, [methods, now]);
 
   const overBalance = coins > balance;
+  const selectedForQuote = methods.find((m) => m._id === selectedId && isUsable(m, now))?._id ?? null;
 
   // The quote is only a preview; the server checks everything again on submit.
+  // With the chosen account it also carries the fee and the amount received.
   const quoteSeq = useRef(0);
   useEffect(() => {
     setQuoteError('');
@@ -139,9 +141,9 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
     setQuoting(true);
     const t = setTimeout(async () => {
       try {
-        const q = await payoutService.getQuote(ledger, coins);
+        const q = await payoutService.getQuote(ledger, coins, selectedForQuote);
         if (seq !== quoteSeq.current) return;
-        setQuote({ ...q, coins, ledger });
+        setQuote({ ...q, coins, ledger, payoutMethodId: q.payoutMethodId ?? selectedForQuote });
         if (typeof q.balance === 'number') setBalances((b) => ({ ...b, [ledger]: q.balance }));
       } catch (e) {
         if (seq !== quoteSeq.current) return;
@@ -152,7 +154,7 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
       }
     }, QUOTE_DEBOUNCE_MS);
     return () => clearTimeout(t);
-  }, [coins, ledger, overBalance, quoteNonce]);
+  }, [coins, ledger, overBalance, quoteNonce, selectedForQuote]);
 
   useEffect(() => {
     if (resendIn <= 0) return;
@@ -168,11 +170,13 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
     setBalances((b) => ({ ...b, [withdrawal.ledger]: b[withdrawal.ledger] + withdrawal.coinsRedeemed }));
   }, [withdrawal?.status]);
 
-  const freshQuote = quote && quote.coins === coins && quote.ledger === ledger ? quote : null;
-  const belowMin = !!freshQuote && !freshQuote.meetsMinimum;
-  const overMax = !!freshQuote?.maxRupees && freshQuote.amountInRupees > freshQuote.maxRupees;
+  const freshQuote = quote && quote.coins === coins && quote.ledger === ledger && (quote.payoutMethodId ?? null) === selectedForQuote ? quote : null;
   const selected = methods.find((m) => m._id === selectedId) || null;
-  const canWithdraw = !!freshQuote && !quoting && !overBalance && !belowMin && !overMax && !!selected && isUsable(selected, now);
+  // The server decides: canWithdraw and blockedReason cover the minimum and
+  // maximum, daily and monthly limits, a withdrawal in progress, a paused service
+  // and an account still in its 24-hour wait.
+  const blocked = freshQuote && !freshQuote.canWithdraw ? freshQuote.blockedReason : null;
+  const canWithdraw = !!freshQuote && !quoting && !overBalance && freshQuote.canWithdraw && freshQuote.youReceive != null && !!selected && isUsable(selected, now);
 
   const switchLedger = (l: LedgerType) => {
     if (l === ledger) return;
@@ -242,6 +246,12 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
       // No response: the request may or may not have landed. Keep the sheet and
       // the same key so "Try again" can't create a second withdrawal.
       if (!e?.response) { setSheetError('Please check your internet connection and tap Withdraw again.'); return; }
+      const status = e.response.status;
+      const msg = String(e.response.data?.message || '');
+      // The same request is still being processed on the server: retry with the same key.
+      if (status === 409 && /being processed/i.test(msg)) { setSheetError('Another withdrawal is being processed. Please wait a moment and tap Withdraw again.'); return; }
+      // The key was used for a different withdrawal: the next confirm needs a new one.
+      if (status === 422) idemKey.current = newIdempotencyKey();
       setConfirmOpen(false);
       showAlert('Withdrawal not started', payoutErrorMessage(e));
       loadMethods();
@@ -276,13 +286,15 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
       case 'VALIDATING':
         return { icon: <Loader size={14} color={colors.textMuted} />, text: 'Verifying...', color: colors.textMuted };
       case 'NAME_MISMATCH':
-        return { icon: <CircleAlert size={14} color={colors.warning} />, text: "Name doesn't match. Contact support.", color: colors.warning };
+        return { icon: <CircleAlert size={14} color={colors.warning} />, text: `Under review${m.failureReason ? `. ${m.failureReason}` : ''}`, color: colors.warning };
       case 'FAILED':
-        return { icon: <CircleX size={14} color={colors.danger} />, text: "Couldn't verify. Remove and add again.", color: colors.danger };
+        return { icon: <CircleX size={14} color={colors.danger} />, text: `Couldn't verify${m.failureReason ? `. ${m.failureReason}` : '. Remove it and add again.'}`, color: colors.danger };
+      case 'REJECTED':
+        return { icon: <CircleX size={14} color={colors.danger} />, text: `Not approved${m.failureReason ? `. ${m.failureReason}` : '. Remove it and add another account.'}`, color: colors.danger };
       default:
         return isUsable(m, now)
           ? { icon: <CircleCheck size={14} color={colors.primary} />, text: 'Verified', color: colors.primary }
-          : { icon: <Clock size={14} color={colors.textMuted} />, text: `Ready from ${formatDateTime(m.usableFrom)}`, color: colors.textMuted };
+          : { icon: <Clock size={14} color={colors.textMuted} />, text: `Ready on ${formatDateTime(m.usableFrom)}`, color: colors.textMuted };
     }
   };
 
@@ -290,15 +302,14 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
     if (coins <= 0) return null;
     if (overBalance) return { text: `You only have ${balance.toLocaleString('en-IN')} ${isPickup ? 'pickup' : 'reward'} coins`, error: true };
     if (quoteError) return { text: quoteError, error: true };
-    if (belowMin) return { text: `Minimum withdrawal is ${formatInr(freshQuote!.minRupees)}`, error: true };
-    if (overMax) return { text: `Maximum per withdrawal is ${formatInr(freshQuote!.maxRupees!)}`, error: true };
+    if (blocked) return { text: blocked.message, error: true };
     return null;
   };
 
   const renderSuccess = () => {
     const w = withdrawal!;
     const amount = formatInr(w.amountInRupees);
-    const label = methodLabel(w.payoutMethod) || (selected ? methodLabel(selected) : 'your account');
+    const label = withdrawalAccountLabel(w, methods) || 'your account';
     const refunded = isRefunded(w.status);
     return (
       <View style={styles.body}>
@@ -313,7 +324,7 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
           </Text>
           <Text style={styles.resultText}>
             {refunded
-              ? `${w.coinsRedeemed.toLocaleString('en-IN')} coins are back in your wallet.${w.failureReason ? ` ${w.failureReason}` : ''}`
+              ? `${w.coinsRedeemed.toLocaleString('en-IN')} coins are back in your wallet.`
               : w.status === 'PAID'
                 ? `The money has reached ${label}.`
                 : statusSlow
@@ -397,11 +408,12 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
           </View>
           <View style={styles.row}>
             <Text style={styles.rowLabel}>Fee</Text>
-            <Text style={styles.rowValue}>{freshQuote ? (freshQuote.fee ? formatInr(freshQuote.fee) : 'Free') : '...'}</Text>
+            <Text style={styles.rowValue}>{!freshQuote ? '...' : freshQuote.fee == null ? 'Choose an account' : freshQuote.fee ? formatInr(freshQuote.fee) : 'Free'}</Text>
           </View>
           <View style={[styles.row, styles.rowTotal]}>
             <Text style={styles.totalLabel}>You receive</Text>
-            {freshQuote ? <Text style={styles.totalValue}>{formatInr(freshQuote.youReceive)}</Text> : <ActivityIndicator size="small" color={colors.primary} />}
+            {!freshQuote ? <ActivityIndicator size="small" color={colors.primary} />
+              : <Text style={styles.totalValue}>{freshQuote.youReceive != null ? formatInr(freshQuote.youReceive) : '—'}</Text>}
           </View>
         </View>
       )}
@@ -450,7 +462,7 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
 
       <View style={styles.actions}>
         <PrimaryButton
-          label={freshQuote && canWithdraw ? `Withdraw ${formatInr(freshQuote.youReceive)}` : 'Withdraw'}
+          label={freshQuote && canWithdraw ? `Withdraw ${formatInr(freshQuote.amountInRupees)}` : 'Withdraw'}
           onPress={openConfirm}
           disabled={!canWithdraw}
         />
@@ -475,8 +487,9 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
               </TouchableOpacity>
             </View>
             <Text style={styles.sheetLead}>
-              Withdraw {coins.toLocaleString('en-IN')} {isPickup ? 'pickup' : 'reward'} coins and receive{' '}
-              <Text style={styles.bold}>{formatInr(freshQuote.youReceive)}</Text> in <Text style={styles.bold}>{methodLabel(selected)}</Text>?
+              Withdraw {coins.toLocaleString('en-IN')} {isPickup ? 'pickup' : 'reward'} coins ({formatInr(freshQuote.amountInRupees)}).
+              {freshQuote.fee ? ` Fee ${formatInr(freshQuote.fee)}.` : ''} You receive{' '}
+              <Text style={styles.bold}>{formatInr(freshQuote.youReceive ?? 0)}</Text> in <Text style={styles.bold}>{methodLabel(selected)}</Text>.
             </Text>
 
             {needsOtp && (
@@ -496,7 +509,7 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
 
             <View style={styles.actions}>
               <PrimaryButton
-                label={`Withdraw ${formatInr(freshQuote.youReceive)}`}
+                label={`Withdraw ${formatInr(freshQuote.amountInRupees)}`}
                 onPress={submit}
                 disabled={needsOtp && !otpToken.current && otp.length !== 6}
                 loading={submitting}

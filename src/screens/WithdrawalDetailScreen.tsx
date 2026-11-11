@@ -6,7 +6,7 @@ import { ChevronLeft, CircleCheck, CircleX, Clock } from 'lucide-react-native';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 import { WebFooter } from '../components/shared/WebFooter';
 import { WithdrawalProgress, useLiveWithdrawal, isRefunded, withdrawalStatusMeta, refundNote } from '../components/shared/WithdrawalProgress';
-import { payoutService, methodLabel, formatDateTime, formatInr } from '../services/payout';
+import { payoutService, withdrawalAccountLabel, withdrawalMoney, formatDateTime, formatInr, type PayoutMethod } from '../services/payout';
 import { PICKUP_RATE } from '../utils/streakTiers';
 import { useTheme, makeStyles } from '../theme';
 
@@ -20,6 +20,9 @@ export function WithdrawalDetailScreen({ navigation, route }: any) {
   const id: string | undefined = route?.params?.id || route?.params?.withdrawal?._id;
   const [withdrawal, setWithdrawal, slow] = useLiveWithdrawal(route?.params?.withdrawal || null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>(withdrawal ? 'ready' : 'loading');
+  const [methods, setMethods] = useState<PayoutMethod[]>([]);
+
+  useEffect(() => { payoutService.listMethods().then((m) => setMethods(m || [])).catch(() => {}); }, []);
 
   const load = () => {
     if (!id) { setState('error'); return; }
@@ -55,10 +58,14 @@ export function WithdrawalDetailScreen({ navigation, route }: any) {
     const meta = withdrawalStatusMeta(w.status);
     const note = refundNote(w);
     const rate = w.rateApplied || (w.ledger === 'pickup' ? PICKUP_RATE : 0);
+    const money = withdrawalMoney(w);
+    const account = withdrawalAccountLabel(w, methods);
     const rows: [string, string][] = [
       ['Coins', `${w.coinsRedeemed.toLocaleString('en-IN')} ${w.ledger === 'reward' ? 'reward' : 'pickup'} coins`],
       ...(rate ? [['Rate', `${w.streakTier ? w.streakTier + ' · ' : ''}${rate} coins = ₹1`] as [string, string]] : []),
-      ...(w.payoutMethod ? [['To', methodLabel(w.payoutMethod)] as [string, string]] : []),
+      ...(account ? [['To', account] as [string, string]] : []),
+      ...(money.fee != null ? [['Fee', formatInr(money.fee)] as [string, string]] : []),
+      ...(w.status === 'PAID' && money.received != null ? [['You received', formatInr(money.received)] as [string, string]] : []),
       ['Requested', formatDateTime(w.createdAt)],
       ...(w.processedAt ? [[w.status === 'PAID' ? 'Paid on' : 'Updated', formatDateTime(w.processedAt)] as [string, string]] : []),
       ['Withdrawal ID', w._id],
