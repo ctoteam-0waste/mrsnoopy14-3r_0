@@ -408,7 +408,7 @@ const useStyles = makeStyles((c) => ({
   inputGroup: { marginBottom: 16 },
   inputLabel: { fontSize: 13, fontWeight: '700', color: c.textMuted, marginBottom: 6, marginLeft: 4 },
   inputWrapper: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border, borderRadius: 16, paddingHorizontal: 16, height: 56 },
-  inputWrapperError: { borderColor: '#fca5a5', backgroundColor: '#fef2f2' },
+  inputWrapperError: { borderColor: c.danger, backgroundColor: c.dangerSoft },
   inputIcon: { marginRight: 12 },
   input: { flex: 1, fontSize: 16, color: c.text, fontWeight: '600', height: '100%' },
   errorText: { fontSize: 12, color: c.danger, fontWeight: '600', marginTop: 8, marginLeft: 4 },
@@ -425,8 +425,8 @@ const useStyles = makeStyles((c) => ({
   quickChipText: { fontSize: 13, fontWeight: '700', color: c.textMuted },
   quickChipTextActive: { color: c.primary },
 
-  generalError: { backgroundColor: '#fef2f2', borderWidth: 1, borderColor: '#fecaca', borderRadius: 14, padding: 14, marginBottom: 16 },
-  generalErrorText: { fontSize: 13, color: '#b91c1c', fontWeight: '700' },
+  generalError: { backgroundColor: c.dangerSoft, borderWidth: 1, borderColor: c.danger, borderRadius: 14, padding: 14, marginBottom: 16 },
+  generalErrorText: { fontSize: 13, color: c.danger, fontWeight: '700' },
 
   quoteLoading: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 18 },
   quoteLoadingText: { color: c.textMuted, fontWeight: '600', fontSize: 13 },
