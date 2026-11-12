@@ -35,23 +35,27 @@ export function ReferralScreen({ navigation }: any) {
   // what they get — and keep the link inside the text, because several share
   // targets (Gmail via the web share sheet, some Android apps) drop a separate
   // `url` field.
+  // Copy rule: upbeat, benefit-first; never says "waste" or "pickup".
   const inviter = '3R ZeroWaste';
   const shareMsg =
-    `${inviter} invited you to KarmaVer$e 🌱\n\n` +
-    `KarmaVer$e picks up your recyclables (plastic, paper, metal, e-waste and more) from your doorstep for free ` +
-    `and rewards you with KarmaCoins XP. Pickups are available in Gurugram and nearby areas (within 50 km).\n\n` +
-    `Sign up with referral code ${referralCode} and you and the friend who shared it both get 1,000 KarmaCoins XP.`;
-  const shareText = `${shareMsg}\n\n${shareUrl}`;
+    `🌱 ${inviter} invited you to KarmaVer$e!\n\n` +
+    `Those old newspapers, bottles, cartons and gadgets lying around? They're worth more than you think. ` +
+    `We come to your doorstep, collect your recyclables for free, and reward you with KarmaCoins XP. ` +
+    `The more you recycle, the more you earn 🎁\n\n` +
+    `✨ Join with code ${referralCode} and you and your friend both get 1,000 KarmaCoins XP to start.\n\n` +
+    `📍 Now live in Gurugram and nearby areas (within 50 km).`;
+  const shareText = `${shareMsg}\n\n👉 ${shareUrl}`;
   // X has a 280-character limit; keep its version to one line.
-  const tweetMsg = `I recycle with KarmaVer$e: free doorstep pickup in Gurugram 🌱 Sign up with my code ${referralCode} and we both get 1,000 KarmaCoins XP.`;
-  const emailSubject = `${inviter} invited you to KarmaVer$e: free doorstep recycling pickup`;
+  const tweetMsg = `Turning my old bottles and newspapers into rewards with KarmaVer$e 🌱 Join with my code ${referralCode} and we both get 1,000 KarmaCoins XP! Now live in Gurugram.`;
+  const emailSubject = `🌱 ${inviter} invited you: turn your recyclables into rewards`;
   const emailBody =
-    `Hi,\n\n${shareMsg}\n\n` +
-    `How it works:\n` +
-    `1. Open the link below and sign up (your code is filled in for you).\n` +
-    `2. Book a free pickup for your dry recyclables.\n` +
-    `3. Earn KarmaCoins XP for every verified pickup and redeem them in the app.\n\n` +
-    `${shareUrl}\n\n` +
+    `Hi there,\n\n${shareMsg}\n\n` +
+    `It's this easy:\n` +
+    `1️⃣ Tap the link below and sign up (your code is already filled in).\n` +
+    `2️⃣ Choose a time and we'll come to your door.\n` +
+    `3️⃣ Hand over your recyclables, collect KarmaCoins XP and redeem them for rewards.\n\n` +
+    `👉 ${shareUrl}\n\n` +
+    `Small habits, real rewards, a cleaner city. See you inside! 💚\n\n` +
     `— Team 3R ZeroWaste`;
 
   const copyLink = () => {
