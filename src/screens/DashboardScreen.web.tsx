@@ -27,7 +27,7 @@ const FEATURE_DETAILS = [
   {
     id: 'refer', title: 'Refer & earn', emoji: '👥', icon: Gift,
     desc: 'Share your referral code with friends. When they sign up with it, you both get 1,000 bonus KarmaCoins XP!',
-    steps: ['Share your unique code', 'Friend signs up with your code', 'Both earn bonus coins', 'No limit on referrals'],
+    steps: ['Share your unique code', 'Friend signs up with your code', 'You both get 1,000 KarmaCoins XP', 'Coins land in your Reward wallet'],
     benefit: 'Bonus coins for every friend',
     gradient: ['#881337', '#e11d48'] as [string, string],
     accent: '#fb7185',

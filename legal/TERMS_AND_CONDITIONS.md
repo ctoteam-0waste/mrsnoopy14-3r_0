@@ -34,7 +34,7 @@ KarmaVer$e provides the following services:
 - **Waste pickup scheduling**: free doorstep pickups for plastic, paper, metal, glass, e-waste, textile, organic, and hazardous materials.
 - **KarmaCoins XP rewards**: earn coins based on the type and verified weight of waste collected.
 - **Daily eco-quiz**: play daily quizzes to earn additional KarmaCoins XP.
-- **Referral program**: invite others and earn bonus coins on their first successful pickup.
+- **Referral program**: when a new user signs up with your referral code, you both get 1,000 bonus KarmaCoins XP.
 - **Redemption**: redeem coins in the app for rewards, eco-friendly products, donations, or a cash payout through our payment partner (RazorpayX, KYC required), as available. Cash is never paid at the doorstep.
 
 ## 5. Pickup terms
@@ -61,7 +61,8 @@ KarmaVer$e provides the following services:
 ## 7. Referral program
 
 - Each user gets a unique referral code to share.
-- Bonus coins are credited to both the referrer and referee on the referee's first successful pickup.
+- When a genuinely new user signs up with your code, both the referrer and the referee are credited 1,000 bonus KarmaCoins XP. Referral coins can be redeemed only from the date and at the streak-based rate set out in the app.
+- We may cap the number of eligible referrals in any period, and may modify or discontinue the program on notice.
 - Self-referrals, fake accounts, or fraud will result in termination and forfeiture of all coins.
 - We may modify or discontinue the referral program at any time.
 

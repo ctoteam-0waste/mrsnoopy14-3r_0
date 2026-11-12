@@ -586,7 +586,7 @@ const templates = {
         preheader: `Share your code — you each get ${amt} ${BRAND.currency}.`,
         heading: 'Invite friends, both earn',
         greetingName: name,
-        bodyHtml: `<p style="margin:0 0 12px;">Know someone who'd love to turn everyday materials into rewards? Share ${BRAND.name} — when they join and complete their first pickup, <strong>you each earn ${amt} ${BRAND.currency}</strong>.</p>
+        bodyHtml: `<p style="margin:0 0 12px;">Know someone who'd love to turn everyday materials into rewards? Share ${BRAND.name} — when they sign up with your code, <strong>you each earn ${amt} ${BRAND.currency}</strong>.</p>
           ${codeCard}
           <p style="margin:0;">The more friends you bring, the more you both keep earning.</p>`,
         ctaLabel: 'Invite friends',
