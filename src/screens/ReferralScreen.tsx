@@ -6,6 +6,7 @@ import { ChevronLeft, Share2, Copy, Users, Gift, CheckCircle2, Clock, X, Message
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { referralService } from '../services/referral';
+import { profileService } from '../services/profile';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
@@ -19,6 +20,7 @@ export function ReferralScreen({ navigation }: any) {
   const [referrals, setReferrals] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [firstName, setFirstName] = useState('');
 
   // Link straight to the login/signup page with ?ref= prefilled. Must point at a real
   // route: /login is in the router, /register is NOT (it resolved to NotFound, so the
@@ -30,10 +32,32 @@ export function ReferralScreen({ navigation }: any) {
     ? window.location.origin
     : 'https://karmaverse.earth';
   const shareUrl = referralCode ? `${frontendOrigin}/login?ref=${referralCode}` : `${frontendOrigin}/`;
-  const shareMsg = `Join KarmaVer$e and we both earn 1,000 KarmaCoins XP! 🌱 Use my referral code ${referralCode}`;
+  // A bare "join + link" read as spam: the friend didn't know who sent it or what
+  // the app is. Say who is inviting, what KarmaVerse does, where it works and
+  // what they get — and keep the link inside the text, because several share
+  // targets (Gmail via the web share sheet, some Android apps) drop a separate
+  // `url` field.
+  const inviter = firstName || 'A friend';
+  const shareMsg =
+    `${inviter} invited you to KarmaVer$e 🌱\n\n` +
+    `KarmaVer$e picks up your recyclables (plastic, paper, metal, e-waste and more) from your doorstep for free ` +
+    `and rewards you with KarmaCoins XP. Pickups are available in Gurugram and nearby areas (within 50 km).\n\n` +
+    `Sign up with ${firstName ? 'my' : 'this'} referral code ${referralCode} and we both get 1,000 KarmaCoins XP.`;
+  const shareText = `${shareMsg}\n\n${shareUrl}`;
+  // X has a 280-character limit; keep its version to one line.
+  const tweetMsg = `I recycle with KarmaVer$e: free doorstep pickup in Gurugram 🌱 Sign up with my code ${referralCode} and we both get 1,000 KarmaCoins XP.`;
+  const emailSubject = `${inviter} invited you to KarmaVer$e: free doorstep recycling pickup`;
+  const emailBody =
+    `Hi,\n\n${shareMsg}\n\n` +
+    `How it works:\n` +
+    `1. Open the link below and sign up (your code is filled in for you).\n` +
+    `2. Book a free pickup for your dry recyclables.\n` +
+    `3. Earn KarmaCoins XP for every verified pickup and redeem them in the app.\n\n` +
+    `${shareUrl}` +
+    (firstName ? `\n\n— ${firstName}` : '');
 
   const copyLink = () => {
-    const text = `${shareMsg} ${shareUrl}`;
+    const text = shareText;
     const nav: any = typeof navigator !== 'undefined' ? navigator : null;
     if (nav?.clipboard?.writeText) nav.clipboard.writeText(text);
     else Share.share({ message: text }).catch(() => {});
@@ -42,11 +66,11 @@ export function ReferralScreen({ navigation }: any) {
   };
 
   const SHARE_TARGETS = [
-    { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25D366', url: `https://wa.me/?text=${encodeURIComponent(shareMsg + ' ' + shareUrl)}` },
+    { key: 'whatsapp', label: 'WhatsApp', icon: MessageCircle, color: '#25D366', url: `https://wa.me/?text=${encodeURIComponent(shareText)}` },
     { key: 'linkedin', label: 'LinkedIn', icon: Linkedin, color: '#0A66C2', url: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}` },
     { key: 'facebook', label: 'Facebook', icon: Facebook, color: '#1877F2', url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` },
-    { key: 'x', label: 'X', icon: Twitter, color: '#0f172a', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMsg)}&url=${encodeURIComponent(shareUrl)}` },
-    { key: 'email', label: 'Email', icon: Mail, color: '#ea4335', url: `mailto:?subject=${encodeURIComponent('Join KarmaVer$e')}&body=${encodeURIComponent(shareMsg + '\n\n' + shareUrl)}` },
+    { key: 'x', label: 'X', icon: Twitter, color: '#0f172a', url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetMsg)}&url=${encodeURIComponent(shareUrl)}` },
+    { key: 'email', label: 'Email', icon: Mail, color: '#ea4335', url: `mailto:?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}` },
     { key: 'instagram', label: 'Instagram', icon: Instagram, color: '#E4405F', url: '' },
     { key: 'copy', label: 'Copy link', icon: Link2, color: '#16a34a', url: '' },
   ];
@@ -63,10 +87,13 @@ export function ReferralScreen({ navigation }: any) {
     const load = async () => {
       try {
         // getMyCode guarantees a code is generated if user doesn't have one
-        const [codeData, statsData] = await Promise.all([
+        const [codeData, statsData, profile] = await Promise.all([
           referralService.getMyCode().catch(() => null),
           referralService.getStats().catch(() => null),
+          profileService.getProfile().catch(() => null),
         ]);
+        const name = String((profile as any)?.name || '').trim();
+        if (name) setFirstName(name.split(/\s+/)[0]);
         const code = codeData?.referralCode || statsData?.referralCode || '';
         setReferralCode(code);
         setTotalReferrals(statsData?.totalReferrals || codeData?.totalReferrals || 0);
@@ -100,13 +127,14 @@ export function ReferralScreen({ navigation }: any) {
     if (Platform.OS === 'web') {
       const nav: any = typeof navigator !== 'undefined' ? navigator : null;
       if (nav?.share) {
-        try { await nav.share({ title: 'KarmaVer$e', text: shareMsg, url: shareUrl }); return; } catch (_) { /* fall through */ }
+        try { await nav.share({ title: emailSubject, text: shareText }); return; } catch (_) { /* fall through */ }
       }
       setShareOpen(true);
       return;
     }
     try {
-      await Share.share({ message: `${shareMsg}\n${shareUrl}` });
+      // `subject` fills the email subject when the user picks Gmail/Mail.
+      await Share.share({ message: shareText, title: emailSubject }, { subject: emailSubject, dialogTitle: 'Invite a friend' });
     } catch (_) {}
   };
 
