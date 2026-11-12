@@ -59,9 +59,12 @@ interface AddressSearchProps {
   onCancel: () => void;
   userCoords?: [number, number] | null;
   initialDetails?: Partial<AddressDetails>;
+  // Edit: opens on the details form at userCoords, with initialArea as the location.
+  editing?: boolean;
+  initialArea?: string;
 }
 
-export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoords, initialDetails }: AddressSearchProps) {
+export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoords, initialDetails, editing, initialArea }: AddressSearchProps) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
   const [step, setStep] = useState<'map' | 'details'>('map');
@@ -155,7 +158,15 @@ export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoor
         ? userCoords
         : DEFAULT_CENTER;
       setCenter(start);
-      reverseGeocodeCenter(start);
+      beforeMapRef.current = null;
+      if (editing && userCoords && initialArea) {
+        setResolvedCoords(userCoords);
+        setResolvedAddress(initialArea);
+        setIsOutOfServiceArea(!isWithinServiceArea(userCoords[1], userCoords[0]));
+        setStep('details');
+      } else {
+        reverseGeocodeCenter(start);
+      }
       setMapMounted(true);
     } else {
       setMapMounted(false);
@@ -259,10 +270,38 @@ export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoor
     onCancel();
   };
 
+  // While editing, the map is opened from the form; leaving it without confirming
+  // puts the pin back where it was.
+  const beforeMapRef = useRef<{ coords: [number, number] | null; address: string } | null>(null);
+  const openMapFromDetails = () => {
+    if (editing) {
+      beforeMapRef.current = { coords: resolvedCoords, address: resolvedAddress };
+      if (resolvedCoords) setCenter(resolvedCoords);
+    }
+    setStep('map');
+  };
+  const handleMapBack = () => {
+    const before = beforeMapRef.current;
+    if (!editing || !before) return handleCancel();
+    Keyboard.dismiss();
+    beforeMapRef.current = null;
+    if (geocodeDebounceRef.current) clearTimeout(geocodeDebounceRef.current);
+    geocodeSeqRef.current++;
+    setIsGeocoding(false);
+    setResolvedCoords(before.coords);
+    setResolvedAddress(before.address);
+    if (before.coords) {
+      setCenter(before.coords);
+      setIsOutOfServiceArea(!isWithinServiceArea(before.coords[1], before.coords[0]));
+    }
+    setStep('details');
+  };
+
   // Map step → go to details form
   const handleConfirmLocation = () => {
     if (!resolvedCoords || !resolvedAddress || isOutOfServiceArea) return;
     Keyboard.dismiss();
+    beforeMapRef.current = null;
     setStep('details');
   };
 
@@ -306,10 +345,10 @@ export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoor
         <StatusBar backgroundColor={colors.bg} barStyle={isDark ? 'light-content' : 'dark-content'} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.screen}>
           <View style={styles.topBar}>
-            <TouchableOpacity onPress={() => setStep('map')} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity onPress={editing ? handleCancel : () => setStep('map')} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <ArrowLeft size={22} color={colors.text} />
             </TouchableOpacity>
-            <Text style={styles.detailsTitle}>Add address details</Text>
+            <Text style={styles.detailsTitle}>{editing ? 'Edit address' : 'Add address details'}</Text>
           </View>
 
           <ScrollView contentContainerStyle={styles.detailsScroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
@@ -319,7 +358,7 @@ export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoor
                 <MapPin size={18} color="#16a34a" />
               </View>
               <Text style={styles.locBannerText} numberOfLines={2}>{resolvedAddress}</Text>
-              <TouchableOpacity onPress={() => setStep('map')} style={styles.locChangeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <TouchableOpacity onPress={openMapFromDetails} style={styles.locChangeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
                 <Pencil size={13} color="#16a34a" />
                 <Text style={styles.locChangeText}>Change</Text>
               </TouchableOpacity>
@@ -360,7 +399,7 @@ export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoor
 
           <SafeAreaView edges={['bottom']} style={styles.bottomSheet}>
             <TouchableOpacity style={styles.confirmBtn} onPress={handleSaveDetails} activeOpacity={0.85}>
-              <Text style={styles.confirmBtnText}>Save address</Text>
+              <Text style={styles.confirmBtnText}>{editing ? 'Save changes' : 'Save address'}</Text>
             </TouchableOpacity>
           </SafeAreaView>
 
@@ -383,12 +422,12 @@ export function AddressSearch({ visible, onSelect, onCancel, onDismiss, userCoor
 
   // ────────────────────────────── MAP STEP ──────────────────────────────
   return (
-    <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleCancel} onDismiss={onDismiss}>
+    <Modal visible={visible} animationType="slide" statusBarTranslucent onRequestClose={handleMapBack} onDismiss={onDismiss}>
       <StatusBar backgroundColor={colors.bg} barStyle={isDark ? 'light-content' : 'dark-content'} />
       <View style={styles.screen}>
         {/* ── Top bar ── */}
         <View style={styles.topBar}>
-          <TouchableOpacity onPress={handleCancel} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity onPress={handleMapBack} style={styles.backBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <ArrowLeft size={22} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.searchBox}>
