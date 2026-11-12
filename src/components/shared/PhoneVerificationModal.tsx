@@ -15,11 +15,13 @@ export function PhoneVerificationModal({
   onClose,
   onVerified,
   initialPhone = '',
+  reason = 'Please verify a phone number to continue booking your pickup.',
 }: {
   visible: boolean;
   onClose: () => void;
   onVerified: () => void;
   initialPhone?: string;
+  reason?: string;
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
@@ -102,7 +104,7 @@ export function PhoneVerificationModal({
             <Text style={styles.title}>Verify your phone number</Text>
             <Text style={styles.sub}>
               {step === 'phone'
-                ? 'Please verify a phone number to continue booking your pickup.'
+                ? reason
                 : `Enter the 6-digit code sent to +91 ${phone}.`}
             </Text>
 
