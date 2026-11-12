@@ -148,7 +148,7 @@ export function Avatar({ avatarId, size = 48, name, ring }: {
   if (avatarId && PERSON_IMAGES[avatarId]) {
     return (
       <View style={[{ width: size, height: size, borderRadius: size / 2, overflow: 'hidden' }, ring && styles.ring]}>
-        <Image source={PERSON_IMAGES[avatarId]} style={{ width: inner, height: inner }} resizeMode="cover" />
+        <Image source={PERSON_IMAGES[avatarId]} style={{ width: inner, height: inner, borderRadius: inner / 2 }} resizeMode="cover" />
       </View>
     );
   }
