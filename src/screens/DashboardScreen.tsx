@@ -6,6 +6,7 @@ import { getToken } from '../utils/tokenStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Bell, ChevronRight, Truck, Camera, Clock, Users, Package, Flame, Gamepad2, Gift, Star, ShieldCheck, Coins, BadgeCheck, ArrowRight, X, WifiOff, RefreshCw, Trophy, Sparkles } from 'lucide-react-native';
 import { useTheme, makeStyles } from '../theme';
+import { bookingCoins, formatBookingCoins } from '../utils/bookingCoins';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import NotificationPermissionBanner from '../components/shared/NotificationPermissionBanner';
@@ -342,7 +343,7 @@ export function DashboardScreen({ navigation, route }: any) {
               type: mainCategory,
               date: dateStr,
               status: uiStatus,
-              credits: order.totalKarmaCoins || 0
+              credits: bookingCoins(order)
             };
           });
           setRecentOrders(formattedOrders);
@@ -780,7 +781,7 @@ export function DashboardScreen({ navigation, route }: any) {
                     <Text style={styles.orderSub}>{order.id} • {order.date}</Text>
                     <View style={styles.orderCreditsBadge}>
                       <KarmaCoin size={14} />
-                      <Text style={styles.orderCreditsText}>+{order.credits}</Text>
+                      <Text style={styles.orderCreditsText}>{formatBookingCoins(order.credits)}</Text>
                     </View>
                   </View>
                 </View>

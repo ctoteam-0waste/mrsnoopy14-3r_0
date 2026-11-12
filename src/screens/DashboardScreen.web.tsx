@@ -21,6 +21,7 @@ import {
 } from '../components/festive/Diwali';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
+import { bookingCoins, formatBookingCoins } from '../utils/bookingCoins';
 
 const MAX = 1200;
 
@@ -144,7 +145,7 @@ export function DashboardScreen({ navigation, route }: any) {
           if (o.status === 'CANCELLED') st = 'Cancelled';
           const cat = o.categories?.[0]?.subCategory || o.categories?.[0]?.category || 'Mixed items';
           const date = new Date(o.pickupDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-          return { id: `#${(o._id || o.id || '').substring(0, 8).toUpperCase()}`, type: cat, date, status: st, credits: o.totalKarmaCoins || 0, raw: o };
+          return { id: `#${(o._id || o.id || '').substring(0, 8).toUpperCase()}`, type: cat, date, status: st, credits: bookingCoins(o), raw: o };
         }));
       }
     };
@@ -457,7 +458,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   </View>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                     <Text style={z.ordersCellText}>{order.id} · {order.date}</Text>
-                    <Text style={z.orderCoinsText}>{order.credits > 0 ? `+${order.credits} coins` : '—'}</Text>
+                    <Text style={z.orderCoinsText}>{order.credits == null ? '—' : `${formatBookingCoins(order.credits)} coins`}</Text>
                   </View>
                 </TouchableOpacity>
               );
@@ -488,7 +489,7 @@ export function DashboardScreen({ navigation, route }: any) {
                       <Text style={[z.statusPillText, { color: sc.text }]}>{order.status}</Text>
                     </View>
                   </View>
-                  <Text style={[z.orderCoinsText, { flex: 1, textAlign: 'right' }]}>{order.credits > 0 ? `+${order.credits}` : '—'}</Text>
+                  <Text style={[z.orderCoinsText, { flex: 1, textAlign: 'right' }]}>{formatBookingCoins(order.credits)}</Text>
                   <ChevronRight size={14} color={colors.borderStrong} />
                 </TouchableOpacity>
               );
