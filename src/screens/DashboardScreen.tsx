@@ -16,6 +16,7 @@ import { Avatar } from '../components/shared/Avatar';
 import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
 import { AnimatedPickupCta } from '../components/shared/AnimatedPickupCta';
 import { QuizCalendarModal } from '../components/shared/QuizCalendarModal';
+import { loadQuizDays, QuizDays } from '../utils/quizHistory';
 import { StreakModal } from '../components/shared/StreakModal';
 import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { CoachMarkTour, CoachMarkStep } from '../components/shared/CoachMarkTour';
@@ -355,31 +356,14 @@ export function DashboardScreen({ navigation, route }: any) {
     };
     
     const fetchQuizStreak = async () => {
-      const token = await getToken();
-      const suffix = getStableUserSuffix(token);
-      const [storedDate, storedStreak, storedHistory] = await Promise.all([
-        AsyncStorage.getItem(`lastQuizDate_${suffix}`),
-        AsyncStorage.getItem(`quizStreak_${suffix}`),
-        AsyncStorage.getItem(`quizHistory_${suffix}`),
-      ]);
-      let history: string[] = storedHistory ? JSON.parse(storedHistory) : [];
-      // If history is empty but lastQuizDate exists, seed it (quiz played before history tracking was added)
-      if (history.length === 0 && storedDate && /^\d{4}-\d{2}-\d{2}$/.test(storedDate)) {
-        history = [storedDate];
-        await AsyncStorage.setItem(`quizHistory_${suffix}`, JSON.stringify(history));
-      }
-      setQuizHistory(history);
-      if (!storedDate) { setQuizStreak(0); return; }
-      const todayStr = getLocalDateStr();
-      const yesterdayStr = getLocalYesterdayStr();
-      setQuizPlayedToday(storedDate === todayStr);
-      const valid = storedDate === todayStr || storedDate === yesterdayStr;
-      if (!valid) {
-        await AsyncStorage.setItem(`quizStreak_${suffix}`, '0');
-        setQuizStreak(0);
-      } else {
-        setQuizStreak(Number(storedStreak) || 0);
-      }
+      const suffix = getStableUserSuffix(await getToken());
+      const show = ({ days, streak, playedToday }: QuizDays) => {
+        setQuizHistory(days);
+        setQuizStreak(streak);
+        setQuizPlayedToday(playedToday);
+      };
+      show(await loadQuizDays(suffix, false));
+      show(await loadQuizDays(suffix));
     };
 
     // Day streak: the backend's /streak/status, the same number the wallet shows and

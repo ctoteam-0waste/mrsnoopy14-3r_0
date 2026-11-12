@@ -12,10 +12,11 @@ import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { quizService } from '../services/quiz';
 import { BACKEND_BASE } from '../services/api';
 import { useNotifications } from '../context/NotificationContext';
-import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
+import { getLocalDateStr } from '../utils/quizDate';
 import { showAlert } from '../utils/alert';
 import { showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
+import { loadQuizDays, quizStreakFrom, QuizDays } from '../utils/quizHistory';
 import { useTheme, makeStyles } from '../theme';
 
 const CONFETTI_COLORS = ['#fbbf24', '#4ade80', '#f472b6', '#60a5fa', '#fb923c', '#a78bfa', '#34d399', '#f87171'];
@@ -145,24 +146,13 @@ export function QuizScreen({ navigation }: any) {
       const streakKey = `quizStreak_${suffix}`;
       setQuizDateKey(dateKey);
       setQuizStreakKey(streakKey);
-      const [storedDate, storedStreakVal] = await Promise.all([
-        AsyncStorage.getItem(dateKey),
-        AsyncStorage.getItem(streakKey),
-      ]);
-      const todayStr = getLocalDateStr();
-      const yesterdayStr = getLocalYesterdayStr();
-      // Old format was toDateString() e.g. "Wed May 28 2026" â€” treat as stale if not YYYY-MM-DD
-      const isValidFormat = storedDate ? /^\d{4}-\d{2}-\d{2}$/.test(storedDate) : false;
-      const isToday = isValidFormat && storedDate === todayStr;
-      const isYesterday = isValidFormat && storedDate === yesterdayStr;
-      if (isToday) setIsLocked(true);
-      if (storedDate && !isToday && !isYesterday) {
-        await AsyncStorage.setItem(streakKey, '0');
-        setStoredStreak(0);
-      } else {
-        setStoredStreak(Number(storedStreakVal) || 0);
-      }
+      const show = ({ streak, playedToday }: QuizDays) => {
+        setStoredStreak(streak);
+        if (playedToday) setIsLocked(true);
+      };
+      show(await loadQuizDays(suffix, false));
       setScreenState('lobby');
+      loadQuizDays(suffix).then(show).catch(() => {});
     };
     init();
   }, []);
@@ -233,10 +223,13 @@ export function QuizScreen({ navigation }: any) {
   }, [timeLeft, screenState, selectedAnswer, isSubmitting, isOffline]);
 
   const finishQuiz = async () => {
-    // Base the new streak on the validated local streak (storedStreak), not the
-    // backend value — this grows the streak reliably day over day on the client.
-    const newStreak = storedStreak + 1;
     const todayStr = getLocalDateStr();
+    const histKey = quizStreakKey.replace('quizStreak_', 'quizHistory_');
+    const raw = await AsyncStorage.getItem(histKey);
+    let history: string[] = [];
+    try { const parsed = JSON.parse(raw || '[]'); if (Array.isArray(parsed)) history = parsed; } catch {}
+    if (!history.includes(todayStr)) history.push(todayStr);
+    const newStreak = quizStreakFrom(history);
     await AsyncStorage.setItem(quizDateKey, todayStr);
     await AsyncStorage.setItem(quizStreakKey, String(newStreak));
     addNotification({
@@ -246,10 +239,6 @@ export function QuizScreen({ navigation }: any) {
         ? `You got ${correctCountRef.current}/${questions.length} correct and earned ${totalCoinsRef.current} KarmaCoins XP!`
         : `You attempted the quiz. Try again tomorrow!`,
     });
-    const histKey = quizStreakKey.replace('quizStreak_', 'quizHistory_');
-    const raw = await AsyncStorage.getItem(histKey);
-    const history: string[] = raw ? JSON.parse(raw) : [];
-    if (!history.includes(todayStr)) history.push(todayStr);
     await AsyncStorage.setItem(histKey, JSON.stringify(history));
     setStreak(newStreak);
     setScreenState('results');
