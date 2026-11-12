@@ -31,10 +31,11 @@ export const TERMS: LegalDoc = {
       bullets: [
         'What we do — we collect segregated recyclable waste from your address, free of charge, in areas we currently serve.',
         'What you get — KarmaCoins XP, loyalty reward points. They are not money and not a payment instrument.',
+        'Welcome bonus — 500 KarmaCoins XP once, when you sign up (Early Bird offer, while it runs). It redeems at the same rate and from the same date as quiz and referral coins.',
         'No cash at pickup — Agents do not pay cash for your material. Every Pickup is rewarded only in KarmaCoins XP, which you can later redeem in the app.',
         'Where we operate — Gurugram, Haryana and nearby areas within 50 km of central Gurugram, at present. The app checks your exact address when you book; bookings outside a live service area cannot be accepted.',
         'Cashing out — redemption opens on the dates in the KarmaCoins XP section. Payouts run through RazorpayX and require KYC.',
-        'Rate for quiz & referral coins — depends on your unbroken verified-pickup streak at the moment you redeem.',
+        'Rate for quiz, referral & welcome bonus coins — depends on your unbroken verified-pickup streak at the moment you redeem.',
         'Rate for pickup coins — always the best rate: 10 coins = ₹1. Your streak does not affect it.',
         'Age — you must be 18 or older to use KarmaVerse.',
         'Complaints — in-app "Need help?" first, then our Grievance Officer. Escalation rights are preserved.',
@@ -134,10 +135,11 @@ export const TERMS: LegalDoc = {
       ],
       bullets: [
         'Earning — coins are credited on the category and Agent-verified weight of material collected, and for the daily quiz or qualifying referrals. Rates are set by the Company and may change prospectively. Pickups are rewarded only in KarmaCoins XP — Agents do not pay cash at the doorstep.',
-        'Sending coins — you may send KarmaCoins XP to another registered User, identified by their mobile number, through the in-app "Send coins" feature (the Transfer button in your Wallet). The recipient’s name is shown before you confirm. Pickup coins move one-for-one. Quiz and referral coins move at their ₹ value, so the number the recipient receives can differ from the number you send, depending on each side’s Streak rate; the exact amounts are shown before you confirm. Buying or selling coins for money, inside or outside the app, is not permitted, and we may reverse transfers made in error or through fraud or abuse.',
+        'Welcome bonus — each new User receives a one-time Early Bird welcome bonus of 500 KarmaCoins XP, credited to the Wallet on sign-up. It is given once per person: accounts created again after deletion, duplicate accounts, and accounts we close for fraud or abuse are not eligible, and the bonus may be reversed. Welcome bonus coins are reward coins: like quiz and referral coins, they redeem only from the date and at the Streak-based rate set out below. The Early Bird offer is promotional; we may change its amount or end it for new sign-ups at any time, without affecting bonuses already credited.',
+        'Sending coins — you may send KarmaCoins XP to another registered User, identified by their mobile number, through the in-app "Send coins" feature (the Transfer button in your Wallet). The recipient’s name is shown before you confirm. Pickup coins move one-for-one. Quiz, referral and welcome bonus coins move at their ₹ value, so the number the recipient receives can differ from the number you send, depending on each side’s Streak rate; the exact amounts are shown before you confirm. Buying or selling coins for money, inside or outside the app, is not permitted, and we may reverse transfers made in error or through fraud or abuse.',
         'Adjustment — we may adjust, reverse, or revoke coins credited in error or through fraud, abuse, manipulation, system fault, or breach, and will notify you of the reason.',
         'Expiry — coins may carry an expiry period notified in the app; at least 30 days’ notice is given before an expiry is introduced or shortened for coins already in your Wallet.',
-        'Redemption is enabled in stages — Pickup coins after 30 September 2026 (subject to verification); Quiz coins after 31 December 2026; Referral coins after 31 December 2026 (subject to anti-abuse rules).',
+        'Redemption is enabled in stages — Pickup coins after 30 September 2026 (subject to verification); Quiz coins after 31 December 2026; Referral coins and Welcome bonus coins after 31 December 2026 (subject to anti-abuse rules).',
         'Payouts run through RazorpayX, subject to its terms, KYC, and RBI regulations. You may need to provide bank/UPI details and identity documents. You are responsible for any tax on amounts you receive. A minimum balance or payout amount may apply and is shown before you confirm.',
       ],
     },
@@ -148,9 +150,9 @@ export const TERMS: LegalDoc = {
       ],
     },
     {
-      heading: 'Streak-based rate for quiz & referral coins',
+      heading: 'Streak-based rate for quiz, referral & welcome bonus coins',
       body: [
-        'Coins earned through the daily eco-quiz or the referral programme redeem at a rate set by your unbroken daily Streak of verified Pickups, read at the moment you redeem. This rewards consistent, genuine recycling and prevents one-time or bulk sign-ups being cashed out at the best rate on day one.',
+        'Coins earned through the daily eco-quiz, the referral programme, or the welcome bonus redeem at a rate set by your unbroken daily Streak of verified Pickups, read at the moment you redeem. This rewards consistent, genuine recycling and prevents one-time or bulk sign-ups being cashed out at the best rate on day one.',
       ],
       bullets: [
         'Seedling · Bronze · Day 1–2 · 100 coins = ₹1 · 1×',
@@ -160,7 +162,7 @@ export const TERMS: LegalDoc = {
         'Forest · Diamond · Day 21–29 · 20 coins = ₹1 · 5×',
         'Evergreen · Royal · Day 30+ · 10 coins = ₹1 · 10× (best rate)',
         'Each day with a verified Pickup advances your Streak by one; completing the quiz or making a referral earns coins but does not advance the Streak.',
-        'Miss a single day without a verified Pickup and the Streak resets to Seedling — you keep all coins earned, only the rate on quiz and referral coins returns to the Seedling rate until you rebuild it.',
+        'Miss a single day without a verified Pickup and the Streak resets to Seedling — you keep all coins earned, only the rate on quiz, referral and welcome bonus coins returns to the Seedling rate until you rebuild it.',
         'A day is not counted against you where a Pickup you booked was cancelled, missed, or unavailable because of us, an Agent, or a suspended Service Area — report it and we will restore the Streak where our records confirm it.',
         'We may change the stages, rates, or multipliers, with at least 30 days’ notice of any change that reduces the rate on coins already in your Wallet.',
       ],

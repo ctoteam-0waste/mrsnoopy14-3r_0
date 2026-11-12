@@ -56,6 +56,7 @@ KarmaVer$e provides the following services:
 - Coins can be sent to another registered user only through the in-app "Send coins" feature (the Transfer button in your Wallet). The recipient's name and the exact amounts sent and received are shown before you confirm. Buying or selling coins for money is not permitted.
 - We may adjust, revoke, or expire coins in cases of fraud, abuse, system errors, or policy violations.
 - Coins may have an expiry period as determined from time to time.
+- **Welcome bonus**: each new user receives a one-time Early Bird welcome bonus of 500 KarmaCoins XP on sign-up, once per person (not for re-created, duplicate, or fraudulent accounts). Welcome bonus coins redeem at the same streak-based rate and from the same date as quiz and referral coins. We may change or end the offer for new sign-ups at any time without affecting bonuses already credited.
 - Bonus coins from referrals, quizzes, or promotions are subject to their specific terms.
 
 ## 7. Referral program
