@@ -1,15 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, ScrollView, TouchableOpacity, StatusBar, Share, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, Share2, Heart, Clock, Lightbulb } from 'lucide-react-native';
 import { getArticleById, ARTICLES, articleThumb } from '../data/articles';
 import { useTheme, makeStyles } from '../theme';
 
+// Liked Knowledge hub articles, kept on this device (articles are built into the app).
+const LIKED_KEY = 'likedArticles';
+async function readLikedArticles(): Promise<string[]> {
+  try {
+    const ids = JSON.parse((await AsyncStorage.getItem(LIKED_KEY)) || '[]');
+    return Array.isArray(ids) ? ids : [];
+  } catch {
+    return [];
+  }
+}
+
 export function ArticleDetailScreen({ route, navigation }: any) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
   const article = getArticleById(route.params?.id);
   const [liked, setLiked] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setLiked(false);
+    readLikedArticles().then((ids) => { if (active) setLiked(ids.includes(article.id)); });
+    return () => { active = false; };
+  }, [article.id]);
+
+  const toggleLike = () => {
+    const next = !liked;
+    setLiked(next);
+    readLikedArticles().then((ids) => {
+      const updated = next ? [...new Set([...ids, article.id])] : ids.filter((id) => id !== article.id);
+      return AsyncStorage.setItem(LIKED_KEY, JSON.stringify(updated));
+    }).catch(() => {});
+  };
 
   const handleShare = async () => {
     const message = `${article.title} — read it on KarmaVerse: https://karmaverse.earth`;
@@ -82,7 +110,7 @@ export function ArticleDetailScreen({ route, navigation }: any) {
             <View style={styles.engagementRow}>
               <TouchableOpacity
                 style={[styles.likeBtn, liked && styles.likeBtnOn]}
-                onPress={() => setLiked(v => !v)}
+                onPress={toggleLike}
                 activeOpacity={0.8}
               >
                 <Heart size={20} color={liked ? 'white' : '#ef4444'} fill={liked ? 'white' : 'none'} />
