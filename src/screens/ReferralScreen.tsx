@@ -6,7 +6,6 @@ import { ChevronLeft, Share2, Copy, Users, Gift, CheckCircle2, Clock, X, Message
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { referralService } from '../services/referral';
-import { profileService } from '../services/profile';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 
@@ -20,7 +19,6 @@ export function ReferralScreen({ navigation }: any) {
   const [referrals, setReferrals] = useState<any[]>([]);
   const [copied, setCopied] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
-  const [firstName, setFirstName] = useState('');
 
   // Link straight to the login/signup page with ?ref= prefilled. Must point at a real
   // route: /login is in the router, /register is NOT (it resolved to NotFound, so the
@@ -37,12 +35,12 @@ export function ReferralScreen({ navigation }: any) {
   // what they get — and keep the link inside the text, because several share
   // targets (Gmail via the web share sheet, some Android apps) drop a separate
   // `url` field.
-  const inviter = firstName || 'A friend';
+  const inviter = '3R ZeroWaste';
   const shareMsg =
     `${inviter} invited you to KarmaVer$e 🌱\n\n` +
     `KarmaVer$e picks up your recyclables (plastic, paper, metal, e-waste and more) from your doorstep for free ` +
     `and rewards you with KarmaCoins XP. Pickups are available in Gurugram and nearby areas (within 50 km).\n\n` +
-    `Sign up with ${firstName ? 'my' : 'this'} referral code ${referralCode} and we both get 1,000 KarmaCoins XP.`;
+    `Sign up with referral code ${referralCode} and you and the friend who shared it both get 1,000 KarmaCoins XP.`;
   const shareText = `${shareMsg}\n\n${shareUrl}`;
   // X has a 280-character limit; keep its version to one line.
   const tweetMsg = `I recycle with KarmaVer$e: free doorstep pickup in Gurugram 🌱 Sign up with my code ${referralCode} and we both get 1,000 KarmaCoins XP.`;
@@ -53,8 +51,8 @@ export function ReferralScreen({ navigation }: any) {
     `1. Open the link below and sign up (your code is filled in for you).\n` +
     `2. Book a free pickup for your dry recyclables.\n` +
     `3. Earn KarmaCoins XP for every verified pickup and redeem them in the app.\n\n` +
-    `${shareUrl}` +
-    (firstName ? `\n\n— ${firstName}` : '');
+    `${shareUrl}\n\n` +
+    `— Team 3R ZeroWaste`;
 
   const copyLink = () => {
     const text = shareText;
@@ -87,13 +85,10 @@ export function ReferralScreen({ navigation }: any) {
     const load = async () => {
       try {
         // getMyCode guarantees a code is generated if user doesn't have one
-        const [codeData, statsData, profile] = await Promise.all([
+        const [codeData, statsData] = await Promise.all([
           referralService.getMyCode().catch(() => null),
           referralService.getStats().catch(() => null),
-          profileService.getProfile().catch(() => null),
         ]);
-        const name = String((profile as any)?.name || '').trim();
-        if (name) setFirstName(name.split(/\s+/)[0]);
         const code = codeData?.referralCode || statsData?.referralCode || '';
         setReferralCode(code);
         setTotalReferrals(statsData?.totalReferrals || codeData?.totalReferrals || 0);
