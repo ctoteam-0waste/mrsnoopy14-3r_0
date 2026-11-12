@@ -412,6 +412,8 @@ export function ProfileScreen({ navigation }: any) {
   // Personal details: show missing State / City under the fields once the user has
   // changed them, and keep Update & Save disabled until the form is complete.
   const [demoTouched, setDemoTouched] = useState(false);
+  const [demoError, setDemoError] = useState('');
+  const [demoSaving, setDemoSaving] = useState(false);
   const demoAge = parseInt(demoEditForm.age);
   const demoComplete = !!demoEditForm.age && !isNaN(demoAge) && demoAge >= 13 && demoAge <= 100
     && !!demoEditForm.state?.trim() && !!demoEditForm.city?.trim();
@@ -427,6 +429,7 @@ export function ProfileScreen({ navigation }: any) {
     });
     setIsDemoEditing(false);
     setDemoTouched(false);
+    setDemoError('');
     setDemoModalVisible(true);
   };
   
@@ -946,7 +949,7 @@ export function ProfileScreen({ navigation }: any) {
                     </View>
                   </View>
 
-                  <TouchableOpacity style={styles.editBtnOutline} onPress={() => setIsDemoEditing(true)}>
+                  <TouchableOpacity style={styles.editBtnOutline} onPress={() => { setDemoError(''); setIsDemoEditing(true); }}>
                     <Text style={styles.editBtnOutlineText}>Modify Details</Text>
                   </TouchableOpacity>
                 </View>
@@ -969,7 +972,7 @@ export function ProfileScreen({ navigation }: any) {
                   </View>
                   <View>
                     <Text style={styles.fieldLabel}>Employment</Text>
-                    <SelectionPills options={['Student', 'Employed', 'Business', 'Unemployed', 'Retired']} selected={demoEditForm.employment} onSelect={(t) => setDemoEditForm({...demoEditForm, employment: t})} />
+                    <SelectionPills options={['Student', 'Employed', 'Business', 'Unemployed']} selected={demoEditForm.employment} onSelect={(t) => setDemoEditForm({...demoEditForm, employment: t})} />
                   </View>
                   <StateCityFields
                     state={demoEditForm.state}
@@ -979,25 +982,33 @@ export function ProfileScreen({ navigation }: any) {
                     showErrors={demoTouched}
                   />
                   <TouchableOpacity
-                    style={[styles.primaryActionBtn, { marginTop: 12 }, !demoComplete && styles.primaryActionBtnDisabled]}
-                    disabled={!demoComplete}
+                    style={[styles.primaryActionBtn, { marginTop: 12 }, (!demoComplete || demoSaving) && styles.primaryActionBtnDisabled]}
+                    disabled={!demoComplete || demoSaving}
                     onPress={async () => {
-                      // The button is disabled until the form is complete; a pop-up from
-                      // inside this sheet can open behind it on iOS and freeze the screen.
+                      // Errors show inline: a pop-up from inside this sheet opens behind
+                      // it on iOS and freezes the screen.
                       setDemoTouched(true);
-                      if (!demoComplete) return;
+                      if (!demoComplete || demoSaving) return;
                       const parsedAge = demoAge;
+                      setDemoError('');
+                      setDemoSaving(true);
                       try {
                         const payload: any = { ...demoEditForm, age: parsedAge, state: demoEditForm.state.trim(), city: demoEditForm.city.trim() };
+                        for (const k of ['gender', 'maritalStatus', 'employment']) if (payload[k] === 'Not Specified') delete payload[k];
                         await profileService.updateDemographics(payload);
                         setUserProfile({...userProfile, demographics: { ...demoEditForm, age: parsedAge }});
                         setIsDemoEditing(false);
-                      } catch (e) {
-                        showAlert('Error', 'Failed to update profile. Please try again.');
+                      } catch (e: any) {
+                        setDemoError(!e?.response
+                          ? 'No internet connection. Please try again.'
+                          : (e.response.data?.message || 'Could not save your details. Please try again.'));
+                      } finally {
+                        setDemoSaving(false);
                       }
                   }}>
-                    <Text style={styles.primaryActionText}>Update & Save</Text>
+                    {demoSaving ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryActionText}>Update & save</Text>}
                   </TouchableOpacity>
+                  {!!demoError && <Text style={[styles.fieldError, { textAlign: 'center', marginTop: -8 }]}>{demoError}</Text>}
                 </View>
               )}
             </ScrollView>
