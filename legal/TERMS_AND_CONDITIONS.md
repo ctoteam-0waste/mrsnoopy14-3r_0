@@ -7,7 +7,7 @@ Welcome to KarmaVer$e, operated by 3R ZeroWaste. By downloading, installing, or 
 
 ## 1. Definitions
 
-- **KarmaCoins XP**: virtual reward points earned through recycling. They are non-transferable, non-refundable, and hold no monetary value outside the platform.
+- **KarmaCoins XP**: virtual reward points earned through recycling. They are non-refundable, can be sent to another registered user only through the in-app "Send coins" feature, and cannot be bought or sold.
 - **Pickup**: the scheduled collection of recyclable waste from your address by a verified Agent.
 - **Agent**: an independent pickup partner verified by the company to collect recyclable waste.
 - **Wallet**: the in-app wallet showing your KarmaCoins XP balance and transaction history.
@@ -53,7 +53,7 @@ KarmaVer$e provides the following services:
 - Coins are earned based on the type and verified weight of recyclable materials collected. Pickups are rewarded only in KarmaCoins XP. Agents do not pay cash at the doorstep.
 - Coin values are set by the company and may change without prior notice.
 - Coins are loyalty reward points, not legal tender, e-money, or cryptocurrency. They cannot be bought or sold. Any cash payout is made only through in-app redemption via our payment partner, never by an Agent.
-- Coins can be sent to another registered user only through the in-app "Send coins" feature. Buying or selling coins for money is not permitted.
+- Coins can be sent to another registered user only through the in-app "Send coins" feature (the Transfer button in your Wallet). The recipient's name and the exact amounts sent and received are shown before you confirm. Buying or selling coins for money is not permitted.
 - We may adjust, revoke, or expire coins in cases of fraud, abuse, system errors, or policy violations.
 - Coins may have an expiry period as determined from time to time.
 - Bonus coins from referrals, quizzes, or promotions are subject to their specific terms.

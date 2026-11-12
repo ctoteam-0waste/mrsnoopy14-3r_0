@@ -44,7 +44,7 @@ export const TERMS: LegalDoc = {
       heading: 'Definitions',
       bullets: [
         'Agent — an independent pickup partner engaged and verified by the Company to collect, weigh, and verify recyclable waste. Agents are not employees of the Company.',
-        'KarmaCoins XP — loyalty reward points issued by the Company. They can be sent to another registered User only through the in-app "Send coins" feature and are otherwise non-transferable. A promotional benefit; not currency, not a security, and not a prepaid payment instrument.',
+        'KarmaCoins XP — loyalty reward points issued by the Company. They can be sent to another registered User only through the in-app "Send coins" feature (the Transfer button in your Wallet) and are otherwise non-transferable. A promotional benefit; not currency, not a security, and not a prepaid payment instrument.',
         'Payment Partner — RazorpayX, or any successor payment service provider engaged to disburse redemption payouts.',
         'Pickup — a scheduled collection of segregated recyclable waste from a Pickup Address by an Agent.',
         'Pickup Address — the address and coordinates you select or confirm in the app for a given Pickup.',
@@ -134,7 +134,7 @@ export const TERMS: LegalDoc = {
       ],
       bullets: [
         'Earning — coins are credited on the category and Agent-verified weight of material collected, and for the daily quiz or qualifying referrals. Rates are set by the Company and may change prospectively. Pickups are rewarded only in KarmaCoins XP — Agents do not pay cash at the doorstep.',
-        'Sending coins — you may send KarmaCoins XP to another registered User, identified by their mobile number, through the in-app "Send coins" feature. Pickup coins move one-for-one. Quiz and referral coins move at their ₹ value, so the number the recipient receives can differ from the number you send, depending on each side’s Streak rate; the exact amounts are shown before you confirm. Buying or selling coins for money, inside or outside the app, is not permitted, and we may reverse transfers made in error or through fraud or abuse.',
+        'Sending coins — you may send KarmaCoins XP to another registered User, identified by their mobile number, through the in-app "Send coins" feature (the Transfer button in your Wallet). The recipient’s name is shown before you confirm. Pickup coins move one-for-one. Quiz and referral coins move at their ₹ value, so the number the recipient receives can differ from the number you send, depending on each side’s Streak rate; the exact amounts are shown before you confirm. Buying or selling coins for money, inside or outside the app, is not permitted, and we may reverse transfers made in error or through fraud or abuse.',
         'Adjustment — we may adjust, reverse, or revoke coins credited in error or through fraud, abuse, manipulation, system fault, or breach, and will notify you of the reason.',
         'Expiry — coins may carry an expiry period notified in the app; at least 30 days’ notice is given before an expiry is introduced or shortened for coins already in your Wallet.',
         'Redemption is enabled in stages — Pickup coins after 30 September 2026 (subject to verification); Quiz coins after 31 December 2026; Referral coins after 31 December 2026 (subject to anti-abuse rules).',
@@ -375,6 +375,7 @@ export const PRIVACY: LegalDoc = {
       heading: 'How we share your personal data',
       bullets: [
         'With Agents — the address, contact number, and pickup details needed to complete your booking, only for the period around it, under confidentiality obligations.',
+        'With other Users, only when coins are sent — when someone enters your registered mobile number to send you KarmaCoins XP, the app shows them your name so they can confirm the right recipient. The transfer then appears in both Users’ transaction history. Your address, email, and other details are never shown.',
         'With our Payment Partner (RazorpayX) — the account and transaction details needed to process a cash payout, handled under its own privacy policy and RBI regulations.',
         'With service providers — vendors who help run the Service under written confidentiality and data-protection obligations.',
         'With recycling and fulfilment partners — where needed to process collected material or fulfil a reward or donation you chose.',

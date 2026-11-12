@@ -34,12 +34,13 @@ To provide and improve our services, we collect:
 
 - We do not sell your personal data to third parties.
 - We share only what is needed with assigned Agents (such as your address) to complete a pickup.
+- With other Users, only when coins are sent — when someone enters your registered mobile number to send you KarmaCoins XP, the app shows them your name so they can confirm the right recipient. The transfer then appears in both Users' transaction history. Your address, email, and other details are never shown.
 - We may share data with service providers who help operate the platform, under confidentiality obligations.
 - We may disclose information if required by law or to protect our rights and users.
 
 ## 5. KarmaCoins XP — virtual currency
 
-- KarmaCoins XP are virtual points with no monetary value outside the platform.
+- KarmaCoins XP are virtual reward points. They can be sent to another registered user through the in-app "Send coins" feature, and redeemed in the app as described in our terms; they cannot be bought or sold.
 - Your coin balance and transaction history are stored to operate your wallet.
 - We may adjust coins in cases of fraud, abuse, or system errors as described in our terms.
 
