@@ -93,7 +93,7 @@ In accordance with the Information Technology Act, 2000, rules made thereunder, 
 
 - **Email**: info@0waste.co.in
 - **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
-- **Response time**: We will acknowledge grievances within 24 hours and aim to resolve them within 15 days, as required by law.
+- **Response time**: We will acknowledge grievances within 24 hours and resolve them within 15 days of receipt, as required by law.
 
 ## 14. Changes to this policy
 
