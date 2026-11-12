@@ -13,6 +13,7 @@ import { streakService } from '../services/streak';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
+import { loadQuizDays, QuizDays } from '../utils/quizHistory';
 import { isLaunchDay } from '../utils/launchDay';
 import { isDiwaliSeason } from '../utils/festive';
 import {
@@ -152,15 +153,12 @@ export function DashboardScreen({ navigation, route }: any) {
     const loadQuiz = async () => {
       const token = await getToken();
       const sfx = getStableUserSuffix(token);
-      const [sd, ss] = await Promise.all([AsyncStorage.getItem(`lastQuizDate_${sfx}`), AsyncStorage.getItem(`quizStreak_${sfx}`)]);
       const today = getLocalDateStr();
       const yest = getLocalYesterdayStr();
-      setQuizStreak(!sd ? 0 : (sd === today || sd === yest ? Number(ss) || 0 : 0));
       setUserSuffix(sfx);
-      try {
-        const hist = JSON.parse((await AsyncStorage.getItem(`quizHistory_${sfx}`)) || '[]');
-        setQuizDays([...(Array.isArray(hist) ? hist : []), ...(sd ? [sd] : [])]);
-      } catch { setQuizDays(sd ? [sd] : []); }
+      const showQuiz = ({ days, streak }: QuizDays) => { setQuizDays(days); setQuizStreak(streak); };
+      showQuiz(await loadQuizDays(sfx, false));
+      loadQuizDays(sfx).then(showQuiz).catch(() => {});
 
       // Day streak from the backend (same as the wallet); the on-device count is only a fallback.
       const live = streakService.getStatus().catch(() => null);
