@@ -9,7 +9,7 @@ This policy explains what information KarmaVer$e (by 3R ZeroWaste) collects, how
 
 To provide and improve our services, we collect:
 
-- **Account details**: your name, email address, and phone number. You may also register or sign in using Google Sign-In.
+- **Account details**: your name, email address, and phone number. You may also register or sign in with Google, Facebook, or Apple; from that provider we receive only your name, email address (with Apple, possibly a private relay address), and an account identifier. We never receive your password for those accounts and never post to them.
 - **Profile details (optional)**: age, gender, marital status, and employment status, if you choose to complete your profile. We do not ask about sexual orientation; an optional question about it in earlier app versions has been removed, any answers are not used, and stored answers are being deleted.
 - **Pickup details**: your address and the waste categories you schedule.
 - **Location data**: your device location to assign the nearest available Agent and to show live pickup tracking.
@@ -64,7 +64,7 @@ To provide and improve our services, we collect:
 
 ## 9. Third-party services
 
-- We use **Google Sign-In** for optional account login/registration.
+- We use **Google Sign-In**, **Facebook Login**, and **Sign in with Apple** for optional account login/registration. Each provider's own privacy policy applies to your account with them.
 - We use **Mappls (MapmyIndia)** for maps, address search, and location services.
 - We use our app platform's push notification service to deliver notifications (relayed via Google's and Apple's underlying push infrastructure).
 - These providers process limited data under their own privacy policies.

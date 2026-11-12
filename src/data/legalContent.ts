@@ -68,7 +68,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Account registration and security',
       bullets: [
-        'Register using a valid email address and mobile number, or by signing in with a Google account.',
+        'Register using a valid email address and mobile number, or by signing in with your Google, Facebook, or Apple account.',
         'One account per person. Duplicate, automated, or fraudulently created accounts may be suspended or terminated and any associated KarmaCoins XP forfeited.',
         'You are responsible for keeping your credentials, device, and registered mobile number secure, and for all activity under your account.',
         'Notify us promptly through in-app support if you believe your account has been accessed without authorisation. Until you do, activity under your account is treated as yours.',
@@ -212,7 +212,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Third-party services',
       bullets: [
-        'The Service relies on third-party providers — mapping and geocoding, cloud hosting, messaging providers, and our Payment Partner. Their availability is outside our control.',
+        'The Service relies on third-party providers — sign-in (Google, Facebook, Apple), mapping and geocoding, cloud hosting, messaging providers, and our Payment Partner. Their availability is outside our control.',
         'Where you follow a link to a third-party site or a redemption or donation partner, that third party’s own terms and privacy policy apply. We are not responsible for their content, products, or practices.',
         'Making a third-party service available through the app is not an endorsement of it.',
       ],
@@ -333,7 +333,7 @@ export const PRIVACY: LegalDoc = {
     {
       heading: 'Personal data we collect',
       bullets: [
-        'Account details (required) — name, email, mobile number; or basic Google profile if you sign in with Google.',
+        'Account details (required) — name and email; mobile number when you sign up with email (optional with social sign-in, and can be added later in your profile). If you sign in with Google, Facebook, or Apple, we receive only your name, email address, and an account identifier from that provider (from Facebook, your basic public profile; from Apple, the email you choose to share, which may be an Apple private relay address). We never receive your password for those accounts, and we never post to them.',
         'Pickup address (required to book) — full address, locality, city, state, PIN code, coordinates, and any landmarks or notes.',
         'Pickup details (required to book) — waste categories, estimated quantity, hazardous-waste declarations, and chosen slot.',
         'Profile details (optional, never needed for pickups or rewards) — age, gender, marital status, employment status. We do not ask about sexual orientation. Earlier versions of the app had an optional sexual-orientation question; it has been removed, we do not use any answer given, and stored answers are being deleted.',
@@ -531,7 +531,7 @@ export const TERMS_OF_USE: LegalDoc = {
       bullets: [
         'We aim to keep the Platform available but do not guarantee uninterrupted or error-free access. Access may be suspended for maintenance, upgrades, security, or reasons beyond our control.',
         'We may add, modify, or remove features, and may require you to update to a supported version; older versions may stop functioning. Beta or preview features may change or be withdrawn without notice.',
-        'The Platform depends on third-party services — mapping and geocoding, cloud hosting, messaging, and our Payment Partner — whose availability is outside our control. Links to third-party sites are not endorsements and are governed by those parties’ own terms. Open-source components are licensed under their own licences.',
+        'The Platform depends on third-party services — sign-in (Google, Facebook, Apple), mapping and geocoding, cloud hosting, messaging, and our Payment Partner — whose availability is outside our control. Links to third-party sites are not endorsements and are governed by those parties’ own terms. Open-source components are licensed under their own licences.',
         'Some features need device permissions — principally location, and optionally camera and notifications. We request them at the point of need with an explanation, do not use background location, and let you decline or revoke them in device settings. How location data is handled is set out in the Privacy Policy.',
         'The Platform is intended for use in India.',
       ],
@@ -608,7 +608,7 @@ export const DATA_DELETION: LegalDoc = {
   title: 'Data deletion',
   updated: 'July 2026',
   intro:
-    'You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (such as Google or Facebook), at any time.',
+    'You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (Google, Facebook, or Apple), at any time.',
   sections: [
     {
       heading: 'How to request deletion',
@@ -627,7 +627,7 @@ export const DATA_DELETION: LegalDoc = {
         'Your account and profile details (name, email, mobile number, and any optional profile fields)',
         'Pickup history, addresses, and location data associated with your account',
         'Your KarmaCoins XP balance and transaction history',
-        'Any data received from third-party sign-in providers (such as your Google or Facebook profile information)',
+        'Any data received from third-party sign-in providers (your Google, Facebook, or Apple profile information)',
       ],
     },
     {

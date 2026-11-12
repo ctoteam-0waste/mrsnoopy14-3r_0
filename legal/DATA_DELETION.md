@@ -3,7 +3,7 @@
 **KarmaVer$e** — operated by **3R ZeroWaste**
 _Last updated: July 2026_
 
-You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (such as Google or Facebook), at any time.
+You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (Google, Facebook, or Apple), at any time.
 
 ## How to request deletion
 
@@ -18,7 +18,7 @@ Email us from the address associated with your account:
 - Your account and profile details (name, email, phone number, and any optional profile fields).
 - Pickup history, addresses, and location data associated with your account.
 - Your KarmaCoins XP balance and transaction history.
-- Any data received from third-party sign-in providers (such as your Google or Facebook profile information).
+- Any data received from third-party sign-in providers (your Google, Facebook, or Apple profile information).
 
 ## Timeline
 

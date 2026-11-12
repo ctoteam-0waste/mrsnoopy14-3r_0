@@ -21,7 +21,7 @@ Welcome to KarmaVer$e, operated by 3R ZeroWaste. By downloading, installing, or 
 
 ## 3. Account registration
 
-- Register using a valid email address and phone number, or sign in with your Google account.
+- Register using a valid email address and phone number, or sign in with your Google, Facebook, or Apple account.
 - One account per person. Duplicate or fraudulent accounts may be terminated without notice.
 - You are solely responsible for all activity under your account.
 - We may suspend or terminate accounts that violate these terms.
