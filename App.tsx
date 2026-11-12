@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { Linking } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from './src/theme';
 import { RootNavigator } from './src/navigation/RootNavigator';
@@ -32,19 +31,6 @@ try {
   });
 } catch (_) {}
 
-// Extract a referral code from a deep link URL.
-// Path style:  karmacoin://r/CODE,  https://karmaverse.earth/r/CODE
-// Query style: https://karmaverse.earth/login?ref=CODE  (what the share sheet builds)
-// Codes look like NAME-KARMA-XXXX — letters, digits and hyphens, not just KARMA-*.
-function extractReferralCode(url: string): string | null {
-  if (!url) return null;
-  const q = url.match(/[?&]ref=([A-Za-z0-9-]+)/);
-  if (q) return q[1].toUpperCase();
-  const p = url.match(/\/r\/([A-Za-z0-9-]+)/);
-  if (p) return p[1].toUpperCase();
-  return null;
-}
-
 export default function App() {
   useEffect(() => {
     // Set up Android notification channels and the action-button categories once,
@@ -52,19 +38,6 @@ export default function App() {
     // supports it) show their action buttons. Fire-and-forget — both are idempotent.
     setupAndroidChannels();
     setupNotificationCategories();
-
-    // Deep link — cold start (app was closed)
-    Linking.getInitialURL().then(url => {
-      if (!url) return;
-      const code = extractReferralCode(url);
-      if (code) AsyncStorage.setItem('pendingReferralCode', code);
-    });
-
-    // Deep link — app already open in background
-    const linkSub = Linking.addEventListener('url', ({ url }) => {
-      const code = extractReferralCode(url);
-      if (code) AsyncStorage.setItem('pendingReferralCode', code);
-    });
 
     // Register push token for already-logged-in users on app start
     AsyncStorage.getItem('userToken').then(token => {
@@ -80,7 +53,6 @@ export default function App() {
     });
 
     return () => {
-      linkSub.remove();
       pushSub.remove();
     };
   }, []);

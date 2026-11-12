@@ -20,7 +20,7 @@ import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { BlogScreen } from '../screens/BlogScreen';
 import { BlogPostScreen } from '../screens/BlogPostScreen';
 import { navigationRef } from './navRef';
-import { capturePendingAppLink, capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
+import { capturePendingAppLink, capturePendingDeepLink, captureReferralLink, clearPendingDeepLink, getPendingReferralCode, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
 import { routeNotification } from '../utils/notificationRoute';
 import { initAnalytics, trackPageView } from '../utils/analytics';
 
@@ -87,9 +87,14 @@ export function RootNavigator() {
         // Already logged in — the router resolves the deep link directly, so drop
         // any captured URL to avoid a stale redirect on a later in-session login.
         if (isValid) clearPendingDeepLink();
-        // Logged out and opened from an App Link: remember it so onReady sends them
-        // to Login and the login returns them to it (web does this at import).
-        else if (Platform.OS !== 'web') capturePendingAppLink(await Linking.getInitialURL());
+        // Logged out and opened from an App Link or a referral link (karmacoin://r/CODE):
+        // remember it so onReady sends them to Login, with the referral code filled in
+        // or returning them to the link after login (web does this at import).
+        else if (Platform.OS !== 'web') {
+          const url = await Linking.getInitialURL();
+          capturePendingAppLink(url);
+          captureReferralLink(url);
+        }
         setIsLoggedIn(isValid);
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -117,16 +122,23 @@ export function RootNavigator() {
   }, []);
 
   // An App Link tapped while the app is open but logged out resolves to NotFound (its
-  // path isn't in the logged-out link map). Remember it and show Login instead.
+  // path isn't in the logged-out link map). Remember it and show Login instead; a
+  // referral link opens Login with its code. Logged-out is checked when the link
+  // arrives, since isLoggedIn only reflects app start (a later log out doesn't change it).
   useEffect(() => {
-    if (Platform.OS === 'web' || isLoggedIn !== false) return;
-    const sub = Linking.addEventListener('url', ({ url }) => {
-      if (capturePendingAppLink(url)) {
+    if (Platform.OS === 'web') return;
+    const sub = Linking.addEventListener('url', async ({ url }) => {
+      const token = await getToken();
+      if (token && token !== 'undefined' && token !== 'null') return;
+      const code = captureReferralLink(url);
+      if (code) {
+        setTimeout(() => navRef.current?.navigate('Login', { referralCode: code }), 0);
+      } else if (capturePendingAppLink(url)) {
         setTimeout(() => navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] }), 0);
       }
     });
     return () => sub.remove();
-  }, [isLoggedIn]);
+  }, []);
 
   // URL routing: on web for real, shareable, crawlable URLs; on Android for App Links
   // (https://karmaverse.earth/<Screen>, declared in app.json's intentFilters) from
@@ -204,7 +216,8 @@ export function RootNavigator() {
         // returns them to a protected link, and the signup form reads the captured
         // referral code.
         if (!isLoggedIn && (hasPendingDeepLink() || hasPendingReferral())) {
-          navRef.current?.reset({ index: 0, routes: [{ name: 'Login' }] });
+          const referralCode = getPendingReferralCode();
+          navRef.current?.reset({ index: 0, routes: [{ name: 'Login', params: referralCode ? { referralCode } : undefined }] });
         }
         trackPageView(navRef.current?.getCurrentRoute());
         // Fade out the static landing hero from public/index.html once the first

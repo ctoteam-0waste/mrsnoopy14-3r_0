@@ -10,6 +10,33 @@ let pendingUrl: string | null = null;
 // logged-out visitor to Login (the signup form) even when the link's path has no
 // matching route and would otherwise resolve to NotFound.
 let pendingReferral = false;
+let pendingReferralCode: string | null = null;
+
+// The referral code in a link, if any.
+// Path style:  karmacoin://r/CODE,  https://karmaverse.earth/r/CODE
+// Query style: https://karmaverse.earth/login?ref=CODE  (what the share sheet builds)
+// Codes look like NAME-KARMA-XXXX: letters, digits and hyphens.
+export function referralCodeFromUrl(url?: string | null): string | null {
+  if (!url) return null;
+  const q = url.match(/[?&]ref=([A-Za-z0-9-]+)/);
+  if (q) return q[1].toUpperCase();
+  const p = url.match(/^karmacoin:\/\/r\/([A-Za-z0-9-]+)/i) || url.match(/\/r\/([A-Za-z0-9-]+)/);
+  return p ? p[1].toUpperCase() : null;
+}
+
+function rememberReferral(code: string): void {
+  pendingReferral = true;
+  pendingReferralCode = code;
+  AsyncStorage.setItem('pendingReferralCode', code).catch(() => {});
+}
+
+// Native: a referral link opened while logged out. Remembers the code for the
+// signup form and returns it, or null if the link isn't a referral link.
+export function captureReferralLink(url: string | null): string | null {
+  const code = referralCodeFromUrl(url);
+  if (code) rememberReferral(code);
+  return code;
+}
 
 // Authenticated routes worth returning to after login. Path is matched
 // case-insensitively against the link's pathname.
@@ -53,10 +80,7 @@ export function capturePendingDeepLink(): void {
   // user to Login regardless of the path they arrived on.
   try {
     const ref = new URLSearchParams(window.location.search).get('ref');
-    if (ref && ref.trim()) {
-      pendingReferral = true;
-      AsyncStorage.setItem('pendingReferralCode', ref.trim().toUpperCase()).catch(() => {});
-    }
+    if (ref && ref.trim()) rememberReferral(ref.trim().toUpperCase());
   } catch (_) { /* URL not parseable */ }
 
   rememberIfProtected(window.location.pathname, window.location.search);
@@ -73,6 +97,10 @@ export function capturePendingAppLink(url: string | null): boolean {
 
 export function hasPendingReferral(): boolean {
   return pendingReferral;
+}
+
+export function getPendingReferralCode(): string | null {
+  return pendingReferralCode;
 }
 
 export function clearPendingDeepLink(): void {

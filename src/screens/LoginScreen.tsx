@@ -392,6 +392,15 @@ export function LoginScreen({ navigation, route }: any) {
     }
   }, []);
 
+  // A referral link opened while this screen is already showing (RootNavigator
+  // navigates here with the code).
+  const linkReferralCode: string | undefined = route?.params?.referralCode;
+  React.useEffect(() => {
+    if (!linkReferralCode) return;
+    setReferralCode(linkReferralCode);
+    AsyncStorage.removeItem('pendingReferralCode');
+  }, [linkReferralCode]);
+
   // Demographics State
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
@@ -1048,6 +1057,16 @@ export function LoginScreen({ navigation, route }: any) {
             )}
             <Text style={styles.title}>Welcome 👋</Text>
             <Text style={styles.subtitle}>Enter your email or mobile number to get started</Text>
+            {!!referralCode && referralStatus !== 'invalid' && (
+              <View style={styles.referralApplied}>
+                <Gift size={16} color={colors.success} />
+                <Text style={styles.referralAppliedText}>
+                  {referralStatus === 'valid' && referralValidName
+                    ? `Invited by ${referralValidName}. Sign up to get 1,000 KarmaCoins XP each.`
+                    : `Referral code ${referralCode.trim().toUpperCase()} applied`}
+                </Text>
+              </View>
+            )}
           </View>
           <InputField
             key="entry-email"
@@ -1834,6 +1853,8 @@ const useStyles = makeStyles((c) => ({
   offlineBanner: { backgroundColor: c.dangerSoft, borderWidth: 1, borderColor: c.danger, borderRadius: 12, padding: 12, marginBottom: 8 },
   offlineBannerText: { color: c.danger, fontSize: 13, fontWeight: '700', textAlign: 'center' },
   fieldError: { color: c.danger, fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4 },
+  referralApplied: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 12, backgroundColor: c.primarySoft },
+  referralAppliedText: { flex: 1, fontSize: 13, fontWeight: '600', color: c.success, lineHeight: 18 },
   referralHint: { fontSize: 12, fontWeight: '600', marginTop: -16, paddingLeft: 4, color: c.textMuted },
   container: { flex: 1, backgroundColor: c.bg, maxWidth: 900, width: '100%', alignSelf: 'center' },
   header: {
