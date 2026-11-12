@@ -30,6 +30,7 @@ Email us from the address associated with your account:
 For questions about this process:
 
 - **Email**: info@0waste.co.in
-- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Operating office**: 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Registered office**: 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010
 
 © 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.

@@ -92,7 +92,8 @@ To provide and improve our services, we collect:
 In accordance with the Information Technology Act, 2000, rules made thereunder, and the Digital Personal Data Protection Act, 2023, grievances regarding this policy may be directed to our Grievance Officer at:
 
 - **Email**: info@0waste.co.in
-- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Operating office**: 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Registered office**: 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010
 - **Response time**: We will acknowledge grievances within 24 hours and resolve them within 15 days of receipt, as required by law.
 
 ## 14. Changes to this policy
@@ -106,7 +107,8 @@ In accordance with the Information Technology Act, 2000, rules made thereunder, 
 For any privacy questions or requests:
 
 - **Email**: info@0waste.co.in
-- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Operating office**: 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Registered office**: 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010
 
 ---
 

@@ -138,7 +138,8 @@ For any questions or complaints about these terms or the service:
 
 - **Email**: info@0waste.co.in
 - **Phone**: 070931 98828 / 099071 91928
-- **Address**: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Operating office**: 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051
+- **Registered office**: 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010
 - **In-app**: use the "Need help?" option
 
 ---
