@@ -1,7 +1,7 @@
 # Terms & Conditions
 
 **KarmaVer$e** — operated by **3R ZeroWaste**
-_Last updated: July 2026_
+_Reference copy, last revised 12 November 2026. The current, authoritative version (with its version number) is at https://karmaverse.earth/legal/terms._
 
 Welcome to KarmaVer$e, operated by 3R ZeroWaste. By downloading, installing, or using the KarmaVer$e app or website, you agree to be bound by these terms. If you do not agree, please do not use the service.
 

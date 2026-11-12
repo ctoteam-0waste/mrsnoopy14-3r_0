@@ -57,7 +57,7 @@ export function LegalScreen({ route, navigation }: any) {
             </View>
             <Text style={styles.headerTitle}>{doc.title}</Text>
             <View style={styles.updatedPill}>
-              <Text style={styles.updatedText}>Last updated · {doc.updated}</Text>
+              <Text style={styles.updatedText}>Version {doc.version} · Last updated {doc.updated}</Text>
             </View>
           </View>
         </SafeAreaView>

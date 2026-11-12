@@ -1,7 +1,7 @@
 # Privacy Policy
 
 **KarmaVer$e** — operated by **3R ZeroWaste**
-_Last updated: July 2026_
+_Reference copy, last revised 12 November 2026. The current, authoritative version (with its version number) is at https://karmaverse.earth/legal/privacy._
 
 This policy explains what information KarmaVer$e (by 3R ZeroWaste) collects, how we use it, and the choices you have. We are committed to protecting your privacy and handling your data responsibly.
 

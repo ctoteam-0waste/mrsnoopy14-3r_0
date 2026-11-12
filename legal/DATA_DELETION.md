@@ -1,7 +1,7 @@
 # Data Deletion
 
 **KarmaVer$e** — operated by **3R ZeroWaste**
-_Last updated: July 2026_
+_Reference copy, last revised 12 November 2026. The current, authoritative version (with its version number) is at https://karmaverse.earth/legal/data-deletion._
 
 You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (Google, Facebook, or Apple), at any time.
 

@@ -1,7 +1,8 @@
 // Legal content for KarmaVer$e. Edit the copy here — the LegalScreen renders it,
 // and the website serves it at /legal/:type (terms | privacy | terms-of-use | data-deletion).
 // Source of truth: 3R ZeroWaste legal documentation —
-//   Terms & Conditions v2.0, Privacy Policy v2.0, Terms of Use v1.0 (August 2026).
+//   Terms & Conditions v2.0, Privacy Policy v2.0, Terms of Use v1.0 (August 2026),
+//   revised since — the current version and date are on each doc below.
 // Placeholders in the source docs (officer names, effective date, business hours) are
 // shown here as role + contact; fill the names/date/hours before publishing.
 
@@ -13,6 +14,7 @@ export interface LegalSection {
 
 export interface LegalDoc {
   title: string;
+  version: string; // bump on every published change; shown beside the date
   updated: string;
   intro?: string;
   sections: LegalSection[];
@@ -21,7 +23,8 @@ export interface LegalDoc {
 
 export const TERMS: LegalDoc = {
   title: 'Terms & conditions',
-  updated: '2 September 2026',
+  version: '2.1',
+  updated: '12 November 2026',
   intro:
     `KarmaVer$e is operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our"), with its registered office at 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010, and its operating office at Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051. These Terms & Conditions ("Terms") govern your access to and use of the KarmaVer$e app, website, and related services (the "Service"). Our Privacy Policy is incorporated by reference and forms part of your agreement with us. By creating an account, scheduling a pickup, or otherwise using the Service, you confirm that you have read and accepted these Terms. If you do not accept them, you must not use the Service.`,
   sections: [
@@ -301,7 +304,8 @@ export const TERMS: LegalDoc = {
 
 export const PRIVACY: LegalDoc = {
   title: 'Privacy policy',
-  updated: '2 September 2026',
+  version: '2.1',
+  updated: '12 November 2026',
   intro:
     `3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our") operates the KarmaVer$e app and website (the "Service"). We are the Data Fiduciary for the personal data described here, which means we determine why and how it is processed. This Policy explains what personal data we collect, why, who we share it with, how long we keep it, and your rights under India’s Digital Personal Data Protection Act, 2023. It should be read together with our Terms & Conditions.`,
   sections: [
@@ -455,7 +459,8 @@ export const PRIVACY: LegalDoc = {
 
 export const TERMS_OF_USE: LegalDoc = {
   title: 'Terms of use',
-  updated: '2 September 2026',
+  version: '1.1',
+  updated: '12 November 2026',
   intro:
     `These Terms of Use govern your access to and use of the KarmaVer$e app and website (the "Platform"), operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568). They cover what you are allowed to do on the Platform — the licence to use it, acceptable use, content you post, intellectual property, availability, and our role as an intermediary. By accessing or using the Platform — whether or not you register — you accept these Terms of Use. If you register or book a Pickup, our Terms & Conditions also apply. If you do not accept these Terms of Use, you must not use the Platform.`,
   sections: [
@@ -609,7 +614,8 @@ export const TERMS_OF_USE: LegalDoc = {
 
 export const DATA_DELETION: LegalDoc = {
   title: 'Data deletion',
-  updated: 'July 2026',
+  version: '1.1',
+  updated: '12 November 2026',
   intro:
     'You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (Google, Facebook, or Apple), at any time.',
   sections: [
