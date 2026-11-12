@@ -14,8 +14,8 @@ Welcome to KarmaVer$e, operated by 3R ZeroWaste. By downloading, installing, or 
 
 ## 2. Eligibility
 
-- You must be at least 13 years of age to use this service.
-- If you are under 18, you must have parental or guardian consent.
+- You must be 18 years of age or older to use this service. You confirm this when you sign up.
+- We do not knowingly permit anyone under 18 to register. If we learn an account belongs to someone under 18, we will close it and delete its personal data, except where the law requires us to keep it.
 - You must provide accurate, complete, and current registration information.
 - You are responsible for maintaining the confidentiality of your account credentials.
 

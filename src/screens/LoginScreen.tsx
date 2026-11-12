@@ -925,8 +925,8 @@ export function LoginScreen({ navigation }: any) {
 
   const handleCompleteRegistration = async () => {
     const ageNum = parseInt(age);
-    if (!age || isNaN(ageNum) || ageNum < 13 || ageNum > 100) {
-      showAlert('Invalid age', 'You must be at least 13 years old to use KarmaVerse.');
+    if (!age || isNaN(ageNum) || ageNum < 18 || ageNum > 100) {
+      showAlert('Invalid age', 'You must be 18 or older to use KarmaVerse.');
       return;
     }
     setIsLoading(true);
@@ -1110,7 +1110,7 @@ export function LoginScreen({ navigation }: any) {
           {/* Social sign-up skips the signup form's consent checkbox, so state the
               terms here before the account is created (DPDP consent). */}
           <Text style={styles.socialConsentText}>
-            By continuing, you agree to the{' '}
+            By continuing, you confirm you are 18 or older and agree to the{' '}
             <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms' })}>Terms & Conditions</Text>
             {', '}
             <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>Terms of Use</Text>
@@ -1438,7 +1438,7 @@ export function LoginScreen({ navigation }: any) {
                 {agreedToTerms && <Check size={14} color="#fff" strokeWidth={3} />}
               </TouchableOpacity>
               <Text style={styles.termsText}>
-                I agree to the{' '}
+                I am 18 or older and agree to the{' '}
                 <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms' })}>Terms & Conditions</Text>
                 {', '}
                 <Text style={styles.termsLink} onPress={() => navigation.navigate('Legal', { type: 'terms-of-use' })}>Terms of Use</Text>

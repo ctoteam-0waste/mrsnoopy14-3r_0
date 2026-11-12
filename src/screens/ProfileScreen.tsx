@@ -934,8 +934,8 @@ export function ProfileScreen({ navigation }: any) {
                   <View>
                     <Text style={styles.fieldLabel}>Your Age</Text>
                     <InputField placeholder="e.g. 24" value={demoEditForm.age} onChange={(t: any) => setDemoEditForm({...demoEditForm, age: t.replace(/[^0-9]/g, '')})} keyboardType="number-pad" maxLength={3} />
-                    {demoEditForm.age && (parseInt(demoEditForm.age) < 13 || parseInt(demoEditForm.age) > 100) && (
-                      <Text style={styles.fieldError}>Age must be between 13 and 100</Text>
+                    {demoEditForm.age && (parseInt(demoEditForm.age) < 18 || parseInt(demoEditForm.age) > 100) && (
+                      <Text style={styles.fieldError}>Age must be between 18 and 100</Text>
                     )}
                   </View>
                   <View>
@@ -958,8 +958,8 @@ export function ProfileScreen({ navigation }: any) {
                   />
                   <TouchableOpacity style={[styles.primaryActionBtn, { marginTop: 12 }]} onPress={async () => {
                       const parsedAge = parseInt(demoEditForm.age);
-                      if (!demoEditForm.age || isNaN(parsedAge) || parsedAge < 13 || parsedAge > 100) {
-                        showAlert('Invalid age', 'You must be at least 13 years old to use KarmaVerse.');
+                      if (!demoEditForm.age || isNaN(parsedAge) || parsedAge < 18 || parsedAge > 100) {
+                        showAlert('Invalid age', 'You must be 18 or older to use KarmaVerse.');
                         return;
                       }
                       if (!demoEditForm.state?.trim() || !demoEditForm.city?.trim()) {

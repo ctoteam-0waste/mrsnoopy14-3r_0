@@ -58,9 +58,8 @@ To provide and improve our services, we collect:
 
 ## 8. Children's privacy
 
-- The service is not intended for children under 13.
-- Users under 18 must have parental or guardian consent.
-- We do not knowingly collect data from children under 13. If we learn we have, we will delete it.
+- The service is only for users aged 18 and above.
+- We do not knowingly collect personal data from anyone under 18. If we learn we have, we will close the account and delete that data, except where the law requires us to keep it.
 
 ## 9. Third-party services
 

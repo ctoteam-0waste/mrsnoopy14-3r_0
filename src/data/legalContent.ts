@@ -36,7 +36,7 @@ export const TERMS: LegalDoc = {
         'Cashing out — redemption opens on the dates in the KarmaCoins XP section. Payouts run through RazorpayX and require KYC.',
         'Rate for quiz & referral coins — depends on your unbroken verified-pickup streak at the moment you redeem.',
         'Rate for pickup coins — always the best rate: 10 coins = ₹1. Your streak does not affect it.',
-        'Age — 18+ to hold an account in your own name; 13–17 only with verifiable parental or guardian consent.',
+        'Age — you must be 18 or older to use KarmaVerse.',
         'Complaints — in-app "Need help?" first, then our Grievance Officer. Escalation rights are preserved.',
       ],
     },
@@ -57,11 +57,9 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Eligibility',
       bullets: [
-        '18 years and above: you may register and hold an account in your own name.',
-        '13 to 17 years: you may use the Service only where a parent or legal guardian has given verifiable consent, accepted these Terms on your behalf, and accepts responsibility for your use and for any Pickup at your address.',
-        'Under 13 years: you may not use the Service, and we do not knowingly permit registration.',
-        'Under the DPDP Act, 2023 an individual under 18 is a "child"; we process a child’s data only on verifiable parental or guardian consent, without tracking or behavioural advertising directed at them.',
-        'You must be competent to contract under the Indian Contract Act, 1872, or be represented by a parent or guardian who is.',
+        'You must be 18 years of age or older to register for, hold an account on, or use the Service. You confirm this when you sign up.',
+        'We do not knowingly permit anyone under 18 to register. If we learn that an account belongs to someone under 18, we will close it and delete its personal data, except where the law requires us to keep it.',
+        'You must be competent to contract under the Indian Contract Act, 1872.',
         'You must provide accurate, complete, and current registration information and keep it updated.',
         'The Service is offered for use in India; Pickups are further limited to active Service Areas. Registration does not by itself entitle you to a Pickup.',
       ],
@@ -342,7 +340,7 @@ export const PRIVACY: LegalDoc = {
         'Quiz and referral activity — answers, scores, referral-code usage, and the referral relationship between accounts.',
         'Collected automatically — device and app data, usage data, approximate or precise location, and network data (IP, connection info) for security and fraud prevention. Cookies are used on the website only.',
         'Generated through the Service — Agent-verified category and weight of material, verification photographs, your Wallet and transaction history, and serviceability results.',
-        'What we do not collect — government identity numbers (except KYC required by our Payment Partner for a payout), sexual orientation, health or biometric data, and no data knowingly from anyone under 13.',
+        'What we do not collect — government identity numbers (except KYC required by our Payment Partner for a payout), sexual orientation, health or biometric data, and no data knowingly from anyone under 18.',
       ],
     },
     {
@@ -423,7 +421,7 @@ export const PRIVACY: LegalDoc = {
       heading: 'Your duties, children & automated processing',
       bullets: [
         'The DPDP Act asks that you comply with applicable law when exercising your rights, do not impersonate another person, do not suppress material information (for example during a KYC check), and do not register false or frivolous grievances.',
-        'The Service is for Users aged 13 and above; Users under 18 may use it only with verifiable parental or guardian consent. We do not undertake tracking, behavioural monitoring, or targeted advertising directed at Users under 18, and do not knowingly collect data from anyone under 13.',
+        'The Service is only for Users aged 18 and above. We do not knowingly collect personal data from anyone under 18; if we learn an account belongs to someone under 18, we close it and delete its personal data, except where the law requires us to keep it. Report a suspected under-18 account to info@0waste.co.in.',
         'We use automated processing for serviceability checks, slot allocation, coin and Streak calculation, and fraud detection. Automated fraud checks may temporarily restrict an account or payout; you can ask for a human review through in-app support or our Data Protection Officer. Final coins for a Pickup are based on an Agent’s human verification.',
       ],
     },
@@ -469,7 +467,7 @@ export const TERMS_OF_USE: LegalDoc = {
       bullets: [
         'By accessing or using the Platform you accept these Terms of Use, which are an electronic record under the Information Technology Act, 2000 and need no signature.',
         'Browsing our public website is open to anyone.',
-        'Creating an account and using account features requires you to meet the eligibility criteria in the Terms & Conditions — in summary, 18 or older, or 13–17 with verifiable parental or guardian consent.',
+        'Creating an account and using account features requires you to meet the eligibility criteria in the Terms & Conditions — in summary, you must be 18 or older.',
         'You must not use the Platform if we have previously terminated your access.',
       ],
     },
