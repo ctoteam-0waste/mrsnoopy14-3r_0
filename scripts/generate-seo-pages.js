@@ -107,7 +107,7 @@ const pages = [
           ),
           faq(
             'What waste categories does KarmaVerse accept?',
-            '8 categories: plastic, paper, metal, e-waste, textile, cardboard, and more.'
+            '10 categories: home appliances and electronics, phones and computers, mixed e-waste, plastic, paper and cardboard, metals, glass, batteries, footwear, and textiles.'
           ),
           faq(
             'How do I earn KarmaCoins XP?',
@@ -139,7 +139,7 @@ const pages = [
       <dt>Where is doorstep pickup available?</dt>
       <dd>Doorstep pickup is currently available in Gurugram, Haryana and nearby areas within 50 km of central Gurugram. The app checks your exact address when you book.</dd>
       <dt>What waste categories does KarmaVerse accept?</dt>
-      <dd>8 categories: plastic, paper, metal, e-waste, textile, cardboard, and more.</dd>
+      <dd>10 categories: home appliances and electronics, phones and computers, mixed e-waste, plastic, paper and cardboard, metals, glass, batteries, footwear, and textiles.</dd>
       <dt>How do I earn KarmaCoins XP?</dt>
       <dd>Schedule a pickup, an agent collects and verifies your waste on the spot, and KarmaCoins XP are credited to your wallet instantly.</dd>
       <dt>What can I redeem KarmaCoins XP for?</dt>

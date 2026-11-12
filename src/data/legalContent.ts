@@ -94,7 +94,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Services we provide',
       bullets: [
-        'Waste pickup scheduling — free collection of segregated plastic, paper, metal, glass, e-waste, textile, organic, and declared hazardous household materials, within active Service Areas.',
+        'Waste pickup scheduling — free doorstep collection, within active Service Areas, of the 10 material categories in the app: home appliances and electronics, phones and computers, mixed e-waste, plastic, paper and cardboard, metals, glass, batteries, footwear, and textiles.',
         'KarmaCoins XP rewards — reward points credited on the type and Agent-verified weight of material collected.',
         'Daily eco-quiz — a daily quiz through which additional KarmaCoins XP may be earned.',
         'Referral programme — bonus KarmaCoins XP for introducing new Users.',
@@ -116,7 +116,9 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Waste categories and prohibited items',
       body: [
-        'Hazardous household waste and e-waste must be declared at booking. Undeclared hazardous material may result in refusal, cancellation, and suspension. E-waste and hazardous waste are collected only where the required authorisations are held, so availability may vary by area and over time.',
+        'What we collect — the 10 material categories shown in the app: home appliances and electronics, phones and computers, mixed e-waste, plastic, paper and cardboard, metals, glass, batteries, footwear, and textiles. The categories and items listed in the app are authoritative and may change.',
+        'Book each item under its own category. E-waste, appliances, and batteries must be booked under their own tabs so the Agent comes prepared; items booked under the wrong category may be refused. These are collected only where we or our partners hold the required authorisations, so availability may vary by area and over time.',
+        'Not collected — organic or food waste, garden waste, and hazardous household waste such as paint, chemicals, pesticides, and medicines. Please do not hand these over.',
       ],
       bullets: [
         'Do not present: medical, biomedical, clinical, or sanitary waste, including sharps and used PPE.',
@@ -251,7 +253,7 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Indemnity',
       body: [
-        'You agree to indemnify the Company and its officers, employees, and Agents against reasonable losses, claims, and costs arising from (a) your breach of these Terms, (b) your presentation of prohibited or undeclared hazardous material, (c) your infringement of any third-party right, or (d) your violation of applicable law. This does not apply to the extent the loss is caused by our own act, omission, or negligence. We will notify you promptly of any claim and will not settle it without your consent, not to be unreasonably withheld.',
+        'You agree to indemnify the Company and its officers, employees, and Agents against reasonable losses, claims, and costs arising from (a) your breach of these Terms, (b) your presentation of prohibited material or material we do not collect, (c) your infringement of any third-party right, or (d) your violation of applicable law. This does not apply to the extent the loss is caused by our own act, omission, or negligence. We will notify you promptly of any claim and will not settle it without your consent, not to be unreasonably withheld.',
       ],
     },
     {
@@ -335,7 +337,7 @@ export const PRIVACY: LegalDoc = {
       bullets: [
         'Account details (required) — name and email; mobile number when you sign up with email (optional with social sign-in, and can be added later in your profile). If you sign in with Google, Facebook, or Apple, we receive only your name, email address, and an account identifier from that provider (from Facebook, your basic public profile; from Apple, the email you choose to share, which may be an Apple private relay address). We never receive your password for those accounts, and we never post to them.',
         'Pickup address (required to book) — full address, locality, city, state, PIN code, coordinates, and any landmarks or notes.',
-        'Pickup details (required to book) — waste categories, estimated quantity, hazardous-waste declarations, and chosen slot.',
+        'Pickup details (required to book) — material categories and items, estimated quantity, and chosen slot.',
         'Profile details (optional, never needed for pickups or rewards) — age, gender, marital status, employment status. We do not ask about sexual orientation. Earlier versions of the app had an optional sexual-orientation question; it has been removed, we do not use any answer given, and stored answers are being deleted.',
         'Redemption details (only if you request a payout) — bank account or UPI ID and any KYC documents our Payment Partner requires.',
         'Communications — support tickets, ratings, reviews, photographs, and dispute details, as you provide them.',

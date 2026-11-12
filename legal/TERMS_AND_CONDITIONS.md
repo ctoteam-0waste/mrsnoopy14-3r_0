@@ -31,7 +31,7 @@ Welcome to KarmaVer$e, operated by 3R ZeroWaste. By downloading, installing, or 
 
 KarmaVer$e provides the following services:
 
-- **Waste pickup scheduling**: free doorstep pickups for plastic, paper, metal, glass, e-waste, textile, organic, and hazardous materials.
+- **Waste pickup scheduling**: free doorstep pickups for the 10 material categories in the app: home appliances and electronics, phones and computers, mixed e-waste, plastic, paper and cardboard, metals, glass, batteries, footwear, and textiles. The list in the app is authoritative and may change.
 - **KarmaCoins XP rewards**: earn coins based on the type and verified weight of waste collected.
 - **Daily eco-quiz**: play daily quizzes to earn additional KarmaCoins XP.
 - **Referral program**: when a new user signs up with your referral code, you both get 1,000 bonus KarmaCoins XP.
@@ -43,7 +43,8 @@ KarmaVer$e provides the following services:
 - Pickups are subject to availability in your area and time slot.
 - We may cancel, reschedule, or decline a pickup due to operational, weather, or safety reasons.
 - Ensure waste is properly segregated and accessible at the scheduled time.
-- Hazardous waste must be declared at booking. Failure to do so may cause cancellation and suspension.
+- Book each item under its own category; e-waste, appliances, and batteries must be booked under their own tabs. Items booked under the wrong category may be refused.
+- We do not collect organic or food waste, garden waste, or hazardous household waste such as paint, chemicals, pesticides, and medicines.
 - The Agent verifies and weighs the waste at pickup. Final coins are based on the Agent's verification, not your estimate.
 - **No cash at pickup.** Agents do not pay cash for your material. Every pickup is rewarded only in KarmaCoins XP, credited to your Wallet, which you can later redeem in the app.
 - Do not include prohibited items such as medical/biomedical waste, explosives, radioactive materials, or anything banned under law.
