@@ -11,6 +11,7 @@ import {
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
+import { bookingCoins } from '../utils/bookingCoins';
 
 const FALLBACK = {
   id: 'KC12345',
@@ -18,7 +19,6 @@ const FALLBACK = {
   address: 'Green Park Society, Sector 16, Noida, UP 201301',
   wasteType: 'Mixed items',
   estWeight: '2.5 kg',
-  estCoins: 45,
   agent: { name: 'Ravi Kumar', rating: 4.8, initials: 'RK', phone: '+91 98765 43210' },
   distanceKm: 0.3,
   etaMins: 3,
@@ -32,12 +32,14 @@ export function BookingDetailsScreen({ navigation, route }: any) {
   const passed = route?.params?.booking;
   const bookingId = passed?._id || passed?.id || '';
   const [agentData, setAgentData] = useState<any>(passed?.agent || null);
+  const [fullBooking, setFullBooking] = useState<any>(null);
 
   useEffect(() => {
     if (!bookingId) return;
     bookingService.getBookingById(bookingId)
       .then((full: any) => {
         if (full?.agent) setAgentData(full.agent);
+        if (full) setFullBooking(full);
       })
       .catch(() => {});
   }, [bookingId]);
@@ -57,7 +59,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
     status: passed?.status || FALLBACK.status,
     address: addressText,
     wasteType,
-    estCoins: passed?.totalKarmaCoins || FALLBACK.estCoins,
+    estCoins: bookingCoins(fullBooking) ?? bookingCoins(passed),
     // Real agent only — never the mock, or a booking cancelled before assignment
     // would show a fake "Ravi Kumar".
     agent: agentData || passed?.agent || null,
@@ -126,7 +128,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
             <View style={styles.gridItem}>
               <Text style={styles.gridLabel}>Est. coins</Text>
               <View style={styles.coinsRow}>
-                <Text style={styles.gridValue}>{booking.estCoins} </Text>
+                <Text style={styles.gridValue}>{booking.estCoins == null ? '—' : booking.estCoins.toLocaleString('en-IN')} </Text>
                 <KarmaCoin size={14} />
               </View>
             </View>

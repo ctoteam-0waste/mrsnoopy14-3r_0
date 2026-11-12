@@ -10,6 +10,7 @@ import { isDiwaliSeason } from '../utils/festive';
 import { DiwaliHeaderDecor, DiwaliStrip, DiwaliBackdrop } from '../components/festive/Diwali';
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
+import { bookingCoins, formatBookingCoins } from '../utils/bookingCoins';
 
 export function OrdersScreen({ navigation, route }: any) {
   const styles = useStyles();
@@ -83,7 +84,7 @@ export function OrdersScreen({ navigation, route }: any) {
       type: typeLabel,
       date: `${dateStr}, ${order.timeSlot}`,
       status: uiStatus,
-      credits: order.totalKarmaCoins || 0,
+      credits: bookingCoins(order),
       weight: 'Est. calculation',
       rawStatus: order.status,
       isRated: !!order.isRated
@@ -195,7 +196,7 @@ export function OrdersScreen({ navigation, route }: any) {
                       <Text style={styles.creditsLabel}>Est. reward</Text>
                       <View style={styles.creditsRow}>
                         <KarmaCoin size={16} />
-                        <Text style={styles.creditsValue}>+{order.credits}</Text>
+                        <Text style={styles.creditsValue}>{formatBookingCoins(order.credits)}</Text>
                       </View>
                     </View>
                     <ChevronRight size={20} color={colors.textFaint} />
