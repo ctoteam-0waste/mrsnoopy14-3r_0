@@ -3,7 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
-import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera } from 'lucide-react-native';
+import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera, Pencil } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
 import { UserAvatar } from '../components/shared/UserAvatar';
@@ -11,7 +11,7 @@ import { Avatar } from '../components/shared/Avatar';
 import { ThemeToggle } from '../components/shared/ThemeToggle';
 import { AvatarPickerModal } from '../components/shared/AvatarPickerModal';
 import { getStoredAvatarId, setStoredAvatarId } from '../utils/avatar';
-import { addressService, SavedAddress, AddressLabel } from '../services/address';
+import { addressService, SavedAddress, AddressLabel, AddressInput } from '../services/address';
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { StateCityFields } from '../components/shared/StateCityFields';
@@ -244,6 +244,7 @@ export function ProfileScreen({ navigation }: any) {
   // Delete confirmation renders INSIDE the address-manager modal (as a second
   // layer) so it can never sit behind it — the global showAlert modal did (KV-014).
   const [deleteTarget, setDeleteTarget] = useState<SavedAddress | null>(null);
+  const [editTarget, setEditTarget] = useState<SavedAddress | null>(null);
   // Errors show inside the manager card: a root alert would open behind this modal on iOS.
   const [mgrError, setMgrError] = useState('');
   // iOS can't present a modal while another is on screen or still closing, so the
@@ -280,6 +281,7 @@ export function ProfileScreen({ navigation }: any) {
   const handleAddressSelected = async (_address: string, _coords: [number, number], details?: AddressDetails) => {
     switchAddrModal('mgr');
     if (!details || mgrBusy) return;
+    if (editTarget) return saveAddressEdit(editTarget, details);
     setMgrBusy(true);
     setMgrError('');
     try {
@@ -297,6 +299,55 @@ export function ProfileScreen({ navigation }: any) {
       setMgrAddresses(list);
     } catch (e: any) {
       setMgrError(e?.response?.data?.message || 'Could not save the address. Please try again.');
+    } finally {
+      setMgrBusy(false);
+    }
+  };
+
+  const startAddAddress = () => {
+    setEditTarget(null);
+    setMgrError('');
+    switchAddrModal('search');
+  };
+
+  const startEditAddress = (addr: SavedAddress) => {
+    setEditTarget(addr);
+    setMgrError('');
+    switchAddrModal('search');
+  };
+
+  // Sends only what changed. The location (and the area text that comes from it)
+  // goes only when the pin was moved; an emptied apartment or landmark goes as "".
+  const saveAddressEdit = async (target: SavedAddress, details: AddressDetails) => {
+    const changes: Partial<AddressInput> = {};
+    const label = (details.label as AddressLabel) || 'Home';
+    if (label !== target.label) changes.label = label;
+    if (details.houseNo !== target.houseNo) changes.houseNo = details.houseNo;
+    if ((details.building || '') !== (target.apartment || '')) changes.apartment = details.building || '';
+    if ((details.landmark || '') !== (target.landmark || '')) changes.landmark = details.landmark || '';
+    if ((details.receiverName || '') !== (target.receiverName || '')) changes.receiverName = details.receiverName || '';
+    if ((details.receiverPhone || '') !== (target.receiverPhone || '')) changes.receiverPhone = details.receiverPhone || '';
+    const [lng, lat] = details.coordinates;
+    const [oldLng, oldLat] = target.location?.coordinates || [NaN, NaN];
+    if (!(Math.abs(lng - oldLng) < 1e-5 && Math.abs(lat - oldLat) < 1e-5)) {
+      changes.longitude = lng;
+      changes.latitude = lat;
+      if (details.area && details.area !== target.fullAddress) changes.fullAddress = details.area;
+    }
+    if (Object.keys(changes).length === 0) return;
+    setMgrBusy(true);
+    setMgrError('');
+    try {
+      setMgrAddresses(await addressService.update(target._id, changes));
+    } catch (e: any) {
+      if (e?.response?.status === 404) {
+        setMgrError('This address was removed, maybe from another device. Your list is now up to date.');
+        addressService.list().then(setMgrAddresses).catch(() => {});
+      } else {
+        setMgrError(!e?.response
+          ? 'No internet connection. Please try again.'
+          : (e.response.data?.message || 'Could not save the changes. Please try again.'));
+      }
     } finally {
       setMgrBusy(false);
     }
@@ -1324,7 +1375,10 @@ export function ProfileScreen({ navigation }: any) {
                         <Text style={styles.addrMgrReceiver}>{addr.receiverName} · {addr.receiverPhone}</Text>
                       )}
                     </View>
-                    <TouchableOpacity style={styles.addrMgrDel} onPress={() => deleteAddress(addr)}>
+                    <TouchableOpacity style={styles.addrMgrEdit} onPress={() => startEditAddress(addr)} disabled={mgrBusy} accessibilityLabel="Edit address">
+                      <Pencil size={15} color="#16a34a" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.addrMgrDel} onPress={() => deleteAddress(addr)} disabled={mgrBusy} accessibilityLabel="Delete address">
                       <Trash2 size={16} color="#dc2626" />
                     </TouchableOpacity>
                   </View>
@@ -1341,7 +1395,7 @@ export function ProfileScreen({ navigation }: any) {
                   <ActivityIndicator size="small" color="#16a34a" />
                 </View>
               ) : (
-                <TouchableOpacity style={styles.addrMgrAddBtn} onPress={() => switchAddrModal('search')} activeOpacity={0.8}>
+                <TouchableOpacity style={styles.addrMgrAddBtn} onPress={startAddAddress} activeOpacity={0.8}>
                   <Text style={styles.addrMgrAddText}>+ Add new address</Text>
                 </TouchableOpacity>
               )
@@ -1374,7 +1428,17 @@ export function ProfileScreen({ navigation }: any) {
       {/* Unified map-based address editor */}
       <AddressSearch
         visible={showAddressSearch}
-        userCoords={null}
+        userCoords={editTarget?.location?.coordinates || null}
+        editing={!!editTarget}
+        initialArea={editTarget?.fullAddress}
+        initialDetails={editTarget ? {
+          houseNo: editTarget.houseNo,
+          building: editTarget.apartment,
+          landmark: editTarget.landmark,
+          receiverName: editTarget.receiverName,
+          receiverPhone: editTarget.receiverPhone,
+          label: editTarget.label,
+        } : undefined}
         onSelect={handleAddressSelected}
         onCancel={() => switchAddrModal('mgr')}
         onDismiss={showNextAddrModal}
@@ -1544,6 +1608,7 @@ const useStyles = makeStyles((c) => ({
   addrMgrMakeDef: { fontSize: 11.5, fontWeight: '700', color: '#0284c7' },
   addrMgrText: { fontSize: 12.5, color: c.textMuted, fontWeight: '500', lineHeight: 18 },
   addrMgrReceiver: { fontSize: 11.5, color: c.textFaint, fontWeight: '600', marginTop: 3 },
+  addrMgrEdit: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginTop: 2 },
   addrMgrDel: { width: 32, height: 32, borderRadius: 16, backgroundColor: '#fef2f2', alignItems: 'center', justifyContent: 'center', marginTop: 2 },
   addrMgrAddBtn: { marginTop: 14, borderWidth: 1.5, borderColor: '#bbf7d0', borderStyle: 'dashed', backgroundColor: c.primarySoft, paddingVertical: 12, borderRadius: 14, alignItems: 'center' },
   addrMgrAddText: { color: '#15803d', fontSize: 14, fontWeight: '800' },
