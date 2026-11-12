@@ -807,7 +807,7 @@ export function ProfileScreen({ navigation }: any) {
                   title="Help & support"
                   onPress={() => showAlert(
                     'Help & support',
-                    'Reach out to us anytime:\n\nEmail: cto.team@0waste.co.in\nAddress: Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'
+                    'Reach out to us anytime:\n\nEmail: info@0waste.co.in\nPhone: +91 70931 98828 / +91 99071 91928\nAddress: Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'
                   )}
                 />
                 <View style={styles.divider} />

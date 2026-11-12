@@ -58,7 +58,7 @@ const orgJsonLd = {
   legalName: '3R ZeroWaste Private Limited',
   url: 'https://0waste.co.in/',
   logo: `${SITE}/apple-touch-icon.png`,
-  email: 'cto.team@0waste.co.in',
+  email: 'info@0waste.co.in',
   telephone: '+91-70931-98828',
   address: {
     '@type': 'PostalAddress',

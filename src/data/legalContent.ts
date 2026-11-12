@@ -280,8 +280,8 @@ export const TERMS: LegalDoc = {
       heading: 'Contact us',
       bullets: [
         'General support — in-app "Need help?"',
-        'General enquiries — info@karmaverse.earth · 070931 98828 / 099071 91928',
-        'Grievance Officer (Terms, content, and platform complaints) — grievance@karmaverse.earth',
+        'General enquiries — info@0waste.co.in · 070931 98828 / 099071 91928',
+        'Grievance Officer (Terms, content, and platform complaints) — info@0waste.co.in, subject "Grievance"',
         'Data protection / privacy requests — see the Privacy Policy, Contact section',
         'Registered office — 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010',
         'Operating office — Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051',
@@ -439,9 +439,9 @@ export const PRIVACY: LegalDoc = {
     {
       heading: 'Contact us',
       bullets: [
-        'Data Protection Officer / privacy requests — privacy@karmaverse.earth',
-        'Privacy grievances and escalations — Grievance Officer, grievance@karmaverse.earth',
-        'General enquiries — info@karmaverse.earth · 070931 98828 / 099071 91928',
+        'Data Protection Officer / privacy requests — info@0waste.co.in, subject "Privacy request"',
+        'Privacy grievances and escalations — Grievance Officer, info@0waste.co.in, subject "Grievance"',
+        'General enquiries — info@0waste.co.in · 070931 98828 / 099071 91928',
         'In-app — "Need help?" → Privacy',
         'Postal address — 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051 (registered office: 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010)',
         'Response time — we acknowledge privacy requests and grievances within 24 hours and resolve them within 15 days of receipt.',
@@ -542,7 +542,7 @@ export const TERMS_OF_USE: LegalDoc = {
     {
       heading: 'Security research and disclosure',
       bullets: [
-        'We welcome good-faith security research. Report a suspected vulnerability to security@karmaverse.earth before disclosing it publicly or to any third party.',
+        'We welcome good-faith security research. Report a suspected vulnerability to info@0waste.co.in (subject "Security") before disclosing it publicly or to any third party.',
         'We will acknowledge your report, keep you informed, and will not pursue action against researchers who act in good faith.',
         'Good-faith research means you test only against your own account and data, do not access or exfiltrate anyone else’s data, do not degrade or deny service, do not use social engineering or physical intrusion, give us reasonable time to remediate before public disclosure, and comply with the law throughout.',
       ],
@@ -560,7 +560,7 @@ export const TERMS_OF_USE: LegalDoc = {
     {
       heading: 'Reporting content & grievance redressal',
       bullets: [
-        'Report content in-app via "Need help?" or the report control beside the content, or write to grievance@karmaverse.earth with a description, where it appears, and why it breaches these Terms or the law.',
+        'Report content in-app via "Need help?" or the report control beside the content, or write to info@0waste.co.in (subject "Grievance") with a description, where it appears, and why it breaches these Terms or the law.',
         'We acknowledge any grievance within 24 hours and resolve it within 15 days.',
         'Content showing an individual in the nude, in a sexual act, or in impersonation — including artificially generated material — is acted on within 24 hours of a valid complaint.',
         'Removal following a court order or government notification, and information or assistance for a lawfully authorised agency, is provided within the period prescribed by law.',
@@ -582,7 +582,7 @@ export const TERMS_OF_USE: LegalDoc = {
         'We may update these Terms of Use for changes to the Platform, our practices, or legal requirements. Material changes are notified at least 30 days before they take effect; non-material changes take effect on publication. Continued use after a change constitutes acceptance.',
         'These Terms of Use, with the Terms & Conditions and Privacy Policy, form the entire agreement about the Platform. If any provision is invalid it is severed; our failure to enforce a right is not a waiver. You may not assign your rights; we may, provided your rights are not reduced.',
         'These Terms of Use are made in English (the English version prevails) and are governed by the laws of India. Subject to your consumer rights, the courts at Gurugram, Haryana have exclusive jurisdiction. We attempt informal resolution for at least 30 days before legal proceedings, without preventing urgent interim relief.',
-        'Contact — general support in-app "Need help?"; Grievance Officer (content reports, platform complaints, IP notices) grievance@karmaverse.earth; security reports security@karmaverse.earth; privacy requests privacy@karmaverse.earth; general enquiries info@karmaverse.earth · 070931 98828 / 099071 91928; registered office 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010; operating office Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051.',
+        'Contact — general support in-app "Need help?"; Grievance Officer (content reports, platform complaints, IP notices), security reports, privacy requests and general enquiries — info@0waste.co.in (subject "Grievance", "Security" or "Privacy request" as relevant) · 070931 98828 / 099071 91928; registered office 3R ZeroWaste Private Limited, 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010; operating office Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051.',
       ],
     },
     {
