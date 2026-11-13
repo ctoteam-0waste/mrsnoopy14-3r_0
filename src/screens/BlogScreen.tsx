@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Clock, RefreshCw, TrendingUp } from 'lucide-react-native';
 import { BlogPost, categoryColor, fetchBlogPosts, fetchMostRead, formatBlogDate } from '../services/blog';
 import { setPageMeta } from '../utils/pageMeta';
-import { getToken } from '../utils/tokenStore';
+import { goBackOrHome } from '../utils/navBack';
 import { WebFooter } from '../components/shared/WebFooter';
 import { NewsletterBox } from '../components/blog/NewsletterBox';
 import { useTheme, makeStyles } from '../theme';
@@ -49,10 +49,7 @@ export function BlogScreen({ navigation }: any) {
     });
   }, [load]);
 
-  const goHome = async () => {
-    if (navigation.canGoBack()) return navigation.goBack();
-    navigation.navigate((await getToken().catch(() => null)) ? 'App' : 'Splash');
-  };
+  const goHome = () => goBackOrHome(navigation);
 
   const categories = useMemo(() => ['All', ...Array.from(new Set((posts ?? []).map((p) => p.category)))], [posts]);
   const shown = (posts ?? []).filter((p) => category === 'All' || p.category === category);

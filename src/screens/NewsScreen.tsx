@@ -8,7 +8,7 @@ import { NewsCard } from '../components/shared/NewsCard';
 import { NEWSLETTERS } from '../data/newsletters';
 import { NewsletterCard } from '../components/shared/NewsletterCard';
 import { WebFooter } from '../components/shared/WebFooter';
-import { getToken } from '../utils/tokenStore';
+import { goBackOrHome } from '../utils/navBack';
 
 const MAX = 1100;
 
@@ -20,13 +20,7 @@ export function NewsScreen({ navigation }: any) {
   const inner = Math.min(width, MAX) - pad * 2;
   const cardWidth = Math.floor((inner - gap * (columns - 1)) / columns);
 
-  // A shared /news link has no history; send guests to the landing page and
-  // logged-in users to the app home instead of a dead back button.
-  const goBack = async () => {
-    if (navigation.canGoBack()) { navigation.goBack(); return; }
-    const token = await getToken().catch(() => null);
-    navigation.navigate(token ? 'App' : 'Splash');
-  };
+  const goBack = () => goBackOrHome(navigation);
 
   return (
     <View style={s.root}>
