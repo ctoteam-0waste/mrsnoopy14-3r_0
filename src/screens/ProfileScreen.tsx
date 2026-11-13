@@ -546,6 +546,8 @@ export function ProfileScreen({ navigation }: any) {
 
   const openEditModal = () => {
     setEditForm({ ...userProfile });
+    setEditError('');
+    setFlowStep('form');
     setModalVisible(true);
   };
 
@@ -597,11 +599,25 @@ export function ProfileScreen({ navigation }: any) {
   // Which field the current OTP round is verifying — email OTP goes to the current phone,
   // phone OTP goes to the new phone, so they can't share a single round-trip.
   const [otpStage, setOtpStage] = useState<'email' | 'phone' | null>(null);
+  // Errors show inside the sheet: an alert opened over the sheet lands behind it on
+  // iOS, so the user never sees it and the screen stops responding.
+  const [editError, setEditError] = useState('');
+  const [loadingLabel, setLoadingLabel] = useState('Saving details...');
+  const serverMessage = (error: any, fallback: string) =>
+    error?.response?.data?.message || error?.response?.data?.error || fallback;
+  const showOtpError = (message: string) => {
+    setEditError(message);
+    setProfileOtp(['', '', '', '', '', '']);
+    setFlowStep('otp');
+    setTimeout(() => profileOtpRefs.current[0]?.focus(), 50);
+  };
 
   const emailChanged = editForm.email && editForm.email !== userProfile?.email;
   const phoneChanged = editForm.phone && editForm.phone !== userProfile?.phone;
 
   const startEmailOtp = async () => {
+    setEditError('');
+    setLoadingLabel('Sending OTP...');
     setFlowStep('loading');
     try {
       await authService.sendOtp(userProfile?.phone, 'change-email');
@@ -609,12 +625,14 @@ export function ProfileScreen({ navigation }: any) {
       setProfileOtp(['', '', '', '', '', '']);
       setFlowStep('otp');
     } catch (error: any) {
-      showAlert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
+      setEditError(serverMessage(error, 'Could not send the OTP. Please try again.'));
       setFlowStep('form');
     }
   };
 
   const startPhoneOtp = async () => {
+    setEditError('');
+    setLoadingLabel('Sending OTP...');
     setFlowStep('loading');
     try {
       await authService.sendOtp(editForm.phone, 'change-phone');
@@ -622,7 +640,7 @@ export function ProfileScreen({ navigation }: any) {
       setProfileOtp(['', '', '', '', '', '']);
       setFlowStep('otp');
     } catch (error: any) {
-      showAlert('Could not send OTP', error?.response?.data?.message || 'Please try again.');
+      setEditError(serverMessage(error, 'Could not send the OTP. Please try again.'));
       setFlowStep('form');
     }
   };
@@ -633,11 +651,11 @@ export function ProfileScreen({ navigation }: any) {
     // Validate a changed phone up front so we never fire an OTP to a malformed
     // number — must be a 10-digit Indian mobile.
     if (phoneChanged && !/^[6-9]\d{9}$/.test(editForm.phone.trim())) {
-      showAlert('Invalid mobile number', 'Please enter a valid 10-digit mobile number.');
+      setEditError('Please enter a valid 10-digit mobile number.');
       return;
     }
     if (emailChanged && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email.trim())) {
-      showAlert('Invalid email', 'Please enter a valid email address.');
+      setEditError('Please enter a valid email address.');
       return;
     }
 
@@ -664,6 +682,8 @@ export function ProfileScreen({ navigation }: any) {
   };
 
   const saveProfileDirect = async () => {
+    setEditError('');
+    setLoadingLabel('Saving details...');
     setFlowStep('loading');
     try {
       if (editForm.name !== userProfile?.name) {
@@ -673,8 +693,7 @@ export function ProfileScreen({ navigation }: any) {
       setFlowStep('success');
       setTimeout(() => closeModal(), 2000);
     } catch (error: any) {
-      const msg = error?.response?.data?.message || error?.response?.data?.error || 'Failed to update profile';
-      showAlert('Update failed', msg);
+      setEditError(serverMessage(error, 'Could not update your profile. Please try again.'));
       setFlowStep('form');
     }
   };
@@ -682,9 +701,11 @@ export function ProfileScreen({ navigation }: any) {
   const handleProfileOtpVerify = async () => {
     const otp = profileOtp.join('');
     if (otp.length < 6) {
-      showAlert('Invalid OTP', 'Please enter the 6-digit OTP.');
+      setEditError('Please enter the 6-digit OTP.');
       return;
     }
+    setEditError('');
+    setLoadingLabel('Verifying OTP...');
     setFlowStep('loading');
     try {
       if (otpStage === 'email') {
@@ -711,12 +732,12 @@ export function ProfileScreen({ navigation }: any) {
       setFlowStep('success');
       setTimeout(() => closeModal(), 2000);
     } catch (error: any) {
-      showAlert('Verification failed', error?.response?.data?.message || 'Invalid or expired OTP.');
-      setFlowStep('otp');
+      showOtpError(serverMessage(error, 'Incorrect or expired OTP. Please try again.'));
     }
   };
 
   const handleProfileOtpChange = (text: string, index: number) => {
+    if (editError) setEditError('');
     const newOtp = [...profileOtp];
     newOtp[index] = text.replace(/[^0-9]/g, '');
     setProfileOtp(newOtp);
@@ -1133,6 +1154,7 @@ export function ProfileScreen({ navigation }: any) {
                   </View>
                 </View>
 
+                {!!editError && <Text style={[styles.fieldError, { textAlign: 'center', marginBottom: 10 }]}>{editError}</Text>}
                 <TouchableOpacity 
                   style={[styles.primaryActionBtn, (!editForm.name || !editForm.email || !editForm.phone) && styles.primaryActionBtnDisabled]} 
                   onPress={handleSaveProfile}
@@ -1147,7 +1169,7 @@ export function ProfileScreen({ navigation }: any) {
             {flowStep === 'loading' && (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#16a34a" />
-                <Text style={styles.loadingText}>Saving details...</Text>
+                <Text style={styles.loadingText}>{loadingLabel}</Text>
               </View>
             )}
 
@@ -1165,14 +1187,14 @@ export function ProfileScreen({ navigation }: any) {
                   +91 {otpStage === 'phone' ? editForm.phone : userProfile?.phone}
                 </Text>
 
-                <View style={{ flexDirection: 'row', gap: 8, marginBottom: 24, justifyContent: 'center' }}>
+                <View style={{ flexDirection: 'row', gap: 8, marginBottom: editError ? 10 : 24, justifyContent: 'center' }}>
                   {profileOtp.map((digit: string, i: number) => (
                     <TextInput
                       key={i}
                       ref={(ref: any) => { profileOtpRefs.current[i] = ref; }}
                       style={{
                         width: 44, height: 52, borderRadius: 12, borderWidth: 2,
-                        borderColor: digit ? '#15803d' : '#e2e8f0',
+                        borderColor: editError ? '#ef4444' : digit ? '#15803d' : '#e2e8f0',
                         backgroundColor: digit ? '#f0fdf4' : '#f8fafc',
                         textAlign: 'center', fontSize: 20, fontWeight: '900', color: colors.text,
       }}
@@ -1186,6 +1208,7 @@ export function ProfileScreen({ navigation }: any) {
                   ))}
                 </View>
 
+                {!!editError && <Text style={[styles.fieldError, { textAlign: 'center', marginBottom: 16 }]}>{editError}</Text>}
                 <TouchableOpacity
                   style={{ backgroundColor: profileOtp.join('').length < 6 ? '#94a3b8' : '#15803d', borderRadius: 14, paddingVertical: 14, width: '100%', alignItems: 'center', marginBottom: 12 }}
                   onPress={handleProfileOtpVerify}
@@ -1194,7 +1217,7 @@ export function ProfileScreen({ navigation }: any) {
                   <Text style={{ color: 'white', fontWeight: '900', fontSize: 15 }}>Verify & save</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => setFlowStep('form')} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <TouchableOpacity onPress={() => { setEditError(''); setFlowStep('form'); }} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                   <ChevronLeft size={15} color={colors.textMuted} />
                   <Text style={{ color: colors.textMuted, fontWeight: '600', fontSize: 13 }}>Back to edit</Text>
                 </TouchableOpacity>
