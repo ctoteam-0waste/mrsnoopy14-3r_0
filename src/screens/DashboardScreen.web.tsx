@@ -243,7 +243,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
-                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups + quizDays.length}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={{ width: Math.floor((width - 2 * pad - 8) / 2), backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
                     {diwali && <DiwaliGoldBorder delay={i * 1} />}
@@ -263,7 +263,7 @@ export function DashboardScreen({ navigation, route }: any) {
                   { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
-                  { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
+                  { icon: Package, color: '#22d3ee', val: `${totalPickups + quizDays.length}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
                   <View key={i} style={z.statCard}>
                     {diwali && <DiwaliGoldBorder delay={i * 1} />}
