@@ -602,6 +602,7 @@ export function ProfileScreen({ navigation }: any) {
   // Errors show inside the sheet: an alert opened over the sheet lands behind it on
   // iOS, so the user never sees it and the screen stops responding.
   const [editError, setEditError] = useState('');
+  const otpGreen = isDark ? colors.primary : '#15803d';
   const [loadingLabel, setLoadingLabel] = useState('Saving details...');
   const serverMessage = (error: any, fallback: string) =>
     error?.response?.data?.message || error?.response?.data?.error || fallback;
@@ -1176,14 +1177,14 @@ export function ProfileScreen({ navigation }: any) {
             {/* Step: OTP Verification */}
             {flowStep === 'otp' && (
               <View style={{ alignItems: 'center', paddingVertical: 20, paddingHorizontal: 16 }}>
-                <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 1.5, borderColor: '#bbf7d0' }}>
-                  <ShieldCheck size={24} color="#15803d" />
+                <View style={{ width: 56, height: 56, borderRadius: 16, backgroundColor: colors.primarySoft, alignItems: 'center', justifyContent: 'center', marginBottom: 16, borderWidth: 1.5, borderColor: isDark ? colors.border : '#bbf7d0' }}>
+                  <ShieldCheck size={24} color={otpGreen} />
                 </View>
                 <Text style={{ fontSize: 20, fontWeight: '900', color: colors.text, marginBottom: 6, textAlign: 'center' }}>Secure verification</Text>
                 <Text style={{ fontSize: 13, color: colors.textMuted, fontWeight: '500', marginBottom: 4, textAlign: 'center' }}>
                   {otpStage === 'phone' ? 'OTP sent to your new mobile number' : 'OTP sent to your registered mobile number'}
                 </Text>
-                <Text style={{ fontSize: 14, color: '#15803d', fontWeight: '800', marginBottom: 24, textAlign: 'center' }}>
+                <Text style={{ fontSize: 14, color: otpGreen, fontWeight: '800', marginBottom: 24, textAlign: 'center' }}>
                   +91 {otpStage === 'phone' ? editForm.phone : userProfile?.phone}
                 </Text>
 
@@ -1194,8 +1195,8 @@ export function ProfileScreen({ navigation }: any) {
                       ref={(ref: any) => { profileOtpRefs.current[i] = ref; }}
                       style={{
                         width: 44, height: 52, borderRadius: 12, borderWidth: 2,
-                        borderColor: editError ? '#ef4444' : digit ? '#15803d' : '#e2e8f0',
-                        backgroundColor: digit ? '#f0fdf4' : '#f8fafc',
+                        borderColor: editError ? '#ef4444' : digit ? otpGreen : colors.border,
+                        backgroundColor: digit ? colors.primarySoft : colors.inputBg,
                         textAlign: 'center', fontSize: 20, fontWeight: '900', color: colors.text,
       }}
                       value={digit}
