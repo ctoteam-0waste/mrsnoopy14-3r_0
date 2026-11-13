@@ -37,26 +37,72 @@ function goToScreen(nav: any, screen?: string): boolean {
   return false;
 }
 
+// Booking pushes reach us under several names (the push `type`, the socket `event`,
+// or a generic type plus the booking `status`), so they are grouped by meaning:
+// in progress → Live tracking, completed → Booking details, cancelled → Orders.
+type BookingStage = 'progress' | 'completed' | 'cancelled';
+const PROGRESS_KINDS = ['BOOKING_ACCEPTED', 'AGENT_ASSIGNED', 'AGENT_REACHED', 'AGENT_ARRIVED', 'BOOKING_PICKED_UP',
+  'PICKED_UP', 'BOOKING_IN_POOL', 'PICKUP_REMINDER', 'BOOKING_CONFIRMED', 'BOOKING_CREATED', 'AGENT_ON_THE_WAY'];
+const PROGRESS_STATUSES = ['PENDING', 'SCHEDULED', 'ACCEPTED', 'ASSIGNED', 'REACHED', 'ARRIVED', 'PICKED_UP', 'IN_PROGRESS', 'VERIFICATION'];
+
+function bookingStage(kind: string, status: string): BookingStage | null {
+  if (kind.includes('CANCEL') || status === 'CANCELLED') return 'cancelled';
+  if (kind === 'BOOKING_COMPLETED' || kind === 'RATING_REQUEST' || kind === 'PICKUP_COMPLETED' || status === 'COMPLETED') return 'completed';
+  if (PROGRESS_KINDS.includes(kind) || PROGRESS_STATUSES.includes(status)) return 'progress';
+  return null;
+}
+
+// Types with no booking and no explicit target still open their feature.
+function screenForKind(kind: string): string | undefined {
+  if (TYPE_SCREEN[kind]) return TYPE_SCREEN[kind];
+  if (/QUIZ|STREAK/.test(kind)) return 'Quiz';
+  if (/REFERR/.test(kind)) return 'Referral';
+  if (/REDEEM|WITHDRAW|PAYOUT/.test(kind)) return 'RedeemHistory';
+  if (/COIN|WALLET|CREDIT|TRANSFER|BONUS/.test(kind)) return 'Wallet';
+  if (/OFFER|STORE|VOUCHER/.test(kind)) return 'Store';
+  if (/BOOKING|PICKUP|ORDER/.test(kind)) return 'Orders';
+  return undefined;
+}
+
+// A tap that arrives before the navigator is ready (the app was closed and is
+// still starting) waits here; RootNavigator replays it once navigation is ready.
+let pendingTap: { data: any; actionIdentifier?: string } | null = null;
+
+export function flushPendingNotification(): void {
+  const tap = pendingTap;
+  pendingTap = null;
+  if (tap) routeNotification(tap.data, tap.actionIdentifier);
+}
+
+export function dropPendingNotification(): void {
+  pendingTap = null;
+}
+
 export function routeNotification(data: any, actionIdentifier?: string): void {
   const nav: any = navigationRef.current;
-  if (!nav) return;
+  if (!nav || !nav.isReady?.()) { pendingTap = { data, actionIdentifier }; return; }
 
-  const bookingId = data?.bookingId;
-  const booking = bookingId ? { _id: bookingId } : undefined;
+  const bookingId = data?.bookingId || data?.booking?._id || data?.booking_id;
+  const booking = bookingId ? { _id: String(bookingId) } : undefined;
+  const kind = String(data?.type || data?.event || data?.notificationType || '').toUpperCase();
+  const status = String(data?.status || data?.bookingStatus || '').toUpperCase();
   const target = data?.screen || data?.route;
+  const openTracking = () => nav.navigate('OrderTracking', { bookingId: String(bookingId) });
+  const openDetails = () => nav.navigate('BookingDetails', { booking });
+  const openOrders = () => nav.navigate('App', { screen: 'Orders', params: { tab: 'History' } });
 
   // ── An action button was tapped — route by the button, not the default target. ──
   if (actionIdentifier && actionIdentifier !== DEFAULT_ACTION) {
     switch (actionIdentifier) {
       case 'track':
-        if (booking) nav.navigate('OrderTracking', { bookingId });
+        if (booking) openTracking();
         return;
       case 'rate':
       case 'view':
-        if (booking) nav.navigate('BookingDetails', { booking });
+        if (booking) openDetails();
         return;
       case 'orders':
-        nav.navigate('App', { screen: 'Orders' });
+        openOrders();
         return;
       case 'open_quiz': nav.navigate('Quiz'); return;
       case 'open_redeem': nav.navigate('Redeem'); return;
@@ -68,31 +114,19 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
     }
   }
 
-  // ── TRANSACTIONAL — the pickup lifecycle. In-progress states open live tracking,
-  //    a completed pickup opens its details, a cancellation opens the orders list. ──
-  switch (data?.type) {
-    case 'BOOKING_ACCEPTED':
-    case 'AGENT_REACHED':
-    case 'BOOKING_PICKED_UP':
-    case 'BOOKING_IN_POOL':
-    case 'PICKUP_REMINDER':
-      if (booking) { nav.navigate('OrderTracking', { bookingId }); return; }
-      break;
-    case 'BOOKING_COMPLETED':
-    case 'RATING_REQUEST':
-      if (booking) { nav.navigate('BookingDetails', { booking }); return; }
-      break;
-    case 'BOOKING_CANCEL_SUCCESS':
-      nav.navigate('App', { screen: 'Orders' });
-      return;
-  }
+  // ── TRANSACTIONAL — the pickup lifecycle. ──
+  const stage = bookingStage(kind, status);
+  if (stage === 'cancelled') { openOrders(); return; }
+  if (booking && stage === 'progress') { openTracking(); return; }
+  if (booking && stage === 'completed') { openDetails(); return; }
 
   // ── Everything else (engagement / marketing, payouts, alerts). Route by the
-  //    explicit target the backend set, then by a known type. ──
-  if (target === 'OrderTracking' && booking) { nav.navigate('OrderTracking', { bookingId }); return; }
+  //    explicit target the backend set, then by the type. ──
+  if (target === 'OrderTracking' && booking) { openTracking(); return; }
+  if (target === 'BookingDetails' && booking) { openDetails(); return; }
   if (goToScreen(nav, target)) return;
-  if (data?.type && goToScreen(nav, TYPE_SCREEN[data.type])) return;
 
-  // Fallback: any booking-linked notification with no/unknown type → booking details.
-  if (booking) nav.navigate('BookingDetails', { booking });
+  // Fallback: a booking-linked notification of an unknown type → booking details.
+  if (booking) { openDetails(); return; }
+  goToScreen(nav, screenForKind(kind));
 }
