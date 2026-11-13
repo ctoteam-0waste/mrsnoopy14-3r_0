@@ -8,7 +8,7 @@ import { makeStyles } from '../../theme';
 const MILESTONES = [3, 7, 14, 30, 60, 100];
 const WD = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-// Celebration popup for the Day streak card. Shows the current streak, this
+// Celebration popup for the Pickup streak card. Shows the current streak, this
 // week's activity (last N consecutive days lit, derived from the streak count),
 // progress to the next milestone and how to keep the streak alive.
 export function StreakModal({ visible, onClose, streak }: { visible: boolean; onClose: () => void; streak: number; }) {
@@ -27,7 +27,7 @@ export function StreakModal({ visible, onClose, streak }: { visible: boolean; on
   });
 
   return (
-    <StatModal visible={visible} onClose={onClose} title="Your streak">
+    <StatModal visible={visible} onClose={onClose} title="Your pickup streak">
       <LinearGradient colors={['#fb923c', '#f97316', '#ea580c']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.hero}>
         <View style={s.heroGlow} pointerEvents="none" />
         <View style={s.flameCircle}><Flame size={28} color="#fff" fill="#fde68a" /></View>
@@ -74,7 +74,7 @@ export function StreakModal({ visible, onClose, streak }: { visible: boolean; on
         })}
       </View>
 
-      <Text style={s.tip}>Open the app daily and do one green action — schedule a pickup or play the eco quiz — to keep your streak alive.</Text>
+      <Text style={s.tip}>Complete a verified pickup every day to keep your streak alive. The quiz and referrals earn coins but do not add to this streak.</Text>
     </StatModal>
   );
 }

@@ -91,7 +91,7 @@ export function ProfileScreen({ navigation }: any) {
   useFocusEffect(useCallback(() => {
     const fetchProfile = async () => {
       try {
-        // Day streak from the backend, the same number Home and the wallet show.
+        // Pickup streak from the backend, the same number Home and the wallet show.
         const [data, streakStatus] = await Promise.all([
           profileService.getProfile(),
           streakService.getStatus().catch(() => null),
@@ -805,7 +805,7 @@ export function ProfileScreen({ navigation }: any) {
                 <View style={styles.statsRow}>
                   <View style={styles.statPill}>
                     <Flame size={14} color="#fb923c" />
-                    <Text style={styles.statText}>{userProfile?.streak || 0} day streak</Text>
+                    <Text style={styles.statText}>{userProfile?.streak || 0} day pickup streak</Text>
                   </View>
                   <View style={styles.statDivider} />
                   <View style={styles.statPill}>

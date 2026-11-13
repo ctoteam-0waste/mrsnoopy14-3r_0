@@ -10,7 +10,7 @@ import { LaunchDayPopup } from '../components/shared/LaunchDayPopup';
 import { profileService } from '../services/profile';
 import { bookingService } from '../services/booking';
 import { streakService } from '../services/streak';
-import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
+import { getLocalDateStr } from '../utils/quizDate';
 import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { loadQuizDays, QuizDays } from '../utils/quizHistory';
@@ -153,23 +153,14 @@ export function DashboardScreen({ navigation, route }: any) {
     const loadQuiz = async () => {
       const token = await getToken();
       const sfx = getStableUserSuffix(token);
-      const today = getLocalDateStr();
-      const yest = getLocalYesterdayStr();
       setUserSuffix(sfx);
       const showQuiz = ({ days, streak }: QuizDays) => { setQuizDays(days); setQuizStreak(streak); };
       showQuiz(await loadQuizDays(sfx, false));
       loadQuizDays(sfx).then(showQuiz).catch(() => {});
 
-      // Day streak from the backend (same as the wallet); the on-device count is only a fallback.
-      const live = streakService.getStatus().catch(() => null);
-      const [lad, ds] = await Promise.all([AsyncStorage.getItem(`lastActiveDate_${sfx}`), AsyncStorage.getItem(`dayStreak_${sfx}`)]);
-      let dayStreak: number;
-      if (lad === today) dayStreak = Number(ds) || 1;
-      else if (lad === yest) dayStreak = (Number(ds) || 0) + 1;
-      else dayStreak = 1;
-      await AsyncStorage.multiSet([[`lastActiveDate_${sfx}`, today], [`dayStreak_${sfx}`, String(dayStreak)]]);
-      const status = await live;
-      setStreak(status ? status.currentStreak : dayStreak);
+      // Pickup streak: only the backend's /streak/status, same as the wallet and profile.
+      const status = await streakService.getStatus().catch(() => null);
+      setStreak(status?.currentStreak ?? 0);
     };
     const unsub = navigation.addListener('focus', () => { load(); loadQuiz(); });
     load(); loadQuiz();
@@ -250,7 +241,7 @@ export function DashboardScreen({ navigation, route }: any) {
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {[
                   { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
-                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
+                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (
@@ -270,7 +261,7 @@ export function DashboardScreen({ navigation, route }: any) {
               <View style={z.heroRight}>
                 {[
                   { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
-                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
+                  { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
                 ].map((st, i) => (

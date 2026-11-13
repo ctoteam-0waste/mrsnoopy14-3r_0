@@ -24,7 +24,7 @@ import { hasSeenTour, markTourSeen } from '../utils/coachMarks';
 import { tabBarHeight } from '../utils/layout';
 import { useNotifications } from '../context/NotificationContext';
 import { profileService } from '../services/profile';
-import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
+import { getLocalDateStr } from '../utils/quizDate';
 import { bookingService } from '../services/booking';
 import { streakService } from '../services/streak';
 import { BACKEND_BASE } from '../services/api';
@@ -239,7 +239,7 @@ export function DashboardScreen({ navigation, route }: any) {
       targetRef: statsRef,
       scroll: 'top',
       title: 'Streaks and impact',
-      body: 'Track your coins, day streak, quiz streak and completed pickups. Open the app daily to keep your streak going, and tap any tile for details.',
+      body: 'Track your coins, pickup streak, quiz streak and completed pickups. Complete a pickup every day to grow your pickup streak, and tap any tile for details.',
     },
     {
       targetRef: pickupRef,
@@ -366,41 +366,21 @@ export function DashboardScreen({ navigation, route }: any) {
       show(await loadQuizDays(suffix));
     };
 
-    // Day streak: the backend's /streak/status, the same number the wallet shows and
-    // the reward rate uses. The on-device visit count is only a fallback for when the
-    // backend can't be reached (it restarts at 1 on a reinstall or a new device).
-    const computeVisitStreak = async () => {
-      const live = streakService.getStatus().catch(() => null);
-      const token = await getToken();
-      const suffix = getStableUserSuffix(token);
-      const todayStr = getLocalDateStr();
-      const yesterdayStr = getLocalYesterdayStr();
-      const [lastVisit, storedStreak] = await Promise.all([
-        AsyncStorage.getItem(`lastVisitDate_${suffix}`),
-        AsyncStorage.getItem(`visitStreak_${suffix}`),
-      ]);
-      let streakVal = Number(storedStreak) || 0;
-      if (lastVisit === todayStr) {
-        streakVal = streakVal || 1;
-      } else {
-        streakVal = lastVisit === yesterdayStr ? streakVal + 1 : 1;
-        await AsyncStorage.multiSet([
-          [`visitStreak_${suffix}`, String(streakVal)],
-          [`lastVisitDate_${suffix}`, todayStr],
-        ]);
-      }
-      const status = await live;
-      setStreak(status ? status.currentStreak : streakVal);
+    // Pickup streak: only the backend's /streak/status, the same number the wallet and
+    // profile show and the reward rate uses.
+    const fetchPickupStreak = async () => {
+      const status = await streakService.getStatus().catch(() => null);
+      setStreak(status?.currentStreak ?? 0);
     };
 
     const unsubscribe = navigation.addListener('focus', () => {
       fetchDashboardData();
       fetchQuizStreak();
-      computeVisitStreak();
+      fetchPickupStreak();
     });
     fetchDashboardData();
     fetchQuizStreak();
-    computeVisitStreak();
+    fetchPickupStreak();
 
     (async () => {
       // Home redirects a user without a verified phone to the OTP page; don't start
@@ -544,12 +524,12 @@ export function DashboardScreen({ navigation, route }: any) {
           </View>
         </View>
 
-        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Eco Actions).
+        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Pickup streak / Eco Quiz Streak / Eco Actions).
             "Sustainability Actions" didn't fit a phone-width tile and was cut off. */}
         <View ref={statsRef} collapsable={false} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
           {[
             { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins', onPress: () => navigation.navigate('Wallet') },
-            { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak', onPress: () => setShowStreak(true) },
+            { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak', onPress: () => setShowStreak(true) },
             { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
             { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Eco Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
           ].map((st, i) => (
