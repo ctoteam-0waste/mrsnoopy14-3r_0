@@ -23,6 +23,7 @@ import * as Location from 'expo-location';
 import { useTheme, makeStyles } from '../theme';
 import { isDiwaliSeason } from '../utils/festive';
 import { applyOtpInput, OTP_AUTOFILL } from '../utils/otpBoxes';
+import { isValidEmail } from '../utils/email';
 import { DiwaliHeaderDecor, DiwaliGoldBorder, DiwaliBackdrop } from '../components/festive/Diwali';
 
 // Reusable Components
@@ -656,8 +657,16 @@ export function ProfileScreen({ navigation }: any) {
       setEditError('Please enter a valid 10-digit mobile number.');
       return;
     }
-    if (emailChanged && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editForm.email.trim())) {
-      setEditError('Please enter a valid email address.');
+    if (emailChanged && !isValidEmail(editForm.email)) {
+      setEditError('Please enter a valid email address, like name@gmail.com.');
+      return;
+    }
+    // The email change is confirmed with an OTP to the mobile number already on the
+    // account, so an account without one can't change its email yet.
+    if (emailChanged && !isRealPhone(userProfile?.phone)) {
+      setEditError(phoneChanged
+        ? 'Save your new mobile number first, then change your email.'
+        : 'Add your mobile number first, then change your email.');
       return;
     }
 
@@ -1151,6 +1160,7 @@ export function ProfileScreen({ navigation }: any) {
                       onChangeText={(t) => setEditForm({...editForm, email: t})}
                       keyboardType="email-address"
                       autoCapitalize="none"
+                      autoCorrect={false}
                     />
                   </View>
                 </View>
