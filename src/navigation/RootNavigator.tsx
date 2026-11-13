@@ -21,7 +21,7 @@ import { BlogScreen } from '../screens/BlogScreen';
 import { BlogPostScreen } from '../screens/BlogPostScreen';
 import { navigationRef } from './navRef';
 import { capturePendingAppLink, capturePendingDeepLink, captureReferralLink, clearPendingDeepLink, getPendingReferralCode, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
-import { routeNotification } from '../utils/notificationRoute';
+import { routeNotification, flushPendingNotification, dropPendingNotification } from '../utils/notificationRoute';
 import { initAnalytics, trackPageView } from '../utils/analytics';
 
 // Runs at import, before the NavigationContainer resolves the URL — remembers a
@@ -223,6 +223,10 @@ export function RootNavigator() {
           const referralCode = getPendingReferralCode();
           navRef.current?.reset({ index: 0, routes: [{ name: 'Login', params: referralCode ? { referralCode } : undefined }] });
         }
+        // A push tapped while the app was closed arrives before navigation is ready;
+        // open its screen now (a logged-out user signs in first, so it is dropped).
+        if (isLoggedIn) flushPendingNotification();
+        else dropPendingNotification();
         trackPageView(navRef.current?.getCurrentRoute());
         // Fade out the static landing hero from public/index.html once the first
         // screen has painted (two frames) — it sits outside #root, so React won't.

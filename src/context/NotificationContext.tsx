@@ -19,6 +19,8 @@ export interface AppNotification {
   title: string;
   message: string;
   bookingId?: string;
+  // Where a tap should go, when the backend set it (route / screen / booking status).
+  target?: { route?: string; screen?: string; status?: string };
   timestamp: number;
   read: boolean;
 }
@@ -80,7 +82,8 @@ const fromServer = (n: any): AppNotification => ({
   type: n.event || n.type || '',
   title: n.title || EVENT_LABELS[n.event] || 'Notification',
   message: n.body || n.data?.message || '',
-  bookingId: n.data?.bookingId,
+  bookingId: n.data?.bookingId || n.bookingId,
+  target: { route: n.data?.route, screen: n.data?.screen, status: n.data?.status },
   timestamp: Date.parse(n.createdAt) || Date.now(),
   read: !!n.read,
 });

@@ -136,7 +136,7 @@ export function NotificationPanel({ visible, onClose, notifications, unreadCount
   // marks it read, and closes the panel.
   const handleOpen = (n: AppNotification) => {
     onMarkRead(n.id);
-    routeNotification({ type: n.type, bookingId: n.bookingId });
+    routeNotification({ type: n.type, bookingId: n.bookingId, ...n.target });
     onClose();
   };
 
