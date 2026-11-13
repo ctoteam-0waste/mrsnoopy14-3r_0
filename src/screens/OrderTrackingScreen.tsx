@@ -9,6 +9,8 @@ import {
   CheckCircle2, Circle, XCircle
 } from 'lucide-react-native';
 import { bookingService } from '../services/booking';
+import { bookingCoins } from '../utils/bookingCoins';
+import { cachedBooking, isBookingObjectId } from '../utils/bookingCache';
 import { showAlert } from '../utils/alert';
 import { useUserSocket } from '../context/UserSocketContext';
 import { trackPickupCompleted } from '../utils/analytics';
@@ -73,22 +75,38 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   const pulseAnim = useRef(new Animated.Value(1)).current;
   
   // Resolve passed parameters or fallback to mock data
-  const passedBooking = route?.params?.booking;
-  // `bookingId` (query param) is how the email "Track pickup" link deep-links to a
-  // specific booking — no full booking object is passed then, so fall back to it
-  // and let the poll below hydrate the live status/agent from the backend.
-  const deepLinkBookingId = route?.params?.bookingId;
-  const rawBookingId = passedBooking?._id || passedBooking?.id || deepLinkBookingId || mockBooking.id;
-
-  // Coins come from the backend, which computes them at verify time from the
-  // live rate card. Until then, fall back to the schedule screen's estimate
-  // passed via navigation (route.params.estimatedCoins).
-  const estimatedCoins = passedBooking?.totalKarmaCoins || passedBooking?.estimatedKarmaCoins || route?.params?.estimatedCoins || 0;
+  // Screens pass only `bookingId` (the booking itself waits in bookingCache), so the
+  // web URL is /OrderTracking?bookingId=<id> and survives a refresh or a shared link.
+  // An old-style `booking` object param is still accepted.
+  const deepLinkBookingId = route?.params?.bookingId ? String(route.params.bookingId) : undefined;
+  const paramBooking = typeof route?.params?.booking === 'object' ? route.params.booking : undefined;
+  const passedBooking = paramBooking || cachedBooking(deepLinkBookingId);
+  // The id the backend knows. A link with the short id shown on screen (#6AF2D251)
+  // is resolved from the user's bookings below.
+  const [resolvedId, setResolvedId] = useState<string | undefined>(
+    passedBooking?._id || passedBooking?.id || (isBookingObjectId(deepLinkBookingId) ? deepLinkBookingId : undefined)
+  );
+  const [fullBooking, setFullBooking] = useState<any>(null);
+  const booking = fullBooking || passedBooking;
+  const rawBookingId = resolvedId || deepLinkBookingId || mockBooking.id;
+  const shortId = rawBookingId.replace(/^#/, '');
 
   const bookingData = {
-    id: rawBookingId.length > 10 ? `#${rawBookingId.substring(0, 8).toUpperCase()}` : rawBookingId,
-    estimatedCoins,
+    id: shortId.length > 10 ? `#${shortId.substring(0, 8).toUpperCase()}` : `#${shortId.toUpperCase()}`,
   };
+  // Credited coins once completed, otherwise the estimate saved with the booking.
+  const estimatedCoins = bookingCoins(booking) ?? 0;
+
+  useEffect(() => {
+    if (resolvedId || !deepLinkBookingId) return;
+    const short = deepLinkBookingId.replace(/^#/, '').toLowerCase();
+    bookingService.getMyBookings()
+      .then((list: any[]) => {
+        const match = (list || []).find((b: any) => String(b?._id || '').toLowerCase().startsWith(short));
+        if (match) { setFullBooking(match); setResolvedId(String(match._id)); }
+      })
+      .catch(() => {});
+  }, [deepLinkBookingId, resolvedId]);
 
   const initialStatus = mapBackendStatus(passedBooking?.status);
 
@@ -101,7 +119,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   const [currentStatus, setCurrentStatus] = useState(initialStatus);
   const [liveMessage, setLiveMessage] = useState(STATUS_MESSAGES[initialStatus] || STATUS_MESSAGES['ORDER_PLACED']);
   const [earnedCoins, setEarnedCoins] = useState<number | null>(
-    passedBooking?.totalKarmaCoins || null
+    passedBooking?.status === 'COMPLETED' && typeof passedBooking?.totalKarmaCoins === 'number' ? passedBooking.totalKarmaCoins : null
   );
   const [isPool, setIsPool] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
@@ -109,12 +127,13 @@ export function OrderTrackingScreen({ route, navigation }: any) {
   // Initialize from actual booking status so already-cancelled bookings show correctly
   const [isCancelled, setIsCancelled] = useState(passedBooking?.status === 'CANCELLED');
   // Don't auto-show rating modal if opening a historical completed booking
-  const openedFromHistory = initialStatus === 'COMPLETED';
+  const [openedFromHistory, setOpenedFromHistory] = useState(initialStatus === 'COMPLETED');
+  const hydrated = useRef(!!passedBooking);
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [isRated, setIsRated] = useState(passedBooking?.isRated ?? openedFromHistory);
 
   // Cancel allowed only when real booking exists and before agent reaches
-  const hasRealBooking = !!(passedBooking?._id || passedBooking?.id || deepLinkBookingId);
+  const hasRealBooking = !!resolvedId;
   const CANCELLABLE_STATUSES = ['ORDER_PLACED', 'AGENT_ASSIGNED', 'PENDING', 'SCHEDULED'];
   const canCancel = hasRealBooking && CANCELLABLE_STATUSES.includes(currentStatus) && !isCancelled;
 
@@ -197,7 +216,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
     } else if (latestUpdate.event === 'BOOKING_CANCEL_SUCCESS') {
       setLiveMessage('Booking cancelled.');
     } else if (latestUpdate.event === 'AGENT_LOCATION' && latestUpdate.agentLocation) {
-      const userCoords = passedBooking?.address?.location?.coordinates;
+      const userCoords = booking?.address?.location?.coordinates;
       if (userCoords) {
         const dist = calcDistance(
           latestUpdate.agentLocation.lat, latestUpdate.agentLocation.lng,
@@ -229,28 +248,24 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       try {
         const b = await bookingService.getBookingById(rawBookingId);
         if (!active || !b) return;
+        setFullBooking(b);
+        // Opened from a link to a booking that was already completed: treat it like
+        // history, so it isn't counted again or asked to be rated a second time.
+        if (!hydrated.current) {
+          hydrated.current = true;
+          if (b.status === 'COMPLETED') { setOpenedFromHistory(true); setIsRated(b.isRated ?? true); }
+        }
         if (b.status === 'CANCELLED') { setIsCancelled(true); return; }
         const st = mapBackendStatus(b.status);
         setCurrentStatus((prev) => (statusRank(st) > statusRank(prev) ? st : prev));
         if (b.agent && typeof b.agent === 'object' && b.agent.name) setActiveAgent(b.agent);
-        if (st === 'VERIFICATION' && (b.totalKarmaCoins || b.totalKarmaCoins === 0)) setEarnedCoins(b.totalKarmaCoins);
+        if ((st === 'VERIFICATION' || st === 'COMPLETED') && typeof b.totalKarmaCoins === 'number') setEarnedCoins(b.totalKarmaCoins);
       } catch (_) { /* transient — next tick retries */ }
     };
     sync(); // correct a stale initial status immediately on open
     const iv = setInterval(sync, 12000);
     return () => { active = false; clearInterval(iv); };
   }, [hasRealBooking, rawBookingId]);
-
-  useEffect(() => {
-    if (!rawBookingId) return;
-    bookingService.getBookingById(rawBookingId)
-      .then((full: any) => {
-        if (full?.agent && typeof full.agent === 'object' && full.agent.name) {
-          setActiveAgent(full.agent);
-        }
-      })
-      .catch(() => {});
-  }, [rawBookingId]);
 
   // Catches completions whose socket event this device missed (seen via the status poll).
   // Bookings opened already-completed from history are not counted again.
@@ -417,9 +432,9 @@ export function OrderTrackingScreen({ route, navigation }: any) {
       {/* Live Map — visible when agent is assigned or reached */}
       {(currentStatus === 'AGENT_ASSIGNED' || currentStatus === 'AGENT_REACHED') && (
         <View style={styles.mapContainer}>
-          {passedBooking?.address?.location?.coordinates ? (
+          {booking?.address?.location?.coordinates ? (
             <TrackingMap
-              userCoordinate={[passedBooking.address.location.coordinates[0], passedBooking.address.location.coordinates[1]]}
+              userCoordinate={[booking.address.location.coordinates[0], booking.address.location.coordinates[1]]}
               agentLocation={agentLocation}
             />
           ) : (
@@ -469,7 +484,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{Number(earnedCoins ?? bookingData.estimatedCoins ?? 0).toLocaleString('en-IN')} KC</Text>
+            <Text style={styles.statValue}>{Number(earnedCoins ?? estimatedCoins).toLocaleString('en-IN')} KC</Text>
             <Text style={styles.statLabel}>{earnedCoins !== null ? 'Coins earned' : 'Est. coins'}</Text>
           </View>
         </View>
