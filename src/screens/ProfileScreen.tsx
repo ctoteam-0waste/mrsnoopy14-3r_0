@@ -22,6 +22,7 @@ import { authService } from '../services/auth';
 import * as Location from 'expo-location';
 import { useTheme, makeStyles } from '../theme';
 import { isDiwaliSeason } from '../utils/festive';
+import { applyOtpInput, OTP_AUTOFILL } from '../utils/otpBoxes';
 import { DiwaliHeaderDecor, DiwaliGoldBorder, DiwaliBackdrop } from '../components/festive/Diwali';
 
 // Reusable Components
@@ -739,10 +740,9 @@ export function ProfileScreen({ navigation }: any) {
 
   const handleProfileOtpChange = (text: string, index: number) => {
     if (editError) setEditError('');
-    const newOtp = [...profileOtp];
-    newOtp[index] = text.replace(/[^0-9]/g, '');
-    setProfileOtp(newOtp);
-    if (text && index < 5) profileOtpRefs.current[index + 1]?.focus();
+    const { next, focus } = applyOtpInput(profileOtp, text, index);
+    setProfileOtp(next);
+    if (focus != null) profileOtpRefs.current[focus]?.focus();
   };
 
   const handleProfileOtpKey = (e: any, index: number) => {
@@ -1203,7 +1203,8 @@ export function ProfileScreen({ navigation }: any) {
                       onChangeText={(t: string) => handleProfileOtpChange(t, i)}
                       onKeyPress={(e: any) => handleProfileOtpKey(e, i)}
                       keyboardType="number-pad"
-                      maxLength={1}
+                      maxLength={6}
+                      {...OTP_AUTOFILL}
                       autoFocus={i === 0}
                     />
                   ))}
