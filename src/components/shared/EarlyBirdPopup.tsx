@@ -31,13 +31,13 @@ export function EarlyBirdPopup({ onGetStarted, onClose }: { onGetStarted: () => 
             </View>
             <Text style={s.title}>🎉 Welcome to KarmaVerse!</Text>
             <Text style={s.sub}>
-              Become an Early Bird today and receive {EARLY_BIRD_COINS.toLocaleString()} Karma Coins instantly after registration.
+              Become an Early Bird today and receive {EARLY_BIRD_COINS.toLocaleString()} KarmaCoins XP instantly after registration.
               {'\n\n'}Complete your first eco action to unlock exclusive rewards and premium brand vouchers.
             </Text>
 
             <View style={s.bonusRow}>
               <KarmaCoin size={22} />
-              <Text style={s.bonusRowText}>+{EARLY_BIRD_COINS.toLocaleString()} KarmaCoins on signup</Text>
+              <Text style={s.bonusRowText}>+{EARLY_BIRD_COINS.toLocaleString()} KarmaCoins XP on signup</Text>
             </View>
             <View style={s.bonusRow}>
               <Gift size={18} color="#fbbf24" />

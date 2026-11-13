@@ -43,7 +43,7 @@ export function NewsScreen({ navigation }: any) {
                 <Text style={s.badgeText}>NEWSROOM</Text>
               </View>
               <Text style={[s.title, width < 640 && { fontSize: 32, lineHeight: 38 }]}>News and updates</Text>
-              <Text style={s.sub}>Our monthly newsletter, press coverage and updates from the KarmaVer$e team.</Text>
+              <Text style={s.sub}>Our monthly newsletter, press coverage and updates from the KarmaVerse team.</Text>
             </View>
           </SafeAreaView>
         </LinearGradient>

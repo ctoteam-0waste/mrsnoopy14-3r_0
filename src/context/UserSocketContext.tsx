@@ -101,7 +101,7 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
 
     socket.on('BOOKING_PICKED_UP', (data: any) => {
       const coins = data.totalKarmaCoins || 0;
-      const msg = data.message || `${coins} KarmaCoins credited to your wallet!`;
+      const msg = data.message || `${coins} KarmaCoins XP credited to your wallet!`;
       setLatestUpdate({ event: 'BOOKING_PICKED_UP', bookingId: data.bookingId, message: msg, totalKarmaCoins: coins });
       addNotification({ type: 'BOOKING_PICKED_UP', title: `+${coins} KarmaCoins XP`, message: msg, bookingId: data.bookingId });
     });

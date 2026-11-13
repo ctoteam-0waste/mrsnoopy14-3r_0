@@ -47,7 +47,7 @@ const SLIDES = [
     id: 'welcome',
     bg: ['#064e3b', '#065f46'],
     accent: '#4ade80',
-    title: 'Welcome to\nKarmaVer$e',
+    title: 'Welcome to\nKarmaVerse',
     subtitle: "You're about to join India's fastest-growing circular economy community. Let's make every kg count.",
     buttonText: 'Get started',
   }

@@ -38,7 +38,7 @@ export function ReferralScreen({ navigation }: any) {
   // Copy rule: upbeat, benefit-first; never says "waste" or "pickup".
   const inviter = '3R ZeroWaste';
   const shareMsg =
-    `🌱 ${inviter} invited you to KarmaVer$e!\n\n` +
+    `🌱 ${inviter} invited you to KarmaVerse!\n\n` +
     `Those old newspapers, bottles, cartons and gadgets lying around? They're worth more than you think. ` +
     `We come to your doorstep, collect your recyclables for free, and reward you with KarmaCoins XP. ` +
     `The more you recycle, the more you earn 🎁\n\n` +
@@ -46,7 +46,7 @@ export function ReferralScreen({ navigation }: any) {
     `📍 Now live in Gurugram and nearby areas (within 50 km).`;
   const shareText = `${shareMsg}\n\n👉 ${shareUrl}`;
   // X has a 280-character limit; keep its version to one line.
-  const tweetMsg = `Turning my old bottles and newspapers into rewards with KarmaVer$e 🌱 Join with my code ${referralCode} and we both get 1,000 KarmaCoins XP! Now live in Gurugram.`;
+  const tweetMsg = `Turning my old bottles and newspapers into rewards with KarmaVerse 🌱 Join with my code ${referralCode} and we both get 1,000 KarmaCoins XP! Now live in Gurugram.`;
   const emailSubject = `🌱 ${inviter} invited you: turn your recyclables into rewards`;
   const emailBody =
     `Hi there,\n\n${shareMsg}\n\n` +

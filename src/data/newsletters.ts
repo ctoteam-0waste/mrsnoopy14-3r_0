@@ -19,7 +19,7 @@ export const NEWSLETTERS: Newsletter[] = [
     issue: 'Issue 09',
     month: 'September 2026',
     title: 'Our Impact',
-    summary: 'A month of action, awareness and impact: waste recovery, Swachhata Hi Seva drives, safety kits for waste workers, students learning the 3Rs, KarmaVer$e at the September event and our hackathons.',
+    summary: 'A month of action, awareness and impact: waste recovery, Swachhata Hi Seva drives, safety kits for waste workers, students learning the 3Rs, KarmaVerse at the September event and our hackathons.',
     highlights: [
       { value: '74,992 kg', label: 'Waste collected' },
       { value: '135,693 kg', label: 'CO₂e avoided' },

@@ -9,11 +9,11 @@ Content/copy draft for all Email + Push/In-app Notification use cases across the
 ### 1. Welcome (signup / Google sign-in)
 **Email**
 - Subject: Welcome to KarmaCoins XP, {{name}}!
-- Body: Hi {{name}}, welcome aboard! Start scheduling pickups, earn Karma Coins for every item you recover, and play the daily quiz to grow your streak. Let's make sustainability rewarding.
+- Body: Hi {{name}}, welcome aboard! Start scheduling pickups, earn KarmaCoins XP for every item you recover, and play the daily quiz to grow your streak. Let's make sustainability rewarding.
 
 **Notification**
 - Title: Welcome to KarmaCoins XP
-- Body: Hi {{name}}, your account is ready. Schedule your first pickup and start earning Karma Coins.
+- Body: Hi {{name}}, your account is ready. Schedule your first pickup and start earning KarmaCoins XP.
 
 ---
 
@@ -70,11 +70,11 @@ Content/copy draft for all Email + Push/In-app Notification use cases across the
 
 ### 7. Pickup verified — coins credited (`BOOKING_PICKED_UP`)
 **Email**
-- Subject: You earned {{coins}} Karma Coins!
-- Body: Hi {{name}}, your items have been verified and {{coins}} Karma Coins have been credited to your wallet. Total balance: {{walletBalance}}.
+- Subject: You earned {{coins}} KarmaCoins XP!
+- Body: Hi {{name}}, your items have been verified and {{coins}} KarmaCoins XP have been credited to your wallet. Total balance: {{walletBalance}}.
 
 **Notification** *(existing copy — keep)*
-- Title: +{{coins}} Karma Coins
+- Title: +{{coins}} KarmaCoins XP
 - Body: Your pickup has been verified and coins have been added to your wallet.
 
 ---
@@ -118,22 +118,22 @@ Content/copy draft for all Email + Push/In-app Notification use cases across the
 ### 12. Daily quiz available / streak reminder
 **Notification**
 - Title: 🔥 Your quiz streak is waiting!
-- Body: Answer today's quiz correctly and earn 40 Karma Coins per question. Keep your {{streak}}-day streak alive!
+- Body: Answer today's quiz correctly and earn 40 KarmaCoins XP per question. Keep your {{streak}}-day streak alive!
 
 **Email** *(optional, for lapsed users)*
 - Subject: Don't lose your {{streak}}-day quiz streak!
-- Body: Hi {{name}}, you haven't played today's KarmaCoins quiz yet. Play now before it resets at 5:30 AM IST.
+- Body: Hi {{name}}, you haven't played today's KarmaCoins XP quiz yet. Play now before it resets at 5:30 AM IST.
 
 ---
 
 ### 13. Referral reward earned
 **Email**
-- Subject: You earned {{coins}} Karma Coins for referring {{friendName}}!
-- Body: Hi {{name}}, your friend {{friendName}} just joined KarmaCoins XP using your referral code. {{coins}} Karma Coins have been added to your wallet.
+- Subject: You earned {{coins}} KarmaCoins XP for referring {{friendName}}!
+- Body: Hi {{name}}, your friend {{friendName}} just joined KarmaCoins XP using your referral code. {{coins}} KarmaCoins XP have been added to your wallet.
 
 **Notification**
 - Title: Referral reward credited 🎉
-- Body: {{friendName}} joined using your code — you earned {{coins}} Karma Coins!
+- Body: {{friendName}} joined using your code — you earned {{coins}} KarmaCoins XP!
 
 ---
 
@@ -197,4 +197,4 @@ Content/copy draft for all Email + Push/In-app Notification use cases across the
 ## Notes for implementation
 - Existing in-app notification copy (marked "existing copy — keep") is already live in `UserSocketContext.tsx` / `SocketContext.tsx` — no changes needed there beyond sentence-case cleanup on the Agent side (#3, #4, #5).
 - Email sending requires backend integration (e.g. SendGrid/Nodemailer) — not yet implemented; this doc covers content only, ready for backend wiring once available.
-- All copy follows sentence case and "Karma Coins" naming per project conventions; emojis used sparingly (🔥 for streaks, 🎉 for rewards, ⭐ for ratings) — drop if CTO prefers zero emojis.
+- All copy follows sentence case and "KarmaCoins XP" naming per project conventions; emojis used sparingly (🔥 for streaks, 🎉 for rewards, ⭐ for ratings) — drop if CTO prefers zero emojis.

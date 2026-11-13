@@ -1,4 +1,4 @@
-// Legal content for KarmaVer$e. Edit the copy here — the LegalScreen renders it,
+// Legal content for KarmaVerse. Edit the copy here — the LegalScreen renders it,
 // and the website serves it at /legal/:type (terms | privacy | terms-of-use | data-deletion).
 // Source of truth: 3R ZeroWaste legal documentation —
 //   Terms & Conditions v2.0, Privacy Policy v2.0, Terms of Use v1.0 (August 2026),
@@ -23,10 +23,10 @@ export interface LegalDoc {
 
 export const TERMS: LegalDoc = {
   title: 'Terms & conditions',
-  version: '2.1',
-  updated: '12 November 2026',
+  version: '2.2',
+  updated: '13 November 2026',
   intro:
-    `KarmaVer$e is operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our"), with its registered office at 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010, and its operating office at Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051. These Terms & Conditions ("Terms") govern your access to and use of the KarmaVer$e app, website, and related services (the "Service"). Our Privacy Policy is incorporated by reference and forms part of your agreement with us. By creating an account, scheduling a pickup, or otherwise using the Service, you confirm that you have read and accepted these Terms. If you do not accept them, you must not use the Service.`,
+    `KarmaVerse is operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our"), with its registered office at 1/12 Pal Road, Shipra Suncity, Indirapuram, Ghaziabad, Uttar Pradesh 201010, and its operating office at Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051. These Terms & Conditions ("Terms") govern your access to and use of the KarmaVerse app, website, and related services (the "Service"). Our Privacy Policy is incorporated by reference and forms part of your agreement with us. By creating an account, scheduling a pickup, or otherwise using the Service, you confirm that you have read and accepted these Terms. If you do not accept them, you must not use the Service.`,
   sections: [
     {
       heading: 'At a glance',
@@ -206,10 +206,10 @@ export const TERMS: LegalDoc = {
     {
       heading: 'Intellectual property',
       bullets: [
-        'All Content, trademarks, logos, app design, quiz material, and software associated with KarmaVer$e are owned by or licensed to the Company and protected under applicable law.',
+        'All Content, trademarks, logos, app design, quiz material, and software associated with KarmaVerse are owned by or licensed to the Company and protected under applicable law.',
         'Subject to your compliance, we grant you a limited, non-exclusive, non-transferable, revocable licence to use the app for personal, non-commercial use.',
         'You may not copy, modify, distribute, sell, lease, publicly display, or create derivative works from any part of the Service, except as expressly permitted.',
-        'The "KarmaVer$e" name and logo and "KarmaCoins XP" branding are trademarks of the Company.',
+        'The "KarmaVerse" name and logo and "KarmaCoins XP" branding are trademarks of the Company.',
         'Your content — you retain ownership of photographs, ratings, and reviews you submit, and grant us a worldwide, royalty-free, non-exclusive licence to host, store, reproduce, and display them to operate, improve, and promote the Service. This licence ends when you delete the material or your account, except for copies retained as described in the Privacy Policy or required by law.',
         'Feedback you voluntarily submit may be used by us without obligation to compensate or credit you.',
       ],
@@ -299,15 +299,15 @@ export const TERMS: LegalDoc = {
       ],
     },
   ],
-  closing: 'By using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these Terms & Conditions.\n© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
+  closing: 'By using KarmaVerse, you acknowledge that you have read, understood, and agreed to these Terms & Conditions.\n© 2026 KarmaVerse by 3R ZeroWaste Private Limited. All rights reserved.',
 };
 
 export const PRIVACY: LegalDoc = {
   title: 'Privacy policy',
-  version: '2.1',
-  updated: '12 November 2026',
+  version: '2.2',
+  updated: '13 November 2026',
   intro:
-    `3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our") operates the KarmaVer$e app and website (the "Service"). We are the Data Fiduciary for the personal data described here, which means we determine why and how it is processed. This Policy explains what personal data we collect, why, who we share it with, how long we keep it, and your rights under India’s Digital Personal Data Protection Act, 2023. It should be read together with our Terms & Conditions.`,
+    `3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568) ("Company", "we", "us", "our") operates the KarmaVerse app and website (the "Service"). We are the Data Fiduciary for the personal data described here, which means we determine why and how it is processed. This Policy explains what personal data we collect, why, who we share it with, how long we keep it, and your rights under India’s Digital Personal Data Protection Act, 2023. It should be read together with our Terms & Conditions.`,
   sections: [
     {
       heading: 'At a glance',
@@ -454,15 +454,15 @@ export const PRIVACY: LegalDoc = {
       ],
     },
   ],
-  closing: 'By using KarmaVer$e, you acknowledge that you have read and understood this Privacy Policy.\n© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
+  closing: 'By using KarmaVerse, you acknowledge that you have read and understood this Privacy Policy.\n© 2026 KarmaVerse by 3R ZeroWaste Private Limited. All rights reserved.',
 };
 
 export const TERMS_OF_USE: LegalDoc = {
   title: 'Terms of use',
-  version: '1.1',
-  updated: '12 November 2026',
+  version: '1.2',
+  updated: '13 November 2026',
   intro:
-    `These Terms of Use govern your access to and use of the KarmaVer$e app and website (the "Platform"), operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568). They cover what you are allowed to do on the Platform — the licence to use it, acceptable use, content you post, intellectual property, availability, and our role as an intermediary. By accessing or using the Platform — whether or not you register — you accept these Terms of Use. If you register or book a Pickup, our Terms & Conditions also apply. If you do not accept these Terms of Use, you must not use the Platform.`,
+    `These Terms of Use govern your access to and use of the KarmaVerse app and website (the "Platform"), operated by 3R ZeroWaste Private Limited (CIN U37200UP2020PTC131568). They cover what you are allowed to do on the Platform — the licence to use it, acceptable use, content you post, intellectual property, availability, and our role as an intermediary. By accessing or using the Platform — whether or not you register — you accept these Terms of Use. If you register or book a Pickup, our Terms & Conditions also apply. If you do not accept these Terms of Use, you must not use the Platform.`,
   sections: [
     {
       heading: 'How our documents fit together',
@@ -528,7 +528,7 @@ export const TERMS_OF_USE: LegalDoc = {
       heading: 'Intellectual property',
       bullets: [
         'All content, trademarks, logos, app design, quiz material, databases, and software forming part of the Platform are owned by or licensed to the Company and protected under the Copyright Act, 1957, the Trade Marks Act, 1999, and other law.',
-        'The "KarmaVer$e" name and logo and "KarmaCoins XP" branding are trademarks of the Company. No licence to use them is granted except as strictly necessary to use the Platform as intended.',
+        'The "KarmaVerse" name and logo and "KarmaCoins XP" branding are trademarks of the Company. No licence to use them is granted except as strictly necessary to use the Platform as intended.',
         'You may not copy, modify, distribute, sell, lease, publicly display, frame, mirror, or create derivative works from any part of the Platform, except as expressly permitted or allowed by law.',
         'You may not use the Platform or its content to build, train, or evaluate any machine-learning model or dataset without our prior written consent.',
         'If you believe content on the Platform infringes your intellectual property, contact our Grievance Officer with the details of the work, its location, your contact details, and a good-faith statement.',
@@ -609,15 +609,15 @@ export const TERMS_OF_USE: LegalDoc = {
       ],
     },
   ],
-  closing: 'By accessing or using KarmaVer$e, you acknowledge that you have read, understood, and agreed to these Terms of Use.\n© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
+  closing: 'By accessing or using KarmaVerse, you acknowledge that you have read, understood, and agreed to these Terms of Use.\n© 2026 KarmaVerse by 3R ZeroWaste Private Limited. All rights reserved.',
 };
 
 export const DATA_DELETION: LegalDoc = {
   title: 'Data deletion',
-  version: '1.1',
-  updated: '12 November 2026',
+  version: '1.2',
+  updated: '13 November 2026',
   intro:
-    'You can request deletion of your KarmaVer$e account and all associated personal data, including data received through any third-party login (Google, Facebook, or Apple), at any time.',
+    'You can request deletion of your KarmaVerse account and all associated personal data, including data received through any third-party login (Google, Facebook, or Apple), at any time.',
   sections: [
     {
       heading: 'How to request deletion',
@@ -655,5 +655,5 @@ export const DATA_DELETION: LegalDoc = {
       ],
     },
   ],
-  closing: '© 2026 KarmaVer$e by 3R ZeroWaste Private Limited. All rights reserved.',
+  closing: '© 2026 KarmaVerse by 3R ZeroWaste Private Limited. All rights reserved.',
 };

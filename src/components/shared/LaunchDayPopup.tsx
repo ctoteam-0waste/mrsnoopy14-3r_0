@@ -41,7 +41,7 @@ export function LaunchDayPopup({ onClose }: { onClose: () => void }) {
               <PartyPopper size={32} color="#fbbf24" />
             </View>
             <Text style={s.title}>We're live! 🎉</Text>
-            <Text style={s.sub}>KarmaVer$e has officially launched</Text>
+            <Text style={s.sub}>KarmaVerse has officially launched</Text>
 
             <TouchableOpacity style={s.ctaBtn} onPress={close} activeOpacity={0.85}>
               <Text style={s.ctaBtnText}>Let's go</Text>

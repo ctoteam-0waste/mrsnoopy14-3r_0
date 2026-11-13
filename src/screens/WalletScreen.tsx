@@ -177,7 +177,7 @@ export function WalletScreen({ navigation }: any) {
               </View>
             </View>
             {diwali && (
-              <Text style={styles.diwaliWish}><DiwaliShimmerText text="Shubh Deepavali! May your KarmaCoins keep growing." /></Text>
+              <Text style={styles.diwaliWish}><DiwaliShimmerText text="Shubh Deepavali! May your KarmaCoins XP keep growing." /></Text>
             )}
 
             <View style={styles.cardDivider} />

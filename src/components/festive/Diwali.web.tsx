@@ -641,7 +641,7 @@ export function DiwaliCleanupCard({ onPress, isMobile = false }: { onPress: () =
           <Text style={[s.title, isMobile && { fontSize: 22 }]}>Clearing out before Diwali?</Text>
           <Text style={s.body}>
             Old newspapers, cartons, e-waste and clothes from your Diwali cleaning deserve a second life.
-            Schedule a pickup and earn KarmaCoins for it.
+            Schedule a pickup and earn KarmaCoins XP for it.
           </Text>
           <TouchableOpacity style={s.cta} onPress={onPress} activeOpacity={0.85}>
             <div className="kvd-sweep" />
@@ -833,11 +833,11 @@ export function DiwaliGreetingModal({ visible, name, pickups, onClose }: { visib
   const base = useUid();
   const [copied, setCopied] = useState(false);
   const message = pickups > 0
-    ? `Thank you for ${pickups} eco ${pickups === 1 ? 'action' : 'actions'} with KarmaVer$e. May this Diwali be bright, clean and green.`
-    : 'This Diwali, give your clean-up a second life with KarmaVer$e. Wishing you a bright, clean and green festival.';
+    ? `Thank you for ${pickups} eco ${pickups === 1 ? 'action' : 'actions'} with KarmaVerse. May this Diwali be bright, clean and green.`
+    : 'This Diwali, give your clean-up a second life with KarmaVerse. Wishing you a bright, clean and green festival.';
 
   const share = async () => {
-    const text = 'Happy Diwali from KarmaVer$e! Celebrate a green Diwali with me.';
+    const text = 'Happy Diwali from KarmaVerse! Celebrate a green Diwali with me.';
     const url = 'https://karmaverse.earth';
     try {
       if (navigator.share) { await navigator.share({ title: 'Happy Diwali', text, url }); return; }
@@ -976,7 +976,7 @@ export function DiwaliStrip({ onPress }: { onPress: () => void }) {
       </div>
       <View style={{ flex: 1 }}>
         <Text style={u.stripTitle}>Diwali clean-up?</Text>
-        <Text style={u.stripSub}>Give the clutter a second life and earn KarmaCoins.</Text>
+        <Text style={u.stripSub}>Give the clutter a second life and earn KarmaCoins XP.</Text>
       </View>
       <TouchableOpacity style={[s.cta, u.stripCta, narrow && u.stripCtaNarrow]} onPress={onPress} activeOpacity={0.85}>
         <div className="kvd-sweep" />

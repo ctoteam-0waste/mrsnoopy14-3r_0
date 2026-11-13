@@ -684,7 +684,7 @@ export function SchedulePickupScreen({ navigation }: any) {
             </View>
             {cartCalculations.totalCoins < MIN_ORDER_VALUE && (
               <Text style={styles.minOrderHint}>
-                Add {(MIN_ORDER_VALUE - cartCalculations.totalCoins).toLocaleString('en-IN')} more KC worth of items to schedule pickup
+                Add {(MIN_ORDER_VALUE - cartCalculations.totalCoins).toLocaleString('en-IN')} more KarmaCoins XP worth of items to schedule pickup
               </Text>
             )}
           </View>

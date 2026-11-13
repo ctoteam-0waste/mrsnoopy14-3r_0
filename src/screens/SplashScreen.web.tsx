@@ -338,7 +338,7 @@ export function SplashScreen({ navigation, route }: any) {
             {/* Badge */}
             <View style={s.heroBadge}>
               <View style={[s.heroBadgeDot, diwali && { backgroundColor: '#fbbf24' }]} />
-              <Text style={s.heroBadgeText}>{diwali ? <DiwaliShimmerText text="Happy Diwali from KarmaVer$e" /> : 'AI-Powered Sustainability Platform'}</Text>
+              <Text style={s.heroBadgeText}>{diwali ? <DiwaliShimmerText text="Happy Diwali from KarmaVerse" /> : 'AI-Powered Sustainability Platform'}</Text>
             </View>
 
             {/* The headline types out character by character. A full-text, invisible
@@ -360,9 +360,9 @@ export function SplashScreen({ navigation, route }: any) {
             <Text style={[s.heroTagline, isMobile && { fontSize: 18 }]}>“Kar Bhala Toh Ho Bhala.” 🌱</Text>
 
             <Text style={[s.heroSub, isMobile && { fontSize: 16 }]}>
-              KarmaVer$e rewards every sustainable action — schedule green pickups,
+              KarmaVerse rewards every sustainable action — schedule green pickups,
               sharpen your green knowledge with our AI-powered eco-quiz, and turn it all into
-              KarmaCoins with real, measurable impact.
+              KarmaCoins XP with real, measurable impact.
             </Text>
 
             <View style={s.poweredByBadge}>
@@ -399,8 +399,8 @@ export function SplashScreen({ navigation, route }: any) {
             <View style={[s.heroHighlightsRow, isMobile && { flexDirection: 'column' }]}>
               {[
                 { icon: Sprout, title: 'Sustainable actions', desc: 'Complete meaningful eco-friendly activities every day' },
-                { icon: Coins, title: 'Earn KarmaCoins', desc: 'Receive rewards for every verified sustainable contribution' },
-                { icon: Gift, title: 'Redeem rewards', desc: 'Exchange KarmaCoins for products, discounts & experiences' },
+                { icon: Coins, title: 'Earn KarmaCoins XP', desc: 'Receive rewards for every verified sustainable contribution' },
+                { icon: Gift, title: 'Redeem rewards', desc: 'Cash out from 31 December (10 XP = ₹1). More reward options coming soon' },
               ].map((h, i) => (
                 <View key={i} style={s.heroHighlightCard}>
                   <View style={s.heroHighlightIconBg}><h.icon size={18} color="#4ade80" /></View>
@@ -427,7 +427,7 @@ export function SplashScreen({ navigation, route }: any) {
             <Text style={s.sectionLabel}>ECOSYSTEM</Text>
             <Text style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>One platform connecting every sustainability stakeholder</Text>
             <Text style={[s.sectionIntro, isMobile && { fontSize: 15 }]}>
-              KarmaVer$e connects citizens, housing societies, schools, corporates, NGOs, recyclers,
+              KarmaVerse connects citizens, housing societies, schools, corporates, NGOs, recyclers,
               pickup partners, and sustainable brands — creating one unified ecosystem where every
               sustainable action generates value.
             </Text>
@@ -462,10 +462,10 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
               {[
-                { num: '1', icon: Target, color: '#16a34a', bg: '#f0fdf4', title: 'Choose sustainable actions', desc: 'Schedule a free doorstep pickup (Gurugram and nearby, within 50 km), play the eco-quiz, or complete a challenge' },
+                { num: '1', icon: Target, color: '#16a34a', bg: '#f0fdf4', title: 'Choose sustainable actions', desc: 'Schedule a free doorstep pickup (Gurugram and nearby, within 50 km), or play the daily eco-quiz' },
                 { num: '2', icon: Shield, color: '#0891b2', bg: '#ecfeff', title: 'Complete actions & verify', desc: 'Your action is checked and verified for authenticity' },
-                { num: '3', icon: Coins, color: '#d97706', bg: '#fffbeb', title: 'Earn KarmaCoins', desc: 'Coins are credited to your wallet instantly' },
-                { num: '4', icon: Gift, color: '#e11d48', bg: '#fff1f2', title: 'Redeem rewards', desc: 'Trade coins for products, discounts, or real-world impact' },
+                { num: '3', icon: Coins, color: '#d97706', bg: '#fffbeb', title: 'Earn KarmaCoins XP', desc: 'Coins are credited to your wallet instantly' },
+                { num: '4', icon: Gift, color: '#e11d48', bg: '#fff1f2', title: 'Redeem rewards', desc: 'Cash out your coins from 31 December. Products and discounts coming soon' },
               ].map((step, i) => (
                 <Card key={i} delay={i * 80} style={[s.stepCard, { width: isMobile ? '100%' : '23%', flex: undefined }]}>
                   <View style={[s.stepIconBg, { backgroundColor: step.bg }]}>
@@ -490,8 +490,8 @@ export function SplashScreen({ navigation, route }: any) {
             <View style={[s.rewardsVisualRow, isMobile && { flexDirection: 'column', gap: 20 }]}>
               <View style={{ flex: 1 }}>
                 <Text style={[s.sectionIntro, isMobile && { fontSize: 15 }]}>
-                  A growing marketplace of eco and lifestyle rewards — because doing good should
-                  feel good too.
+                  From 31 December, cash out your KarmaCoins XP at 10 XP = ₹1. A marketplace of eco
+                  and lifestyle rewards is on the way — the options below are coming soon.
                 </Text>
               </View>
               <KarmaCoin size={64} glow animated />
@@ -508,6 +508,7 @@ export function SplashScreen({ navigation, route }: any) {
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.rewardCard, { width: isMobile ? '100%' : '31%' }]}>
                   <Image source={r.img} resizeMode="cover" style={s.rewardImg} />
+                  <View style={s.soonBadge}><Text style={s.soonBadgeText}>Coming soon</Text></View>
                   <View style={s.rewardBody}>
                     <Text style={s.featTitle}>{r.title}</Text>
                     <Text style={s.featDesc}>{r.desc}</Text>
@@ -524,17 +525,17 @@ export function SplashScreen({ navigation, route }: any) {
             <Text style={s.sectionLabel}>LEARNING & ENGAGEMENT</Text>
             <Text style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>Learn. Act. Earn.</Text>
             <Text style={[s.sectionIntro, isMobile && { fontSize: 15 }]}>
-              Refer friends, play the daily eco-quiz, join community campaigns, take on challenges,
-              and explore our learning modules and knowledge hub. Every step turns into real-world impact.
+              Refer friends, play the daily eco-quiz and explore the knowledge hub today. Community
+              campaigns, challenges and learning modules are coming soon.
             </Text>
 
             <View style={[s.featGrid, { marginTop: 36 }, isMobile && { flexDirection: 'column' }]}>
               {[
                 { icon: Gift, color: '#e11d48', title: 'Refer & Earn', desc: 'Invite friends — you both earn 1,000 bonus KarmaCoins XP' },
                 { icon: Brain, color: '#7c3aed', title: 'Daily Eco Quiz', desc: 'AI-generated daily quiz — never a repeat' },
-                { icon: Megaphone, color: '#16a34a', title: 'Sustainability Community Campaigns', desc: 'Join drives that turn learning into action' },
-                { icon: Trophy, color: '#d97706', title: 'Interactive Challenges', desc: 'Compete, climb the board, stay motivated' },
-                { icon: BookOpen, color: '#0891b2', title: 'Learning Modules', desc: 'Bite-sized lessons on real sustainability topics' },
+                { icon: Megaphone, color: '#16a34a', title: 'Sustainability Community Campaigns', desc: 'Join drives that turn learning into action', soon: true },
+                { icon: Trophy, color: '#d97706', title: 'Interactive Challenges', desc: 'Compete, climb the board, stay motivated', soon: true },
+                { icon: BookOpen, color: '#0891b2', title: 'Learning Modules', desc: 'Bite-sized lessons on real sustainability topics', soon: true },
                 { icon: Sprout, color: '#059669', title: 'Sustainability Knowledge', desc: 'Deep-dive guides to live greener every day' },
                 { icon: GraduationCap, color: '#2563eb', title: 'Knowledge Hub', desc: 'Curated articles, tips, and eco stories' },
               ].map((l, i) => (
@@ -542,6 +543,9 @@ export function SplashScreen({ navigation, route }: any) {
                   <View style={[s.featIconBg, { backgroundColor: l.color + '15' }]}>
                     <l.icon size={26} color={l.color} />
                   </View>
+                  {'soon' in l && l.soon && (
+                    <View style={[s.soonBadge, { top: 18, right: 18 }]}><Text style={s.soonBadgeText}>Coming soon</Text></View>
+                  )}
                   <Text style={s.featTitle}>{l.title}</Text>
                   <Text style={s.featDesc}>{l.desc}</Text>
                 </Card>
@@ -557,7 +561,7 @@ export function SplashScreen({ navigation, route }: any) {
               <View style={[s.newsHeadRow, isMobile && { flexDirection: 'column', alignItems: 'flex-start', gap: 16 }]}>
                 <View style={{ flex: 1 }}>
                   <Text style={s.sectionLabel}>LATEST NEWS</Text>
-                  <Text style={[s.sectionTitle, { marginBottom: 0 }, isMobile && { fontSize: 28 }]}>KarmaVer$e in the news</Text>
+                  <Text style={[s.sectionTitle, { marginBottom: 0 }, isMobile && { fontSize: 28 }]}>KarmaVerse in the news</Text>
                 </View>
                 <TouchableOpacity style={s.newsAllBtn} onPress={() => navigation.navigate('News')} activeOpacity={0.85}>
                   <Text style={s.newsAllText}>View all news</Text>
@@ -665,7 +669,7 @@ export function SplashScreen({ navigation, route }: any) {
             </View>
           </View>
           <View style={[s.container, s.footerBottom, isMobile && { paddingHorizontal: 20 }]}>
-            <Text style={s.footerCopy}>© 2026 KarmaVer$e by 3R ZeroWaste. All rights reserved.</Text>
+            <Text style={s.footerCopy}>© 2026 KarmaVerse by 3R ZeroWaste. All rights reserved.</Text>
           </View>
         </View>
 
@@ -770,6 +774,8 @@ const s = StyleSheet.create({
   rewardCard: { backgroundColor: 'white', borderRadius: 18, borderWidth: 1, borderColor: '#e2e8f0', overflow: 'hidden', shadowColor: '#0f172a', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.06, shadowRadius: 18, elevation: 3 },
   rewardImg: { width: '100%', height: 140 },
   rewardBody: { padding: 22 },
+  soonBadge: { position: 'absolute', top: 12, right: 12, backgroundColor: '#fef3c7', borderColor: '#fcd34d', borderWidth: 1, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  soonBadgeText: { fontSize: 11, fontWeight: '800', color: '#92400e', letterSpacing: 0.3 },
   featIconBg: { width: 54, height: 54, borderRadius: 15, alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
   featTitle: { fontSize: 20, fontWeight: '800', color: '#0f172a', marginBottom: 7 },
   featDesc: { fontSize: 14.5, color: '#64748b', fontWeight: '500', lineHeight: 22 },

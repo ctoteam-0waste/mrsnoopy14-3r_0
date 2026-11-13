@@ -44,7 +44,7 @@ const FEATURES = [
     emoji: '🚛',
     tag: 'PICKUP',
     title: 'Schedule a pickup',
-    desc: 'Give your old items a second life — book a pickup in 3 taps and earn KarmaCoins for going green.',
+    desc: 'Give your old items a second life — book a pickup in 3 taps and earn KarmaCoins XP for going green.',
     benefit: 'Earn Credits on Pickup',
     benefitIcon: <Coins size={16} color="#f59e0b" />,
     bg: ['#064e3b', '#065f46'] as [string, string],
@@ -544,11 +544,11 @@ export function DashboardScreen({ navigation, route }: any) {
           </View>
         </View>
 
-        {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Day streak / Eco Quiz Streak / Eco Actions).
+        {/* Stats grid — mirrors the web dashboard (Total KarmaCoins XP / Day streak / Eco Quiz Streak / Eco Actions).
             "Sustainability Actions" didn't fit a phone-width tile and was cut off. */}
         <View ref={statsRef} collapsable={false} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
           {[
-            { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins', onPress: () => navigation.navigate('Wallet') },
+            { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total KarmaCoins XP', onPress: () => navigation.navigate('Wallet') },
             { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak', onPress: () => setShowStreak(true) },
             { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
             { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Eco Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
@@ -579,7 +579,7 @@ export function DashboardScreen({ navigation, route }: any) {
           <TouchableOpacity activeOpacity={0.9} onPress={() => setShowWelcomeBonusBanner(false)}>
             <LinearGradient colors={['#166534', '#15803d', '#22c55e']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.welcomeBonusBanner}>
               <KarmaCoin size={26} />
-              <Text style={styles.welcomeBonusText}>🎁 Welcome, Early Bird! Your {EARLY_BIRD_COINS.toLocaleString()} Karma Coins have been credited successfully. Schedule your first pickup today and unlock even more rewards, badges, and exclusive partner vouchers.</Text>
+              <Text style={styles.welcomeBonusText}>🎁 Welcome, Early Bird! Your {EARLY_BIRD_COINS.toLocaleString()} KarmaCoins XP have been credited successfully. Schedule your first pickup today and unlock even more rewards, badges, and exclusive partner vouchers.</Text>
               <X size={16} color="rgba(255,255,255,0.7)" />
             </LinearGradient>
           </TouchableOpacity>

@@ -470,7 +470,7 @@ export function QuizScreen({ navigation }: any) {
               </View>
             )}
             <Text style={styles.resultsCardNote}>
-              {totalCoins > 0 ? 'Coins added to your Karma Coin Wallet!' : 'Keep practicing — try again tomorrow!'}
+              {totalCoins > 0 ? 'Coins added to your KarmaCoins XP wallet!' : 'Keep practicing — try again tomorrow!'}
             </Text>
             <View style={styles.streakPill}>
               <Flame size={16} color="#f97316" fill="#f97316" />

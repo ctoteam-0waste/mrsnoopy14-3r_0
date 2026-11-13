@@ -43,7 +43,7 @@ const BASE_STEPS = [
   { key: 'ORDER_PLACED',   label: 'Order placed',       sublabel: 'Your pickup request is confirmed' },
   { key: 'AGENT_ASSIGNED', label: 'Agent assigned',     sublabel: 'Agent accepted and is on the way' },
   { key: 'AGENT_REACHED',  label: 'Agent reached',      sublabel: 'Agent has reached your location' },
-  { key: 'VERIFICATION',   label: 'Verification', sublabel: 'Items weighed, KarmaCoins credited' },
+  { key: 'VERIFICATION',   label: 'Verification', sublabel: 'Items weighed, KarmaCoins XP credited' },
   { key: 'COMPLETED',      label: 'Completed',           sublabel: 'Reached warehouse and completed' },
 ];
 
@@ -51,8 +51,8 @@ const STATUS_MESSAGES: Record<string, string> = {
   ORDER_PLACED:   'Your pickup request is confirmed',
   AGENT_ASSIGNED: 'Agent accepted your booking and is on the way!',
   AGENT_REACHED:  'Agent has reached your location!',
-  VERIFICATION:   'Waste verified. KarmaCoins credited to your wallet!',
-  COMPLETED:      'Booking complete. Thank you for using KarmaVer$e!',
+  VERIFICATION:   'Waste verified. KarmaCoins XP credited to your wallet!',
+  COMPLETED:      'Booking complete. Thank you for using KarmaVerse!',
   POOL:           'High demand in your area. Your booking is in our priority pool.',
 };
 
@@ -452,7 +452,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
         {/* KarmaCoins earned toast */}
         {earnedCoins !== null && (
           <View style={styles.coinsBadge}>
-            <Text style={styles.coinsBadgeText}>🎉 {earnedCoins} KarmaCoins credited to your wallet!</Text>
+            <Text style={styles.coinsBadgeText}>🎉 {earnedCoins} KarmaCoins XP credited to your wallet!</Text>
           </View>
         )}
 
@@ -469,7 +469,7 @@ export function OrderTrackingScreen({ route, navigation }: any) {
           </View>
           <View style={styles.statDivider} />
           <View style={styles.statItem}>
-            <Text style={styles.statValue}>{Number(earnedCoins ?? bookingData.estimatedCoins ?? 0).toLocaleString('en-IN')} KC</Text>
+            <Text style={styles.statValue}>{Number(earnedCoins ?? bookingData.estimatedCoins ?? 0).toLocaleString('en-IN')} KarmaCoins XP</Text>
             <Text style={styles.statLabel}>{earnedCoins !== null ? 'Coins earned' : 'Est. coins'}</Text>
           </View>
         </View>

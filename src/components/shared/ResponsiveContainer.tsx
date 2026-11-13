@@ -12,7 +12,7 @@ function TopBar() {
         <View style={tb.logoIcon}>
           <Leaf size={16} color="#052e16" />
         </View>
-        <Text style={tb.title}>KarmaVer$e</Text>
+        <Text style={tb.title}>KarmaVerse</Text>
       </View>
       <Text style={tb.tagline}>Recover. Earn. Repeat.</Text>
     </View>

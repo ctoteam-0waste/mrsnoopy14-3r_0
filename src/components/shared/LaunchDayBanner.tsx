@@ -11,7 +11,7 @@ export function LaunchDayBanner() {
       </View>
       <View style={{ flex: 1 }}>
         <Text style={s.title}>We're live! 🎉</Text>
-        <Text style={s.sub}>KarmaVer$e has officially launched</Text>
+        <Text style={s.sub}>KarmaVerse has officially launched</Text>
       </View>
       <View style={s.todayChip}>
         <Text style={s.todayChipText}>TODAY{'\n'}ONLY</Text>

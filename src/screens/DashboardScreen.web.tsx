@@ -42,7 +42,7 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'pickup', title: 'Schedule a pickup', emoji: '🚛', icon: Truck,
-    desc: 'Give your old items a second life — book a sustainable pickup in 3 taps and earn KarmaCoins for going green.',
+    desc: 'Give your old items a second life — book a sustainable pickup in 3 taps and earn KarmaCoins XP for going green.',
     steps: ['Pick the items to hand over', 'Choose date & time slot', 'Agent comes to your door', 'Earn KarmaCoins XP instantly'],
     benefit: 'Earn coins on every pickup',
     gradient: ['#052e16', '#15803d'] as [string, string],
@@ -58,9 +58,9 @@ const FEATURE_DETAILS = [
   },
   {
     id: 'instant', title: 'Instant credit', emoji: '⚡', icon: Zap,
-    desc: 'No waiting — KarmaCoins XP are credited to your wallet immediately after the agent verifies and collects your materials.',
-    steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added instantly', 'Check wallet in real-time'],
-    benefit: 'Zero wait for rewards',
+    desc: 'KarmaCoins XP are credited to your wallet as soon as the agent verifies and collects your materials. Cash-out opens 31 December (10 XP = ₹1).',
+    steps: ['Agent weighs items at door', 'Verification done on spot', 'Coins added to your wallet', 'Cash out from 31 December'],
+    benefit: 'Coins credited on the spot',
     gradient: ['#312e81', '#4f46e5'] as [string, string],
     accent: '#818cf8',
   },
@@ -238,7 +238,7 @@ export function DashboardScreen({ navigation, route }: any) {
             {isMobile ? (
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total KarmaCoins XP' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
@@ -258,7 +258,7 @@ export function DashboardScreen({ navigation, route }: any) {
             ) : (
               <View style={z.heroRight}>
                 {[
-                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins' },
+                  { icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total KarmaCoins XP' },
                   { icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Day streak' },
                   { icon: Trophy, color: '#c084fc', val: `${quizStreak}`, label: 'Eco Quiz Streak' },
                   { icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Sustainability Actions' },
@@ -286,7 +286,7 @@ export function DashboardScreen({ navigation, route }: any) {
           <TouchableOpacity activeOpacity={0.9} onPress={() => setShowWelcomeBonusBanner(false)}>
             <LinearGradient colors={['#166534', '#15803d', '#22c55e']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={z.welcomeBonusBanner}>
               <KarmaCoin size={30} />
-              <Text style={z.welcomeBonusText}>🎁 Welcome, Early Bird! Your {EARLY_BIRD_COINS.toLocaleString()} Karma Coins have been credited successfully. Schedule your first pickup today and unlock even more rewards, badges, and exclusive partner vouchers.</Text>
+              <Text style={z.welcomeBonusText}>🎁 Welcome, Early Bird! Your {EARLY_BIRD_COINS.toLocaleString()} KarmaCoins XP have been credited successfully. Schedule your first pickup today and unlock even more rewards, badges, and exclusive partner vouchers.</Text>
               <X size={16} color="rgba(255,255,255,0.7)" />
             </LinearGradient>
           </TouchableOpacity>
@@ -323,7 +323,7 @@ export function DashboardScreen({ navigation, route }: any) {
                 <ArrowRight size={20} color="rgba(255,255,255,0.4)" />
               </View>
               <Text style={z.actionCardTitle}>Schedule a pickup</Text>
-              <Text style={z.actionCardSub}>Turn your clutter into KarmaCoins — sustainable pickup, zero effort, planet-friendly</Text>
+              <Text style={z.actionCardSub}>Turn your clutter into KarmaCoins XP — sustainable pickup, zero effort, planet-friendly</Text>
               <View style={z.actionCardCTA}>
                 <Text style={z.actionCardCTAText}>Schedule now</Text>
                 <ArrowRight size={14} color="#4ade80" />
