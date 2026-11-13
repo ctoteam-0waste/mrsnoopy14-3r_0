@@ -621,7 +621,7 @@ export function ManageAccountScreen({ navigation, route }: any) {
           {b.code === 'WITHDRAWABLE_BALANCE' && (
             <TouchableOpacity
               style={styles.warnBtn}
-              onPress={() => navigation.navigate('Redeem', { ledger: ledgerName(b.meta?.ledger), balance: b.meta?.balance })}
+              onPress={() => navigation.navigate('Redeem', { ledger: ledgerName(b.meta?.ledger) })}
               activeOpacity={0.85}
             >
               <Text style={styles.warnBtnText}>Withdraw coins</Text>

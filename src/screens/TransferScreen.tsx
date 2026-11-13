@@ -35,11 +35,11 @@ function mapTransferError(error: any, coinLabel: string): FieldErrors | 'unautho
   return { general: msg || 'Something went wrong. Please try again.' };
 }
 
-export function TransferScreen({ navigation, route }: any) {
+export function TransferScreen({ navigation }: any) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const [pickupCoins, setPickupCoins] = useState<number>(route?.params?.pickupCoins ?? 0);
-  const [rewardCoins, setRewardCoins] = useState<number>(route?.params?.rewardCoins ?? 0);
+  const [pickupCoins, setPickupCoins] = useState<number>(0);
+  const [rewardCoins, setRewardCoins] = useState<number>(0);
 
   const [phone, setPhone] = useState('');
   const [coinType, setCoinType] = useState<CoinType>('REWARD');
@@ -59,9 +59,8 @@ export function TransferScreen({ navigation, route }: any) {
   const balance = isReward ? rewardCoins : pickupCoins;
   const phoneValid = PHONE_REGEX.test(phone);
 
-  // Keep balances fresh — the wallet passes them in, but the user may have
-  // earned/spent since. Balance is only used for local pre-checks; the backend
-  // is the source of truth on submit.
+  // Balances come from the API, never the URL. They are only used for local
+  // pre-checks; the backend is the source of truth on submit.
   useEffect(() => {
     profileService.getProfile()
       .then((p) => {

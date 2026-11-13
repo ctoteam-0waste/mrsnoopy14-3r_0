@@ -44,12 +44,9 @@ export function WithdrawScreen({ navigation, route, initialMethods }: any) {
   const { colors } = useTheme();
 
   const [ledger, setLedger] = useState<LedgerType>(route?.params?.ledger === 'reward' ? 'reward' : 'pickup');
-  const [balances, setBalances] = useState<Record<LedgerType, number>>({
-    pickup: route?.params?.ledger !== 'reward' ? route?.params?.balance || 0 : 0,
-    reward: route?.params?.ledger === 'reward' ? route?.params?.balance || 0 : 0,
-  });
-  const [rewardRate, setRewardRate] = useState<number>(route?.params?.rewardRate || 100);
-  const [tier, setTier] = useState<string>(route?.params?.tier || '');
+  const [balances, setBalances] = useState<Record<LedgerType, number>>({ pickup: 0, reward: 0 });
+  const [rewardRate, setRewardRate] = useState<number>(100);
+  const [tier, setTier] = useState<string>('');
   const [phone, setPhone] = useState('');
 
   const [methods, setMethods] = useState<PayoutMethod[]>(initialMethods || []);
