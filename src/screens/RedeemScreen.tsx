@@ -75,6 +75,8 @@ function ManualRedeemScreen({ navigation, route }: any) {
   const [isBalanceLoading, setIsBalanceLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  // The amount the server priced the request at, shown once it is placed.
+  const [placedRupees, setPlacedRupees] = useState<number | null>(null);
 
   const [accountHolderName, setAccountHolderName] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
@@ -122,7 +124,7 @@ function ManualRedeemScreen({ navigation, route }: any) {
     if (!isFormValid || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await redeemService.create({
+      const placed: any = await redeemService.create({
         accountHolderName: accountHolderName.trim(),
         accountNumber: accountNumber.trim(),
         ifscCode: ifscCode.trim().toUpperCase(),
@@ -139,6 +141,8 @@ function ManualRedeemScreen({ navigation, route }: any) {
         currency: 'INR',
       });
       setBalance((prev) => prev - coinsToRedeem);
+      const serverRupees = Number(placed?.amountInRupees ?? placed?.redeemRequest?.amountInRupees);
+      setPlacedRupees(Number.isFinite(serverRupees) ? serverRupees : null);
       setIsSuccess(true);
     } catch (error: any) {
       const msg = error?.response?.data?.message;
@@ -158,7 +162,7 @@ function ManualRedeemScreen({ navigation, route }: any) {
           </View>
           <Text style={styles.successTitle}>Request submitted!</Text>
           <Text style={styles.successSub}>
-            Your redeem request for {formatRupees(rupees)} is pending admin approval.
+            Your redeem request for {formatRupees(placedRupees ?? rupees)} is pending admin approval.
           </Text>
           <View style={styles.successInfoNote}>
             <Text style={styles.successInfoText}>{REDEEM_INFO_MESSAGE}</Text>
