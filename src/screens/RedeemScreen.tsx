@@ -27,10 +27,11 @@ export function RedeemScreen({ navigation, route }: any) {
 
   const styles = useStyles();
   const { colors } = useTheme();
-  const [balance, setBalance] = useState<number>(route?.params?.balance || 0);
+  const [balance, setBalance] = useState<number>(0);
   // Rate = coins per ₹1. Pickup is always fixed; reward comes from the live streak tier.
-  const [rate, setRate] = useState<number>(isPickup ? PICKUP_RATE : (route?.params?.rewardRate || 100));
-  const [tier, setTier] = useState<string>(route?.params?.tier || '');
+  const [rate, setRate] = useState<number>(isPickup ? PICKUP_RATE : 100);
+  const [rateReady, setRateReady] = useState(isPickup);
+  const [tier, setTier] = useState<string>('');
   const [isBalanceLoading, setIsBalanceLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -57,9 +58,11 @@ export function RedeemScreen({ navigation, route }: any) {
       .finally(() => setIsBalanceLoading(false));
     // Reward Wallet rate is live — always confirm it against /streak/status at submit time.
     if (!isPickup) {
-      streakService.getStatus().then((s) => {
-        if (s) { setRate(s.rewardRate); setTier(s.tier); }
-      });
+      streakService.getStatus()
+        .then((s) => {
+          if (s) { setRate(s.rewardRate); setTier(s.tier); }
+        })
+        .finally(() => setRateReady(true));
     }
   }, [isPickup]);
 
@@ -72,7 +75,8 @@ export function RedeemScreen({ navigation, route }: any) {
     IFSC_REGEX.test(ifscCode.trim()) &&
     branchName.trim().length >= 2 &&
     coinsToRedeem >= MIN_COINS &&
-    coinsToRedeem <= balance;
+    coinsToRedeem <= balance &&
+    rateReady;
 
   const handleSubmit = async () => {
     if (!isFormValid || isSubmitting) return;
@@ -158,7 +162,7 @@ export function RedeemScreen({ navigation, route }: any) {
           <Text style={styles.rateNote}>
             {isPickup
               ? `Fixed rate · ${PICKUP_RATE} coins = ₹1`
-              : `${tier ? tier + ' tier · ' : ''}${rate} coins = ₹1`}
+              : rateReady ? `${tier ? tier + ' tier · ' : ''}${rate} coins = ₹1` : 'Checking your rate...'}
           </Text>
         </SafeAreaView>
       </LinearGradient>

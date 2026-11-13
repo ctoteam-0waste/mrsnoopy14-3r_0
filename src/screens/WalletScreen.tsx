@@ -106,12 +106,7 @@ export function WalletScreen({ navigation, route }: any) {
 
   const goRedeem = (ledger: LedgerType) => {
     setLedgerPickerVisible(false);
-    navigation.navigate('Redeem', {
-      ledger,
-      balance: ledger === 'pickup' ? pickupCoins : rewardCoins,
-      rewardRate,
-      tier: streak?.tier,
-    });
+    navigation.navigate('Redeem', { ledger });
   };
 
   const onRedeemPress = () => {
@@ -250,7 +245,7 @@ export function WalletScreen({ navigation, route }: any) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnAmber]}
-            onPress={() => navigation.navigate('Transfer', { pickupCoins, rewardCoins, rewardRate, tier: streak?.tier })}
+            onPress={() => navigation.navigate('Transfer')}
             activeOpacity={0.8}
           >
             <ArrowUpRight size={18} color="#d97706" />
@@ -258,7 +253,7 @@ export function WalletScreen({ navigation, route }: any) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.actionBtn, styles.actionBtnRed]}
-            onPress={() => navigation.navigate('Donation', { balance: pickupCoins + rewardCoins })}
+            onPress={() => navigation.navigate('Donation')}
             activeOpacity={0.8}
           >
             <Heart size={18} color="#e11d48" />
