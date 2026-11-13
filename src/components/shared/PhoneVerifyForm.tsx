@@ -4,6 +4,7 @@ import { Phone } from 'lucide-react-native';
 import { authService } from '../../services/auth';
 import { profileService } from '../../services/profile';
 import { useTheme, makeStyles } from '../../theme';
+import { OTP_AUTOFILL } from '../../utils/otpBoxes';
 
 // Phone number -> OTP -> save, for a signed-in user (send-otp and verify-otp with
 // purpose 'change-phone', then PUT /users/change-phone). Errors show inline, never
@@ -122,8 +123,7 @@ export function PhoneVerifyForm({ onVerified, initialPhone = '' }: {
           placeholder="------"
           placeholderTextColor={colors.borderStrong}
           keyboardType="number-pad"
-          textContentType="oneTimeCode"
-          autoComplete="sms-otp"
+          {...OTP_AUTOFILL}
           value={otp}
           onChangeText={(v) => { setOtp(v.replace(/[^0-9]/g, '').slice(0, 6)); setError(''); }}
           maxLength={6}

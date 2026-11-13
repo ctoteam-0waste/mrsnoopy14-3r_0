@@ -5,6 +5,7 @@ import { authService } from '../../services/auth';
 import { profileService } from '../../services/profile';
 import { showAlert } from '../../utils/alert';
 import { useTheme, makeStyles } from '../../theme';
+import { OTP_AUTOFILL } from '../../utils/otpBoxes';
 
 // Reuses the existing send-otp -> verify-otp -> change-phone flow so OAuth users
 // (Google/Facebook) who never verified a phone can do it inline before booking.
@@ -133,8 +134,9 @@ export function PhoneVerificationModal({
                     placeholder="------"
                     placeholderTextColor={colors.borderStrong}
                     keyboardType="number-pad"
+                    {...OTP_AUTOFILL}
                     value={otp}
-                    onChangeText={(v) => setOtp(v.replace(/[^0-9]/g, ''))}
+                    onChangeText={(v) => setOtp(v.replace(/[^0-9]/g, '').slice(0, 6))}
                     maxLength={6}
                     autoFocus
                   />

@@ -20,6 +20,7 @@ import { EARLY_BIRD_COINS } from '../utils/earlyBird';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 import { PhoneVerifyForm } from '../components/shared/PhoneVerifyForm';
+import { applyOtpInput, OTP_AUTOFILL } from '../utils/otpBoxes';
 import { isDiwaliSeason } from '../utils/festive';
 import { DiwaliHeaderDecor, DiwaliBackdrop } from '../components/festive/Diwali';
 let GoogleSignin: any = null;
@@ -890,12 +891,9 @@ export function LoginScreen({ navigation, route }: any) {
   };
 
   const handleOtpChange = (text: string, index: number) => {
-    const newOtp = [...signupOtp];
-    newOtp[index] = text.replace(/[^0-9]/g, '');
-    setSignupOtp(newOtp);
-    if (text && index < 5) {
-      otpRefs.current[index + 1]?.focus();
-    }
+    const { next, focus } = applyOtpInput(signupOtp, text, index);
+    setSignupOtp(next);
+    if (focus != null) otpRefs.current[focus]?.focus();
   };
 
   const handleOtpKeyPress = (e: any, index: number) => {
@@ -1314,11 +1312,12 @@ export function LoginScreen({ navigation, route }: any) {
               placeholder="Enter 6-digit OTP"
               value={otpValue}
               onChange={(v: string) => {
-                const clean = v.replace(/[^0-9]/g, '');
+                const clean = v.replace(/[^0-9]/g, '').slice(0, 6);
                 setOtpValue(clean);
               }}
               keyboardType="number-pad"
               maxLength={6}
+              {...OTP_AUTOFILL}
               icon={<CheckCircle2 size={18} color={colors.textFaint} />}
               autoFocus
             />
@@ -1545,7 +1544,8 @@ export function LoginScreen({ navigation, route }: any) {
                   onChangeText={(t) => handleOtpChange(t, i)}
                   onKeyPress={(e) => handleOtpKeyPress(e, i)}
                   keyboardType="number-pad"
-                  maxLength={1}
+                  maxLength={6}
+                  {...OTP_AUTOFILL}
                   autoFocus={i === 0}
                   selectionColor="#15803d"
                 />
