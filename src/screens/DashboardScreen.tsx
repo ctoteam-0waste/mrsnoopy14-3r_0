@@ -525,13 +525,13 @@ export function DashboardScreen({ navigation, route }: any) {
         </View>
 
         {/* Stats grid — mirrors the web dashboard (Total Karma Coins / Pickup streak / Eco Quiz Streak / Eco Actions).
-            "Sustainability Actions" didn't fit a phone-width tile and was cut off. Actions = completed pickups + days the quiz was played. */}
+            "Sustainability Actions" didn't fit a phone-width tile and was cut off. */}
         <View ref={statsRef} collapsable={false} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }}>
           {[
             { Icon: Coins, color: '#4ade80', val: balance.toLocaleString(), label: 'Total Karma Coins', onPress: () => navigation.navigate('Wallet') },
             { Icon: Flame, color: '#fb923c', val: `${streak}`, label: 'Pickup streak', onPress: () => setShowStreak(true) },
             { Icon: Trophy, color: '#fde68a', val: `${quizStreak}`, label: 'Eco Quiz Streak', onPress: () => setShowQuizCal(true) },
-            { Icon: Package, color: '#22d3ee', val: `${totalPickups + quizHistory.length}`, label: 'Eco Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
+            { Icon: Package, color: '#22d3ee', val: `${totalPickups}`, label: 'Eco Actions', onPress: () => navigation.navigate('Orders', { tab: 'History' }) },
           ].map((st, i) => (
             <TouchableOpacity key={i} style={styles.statTile} activeOpacity={0.7} onPress={st.onPress}>
               <View style={styles.statTileTop}>
