@@ -252,8 +252,12 @@ const pages = [
   },
 ];
 
+// Each page is served from <path>/index.html, so the host redirects /blog to /blog/.
+// Canonicals and sitemap entries must use the trailing-slash URL that actually returns 200.
+const pageUrl = (urlPath) => (urlPath ? `${SITE}/${urlPath}/` : `${SITE}/`);
+
 function renderPage(base, page) {
-  const canonical = `${SITE}/${page.urlPath}`;
+  const canonical = pageUrl(page.urlPath);
   let html = base;
 
   html = html.replace(/<title>.*?<\/title>/s, `<title>${page.title}</title>`);
@@ -306,7 +310,7 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 ${pages
   .map(
     (p) => `  <url>
-    <loc>${SITE}/${p.urlPath}</loc>
+    <loc>${pageUrl(p.urlPath)}</loc>
     <changefreq>weekly</changefreq>
     <priority>${p.urlPath === '' ? '1.0' : '0.6'}</priority>
   </url>`

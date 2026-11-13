@@ -44,7 +44,7 @@
 # silently serving the homepage shell (which the old catch-all below did).
 [[redirects]]
   from = "/privacy-policy/*"
-  to = "/legal/privacy"
+  to = "/legal/privacy/"
   status = 301
 
 # Real prerendered files (/, /login, /legal/privacy, /legal/terms, /legal/data-deletion) are served as-is —

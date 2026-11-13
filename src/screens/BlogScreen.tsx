@@ -45,7 +45,7 @@ export function BlogScreen({ navigation }: any) {
     return setPageMeta({
       title: 'Blog — KarmaVerse',
       description: 'Practical guides on recycling, zero waste, EPR, ESG and climate action in India from the KarmaVerse and 3R ZeroWaste team.',
-      canonical: 'https://karmaverse.earth/blog',
+      canonical: 'https://karmaverse.earth/blog/',
     });
   }, [load]);
 
