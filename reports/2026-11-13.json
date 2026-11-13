@@ -1,0 +1,443 @@
+{
+ "date": "2026-11-13",
+ "gsc": {
+  "status": "unavailable",
+  "reason": "GSC_SA_JSON is set but is not valid JSON (8 characters, parse failed) - cannot mint an access token; GSC_SITE_URL is set. Re-save the full service-account key JSON as the secret.",
+  "window": null,
+  "clicks": "unavailable",
+  "impressions": "unavailable",
+  "ctr": "unavailable",
+  "position": "unavailable",
+  "previous_week": null,
+  "top_queries": "unavailable",
+  "top_pages": "unavailable",
+  "devices": "unavailable"
+ },
+ "seo": {
+  "robots_txt": {
+   "present": true,
+   "status": 200
+  },
+  "sitemap": {
+   "present": true,
+   "url_count": 6
+  },
+  "pages": {
+   "https://karmaverse.earth/": {
+    "first_status": 200,
+    "final_status": 200,
+    "final_url": "https://karmaverse.earth/",
+    "redirects": 0,
+    "status": 200,
+    "ms": 229,
+    "title": "KarmaVerse — Turning Sustainable Gestures into Rewards",
+    "title_len": 54,
+    "meta_desc": "KarmaVerse is India's sustainability rewards ecosystem. Earn KarmaCoins for everyday eco-friendly actions — from doorstep recycling pickups to eco-quizzes — and redeem them for real rewards while creating measurable environmental impact.",
+    "meta_desc_len": 237,
+    "h1": 1,
+    "canonical": "https://karmaverse.earth/",
+    "robots_meta": "index, follow",
+    "jsonld_types": [
+     "Organization",
+     "PostalAddress",
+     "SoftwareApplication",
+     "Offer",
+     "Organization",
+     "FAQPage",
+     "Question",
+     "Answer",
+     "Question",
+     "Answer",
+     "Question",
+     "Answer",
+     "Question",
+     "Answer",
+     "Question",
+     "Answer",
+     "Question",
+     "Answer"
+    ],
+    "images": 1,
+    "images_missing_alt": 1,
+    "internal_links": [
+     "https://karmaverse.earth/login"
+    ],
+    "html_bytes": 19686,
+    "inbound_from_sitemap_pages": 0
+   },
+   "https://karmaverse.earth/blog": {
+    "first_status": 301,
+    "final_status": 200,
+    "final_url": "https://karmaverse.earth/blog/",
+    "redirects": 1,
+    "status": 200,
+    "ms": 308,
+    "title": "Blog — KarmaVerse",
+    "title_len": 17,
+    "meta_desc": "Practical guides on recycling, zero waste, EPR, ESG and climate action in India from the KarmaVerse and 3R ZeroWaste team.",
+    "meta_desc_len": 122,
+    "h1": 1,
+    "canonical": "https://karmaverse.earth/blog",
+    "robots_meta": "index, follow",
+    "jsonld_types": [
+     "Organization",
+     "PostalAddress",
+     "Blog",
+     "WebSite",
+     "Organization"
+    ],
+    "images": 1,
+    "images_missing_alt": 1,
+    "internal_links": [
+     "https://karmaverse.earth/login"
+    ],
+    "html_bytes": 15557,
+    "inbound_from_sitemap_pages": 0
+   },
+   "https://karmaverse.earth/login": {
+    "first_status": 301,
+    "final_status": 200,
+    "final_url": "https://karmaverse.earth/login/",
+    "redirects": 1,
+    "status": 200,
+    "ms": 232,
+    "title": "Log In or Sign Up — KarmaVerse",
+    "title_len": 30,
+    "meta_desc": "Log in or create your free KarmaVerse account to schedule doorstep recycling pickups and start earning KarmaCoins XP.",
+    "meta_desc_len": 117,
+    "h1": 1,
+    "canonical": "https://karmaverse.earth/login",
+    "robots_meta": "index, follow",
+    "jsonld_types": [
+     "Organization",
+     "PostalAddress",
+     "WebPage",
+     "WebSite"
+    ],
+    "images": 1,
+    "images_missing_alt": 1,
+    "internal_links": [
+     "https://karmaverse.earth/login"
+    ],
+    "html_bytes": 15502,
+    "inbound_from_sitemap_pages": 5
+   },
+   "https://karmaverse.earth/legal/privacy": {
+    "first_status": 301,
+    "final_status": 200,
+    "final_url": "https://karmaverse.earth/legal/privacy/",
+    "redirects": 1,
+    "status": 200,
+    "ms": 261,
+    "title": "Privacy Policy — KarmaVerse",
+    "title_len": 27,
+    "meta_desc": "How KarmaVerse (by 3R ZeroWaste) collects, uses, and protects your data. Read the full privacy policy for the KarmaVerse recycling rewards app.",
+    "meta_desc_len": 143,
+    "h1": 1,
+    "canonical": "https://karmaverse.earth/legal/privacy",
+    "robots_meta": "index, follow",
+    "jsonld_types": [
+     "Organization",
+     "PostalAddress",
+     "WebPage",
+     "WebSite",
+     "Organization"
+    ],
+    "images": 1,
+    "images_missing_alt": 1,
+    "internal_links": [
+     "https://karmaverse.earth/login"
+    ],
+    "html_bytes": 28535,
+    "inbound_from_sitemap_pages": 0
+   },
+   "https://karmaverse.earth/legal/terms": {
+    "first_status": 301,
+    "final_status": 200,
+    "final_url": "https://karmaverse.earth/legal/terms/",
+    "redirects": 1,
+    "status": 200,
+    "ms": 219,
+    "title": "Terms & Conditions — KarmaVerse",
+    "title_len": 31,
+    "meta_desc": "The terms and conditions governing use of the KarmaVerse app and website, operated by 3R ZeroWaste.",
+    "meta_desc_len": 99,
+    "h1": 1,
+    "canonical": "https://karmaverse.earth/legal/terms",
+    "robots_meta": "index, follow",
+    "jsonld_types": [
+     "Organization",
+     "PostalAddress",
+     "WebPage",
+     "WebSite",
+     "Organization"
+    ],
+    "images": 1,
+    "images_missing_alt": 1,
+    "internal_links": [
+     "https://karmaverse.earth/login"
+    ],
+    "html_bytes": 40620,
+    "inbound_from_sitemap_pages": 0
+   },
+   "https://karmaverse.earth/legal/data-deletion": {
+    "first_status": 301,
+    "final_status": 200,
+    "final_url": "https://karmaverse.earth/legal/data-deletion/",
+    "redirects": 1,
+    "status": 200,
+    "ms": 222,
+    "title": "Data Deletion — KarmaVerse",
+    "title_len": 26,
+    "meta_desc": "How to request deletion of your KarmaVerse account and associated data, including data from third-party sign-in providers.",
+    "meta_desc_len": 122,
+    "h1": 1,
+    "canonical": "https://karmaverse.earth/legal/data-deletion",
+    "robots_meta": "index, follow",
+    "jsonld_types": [
+     "Organization",
+     "PostalAddress",
+     "WebPage",
+     "WebSite",
+     "Organization"
+    ],
+    "images": 1,
+    "images_missing_alt": 1,
+    "internal_links": [
+     "https://karmaverse.earth/login"
+    ],
+    "html_bytes": 16916,
+    "inbound_from_sitemap_pages": 0
+   }
+  },
+  "issues": [
+   {
+    "severity": "medium",
+    "url": "https://karmaverse.earth/",
+    "issue": "meta description length 237"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/",
+    "issue": "1 image(s) missing alt"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/",
+    "issue": "no internal links from other sitemap pages (raw HTML)"
+   },
+   {
+    "severity": "critical",
+    "url": "https://karmaverse.earth/blog",
+    "issue": "HTTP 301 (sitemap URL redirects to https://karmaverse.earth/blog/, final 200)"
+   },
+   {
+    "severity": "medium",
+    "url": "https://karmaverse.earth/blog",
+    "issue": "title length 17"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/blog",
+    "issue": "1 image(s) missing alt"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/blog",
+    "issue": "no internal links from other sitemap pages (raw HTML)"
+   },
+   {
+    "severity": "critical",
+    "url": "https://karmaverse.earth/login",
+    "issue": "HTTP 301 (sitemap URL redirects to https://karmaverse.earth/login/, final 200)"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/login",
+    "issue": "1 image(s) missing alt"
+   },
+   {
+    "severity": "critical",
+    "url": "https://karmaverse.earth/legal/privacy",
+    "issue": "HTTP 301 (sitemap URL redirects to https://karmaverse.earth/legal/privacy/, final 200)"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/legal/privacy",
+    "issue": "1 image(s) missing alt"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/legal/privacy",
+    "issue": "no internal links from other sitemap pages (raw HTML)"
+   },
+   {
+    "severity": "critical",
+    "url": "https://karmaverse.earth/legal/terms",
+    "issue": "HTTP 301 (sitemap URL redirects to https://karmaverse.earth/legal/terms/, final 200)"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/legal/terms",
+    "issue": "1 image(s) missing alt"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/legal/terms",
+    "issue": "no internal links from other sitemap pages (raw HTML)"
+   },
+   {
+    "severity": "critical",
+    "url": "https://karmaverse.earth/legal/data-deletion",
+    "issue": "HTTP 301 (sitemap URL redirects to https://karmaverse.earth/legal/data-deletion/, final 200)"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/legal/data-deletion",
+    "issue": "1 image(s) missing alt"
+   },
+   {
+    "severity": "low",
+    "url": "https://karmaverse.earth/legal/data-deletion",
+    "issue": "no internal links from other sitemap pages (raw HTML)"
+   }
+  ],
+  "issue_counts": {
+   "critical": 5,
+   "high": 0,
+   "medium": 2,
+   "low": 11
+  },
+  "pagespeed": {
+   "status": "unavailable",
+   "reason": "HTTP 429 RESOURCE_EXHAUSTED (no PAGESPEED_API_KEY configured)"
+  }
+ },
+ "aso": {
+  "title": "KarmaVerse",
+  "downloads_band": "10+",
+  "star_rating": "none shown",
+  "ratings_count": "none shown (no rating block for this app; star values in HTML belong to other apps)",
+  "updated_on": "18 Sept 2026",
+  "screenshot_count": 8,
+  "content_rating": "Rated for 18+",
+  "recent_reviews": []
+ },
+ "llmo": {
+  "queries": [
+   {
+    "query": "best recycling rewards app India",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [
+     "Goodeebag",
+     "The Kabadiwala",
+     "Pom Pom"
+    ],
+    "note": ""
+   },
+   {
+    "query": "doorstep recycling pickup app Gurugram",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [
+     "ScrapUncle",
+     "Recyclekaro/Reloop",
+     "Scrapbuddy"
+    ],
+    "note": ""
+   },
+   {
+    "query": "earn rewards for recycling plastic app India",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [
+     "Goodeebag"
+    ],
+    "note": ""
+   },
+   {
+    "query": "scrap pickup app Delhi NCR",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [
+     "ScrapUncle",
+     "Scrapbuddy",
+     "Pom Pom"
+    ],
+    "note": ""
+   },
+   {
+    "query": "app that pays you for recycling India",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [
+     "Pom Pom",
+     "ScrapUncle",
+     "Goodeebag"
+    ],
+    "note": ""
+   },
+   {
+    "query": "e-waste pickup app Gurugram",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [
+     "Pom Pom",
+     "Scrapbuddy"
+    ],
+    "note": ""
+   },
+   {
+    "query": "sustainability rewards app India",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [],
+    "note": "Do It Zero, Treewards, GoingZero Loop surfaced (not tracked competitors)"
+   },
+   {
+    "query": "KarmaVerse app",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [],
+    "note": "dominated by crypto/GameFi KarmaVerse projects (excluded)"
+   },
+   {
+    "query": "KarmaVerse KarmaCoins",
+    "brand_mentioned": false,
+    "link_rank": null,
+    "karmaverse_earth_cited": false,
+    "competitors": [],
+    "note": "dominated by crypto KarmaVerse by Virtuals / Karmaverse KNOT (excluded)"
+   },
+   {
+    "query": "3R ZeroWaste Manesar",
+    "brand_mentioned": true,
+    "link_rank": 2,
+    "karmaverse_earth_cited": false,
+    "competitors": [],
+    "note": "3R ZeroWaste appears (Outlook Business PR, link rank 2; catalyst2030) and names its platform KarmaVer$e / KarmaCoins; no karmaverse.earth or 0waste.co.in URL; Manesar results mostly the unrelated 3R Recycler"
+   }
+  ],
+  "mentions": 1,
+  "citations": 0,
+  "mention_rate": 0.1,
+  "citation_rate": 0.0,
+  "competitor_mentions": 15,
+  "share_of_voice": 0.0625
+ },
+ "not_measured": [
+  "GA4 sessions/users",
+  "Search Console (credential invalid)",
+  "Play Console visitors/installs/conversion",
+  "Windsor.ai social reach/engagement"
+ ]
+}
