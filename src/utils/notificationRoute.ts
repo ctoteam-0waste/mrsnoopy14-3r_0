@@ -50,7 +50,7 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
   if (actionIdentifier && actionIdentifier !== DEFAULT_ACTION) {
     switch (actionIdentifier) {
       case 'track':
-        if (booking) nav.navigate('OrderTracking', { booking });
+        if (booking) nav.navigate('OrderTracking', { bookingId });
         return;
       case 'rate':
       case 'view':
@@ -77,7 +77,7 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
     case 'BOOKING_PICKED_UP':
     case 'BOOKING_IN_POOL':
     case 'PICKUP_REMINDER':
-      if (booking) { nav.navigate('OrderTracking', { booking }); return; }
+      if (booking) { nav.navigate('OrderTracking', { bookingId }); return; }
       break;
     case 'BOOKING_COMPLETED':
     case 'RATING_REQUEST':
@@ -105,7 +105,7 @@ export function routeNotification(data: any, actionIdentifier?: string): void {
 
   // ── Everything else (engagement / marketing, payouts, alerts). Route by the
   //    explicit target the backend set, then by a known type. ──
-  if (target === 'OrderTracking' && booking) { nav.navigate('OrderTracking', { booking }); return; }
+  if (target === 'OrderTracking' && booking) { nav.navigate('OrderTracking', { bookingId }); return; }
   if (target === 'Withdrawal' && withdrawalId) { nav.navigate('Withdrawal', { id: withdrawalId }); return; }
   if (goToScreen(nav, target)) return;
   if (data?.type && goToScreen(nav, TYPE_SCREEN[data.type])) return;

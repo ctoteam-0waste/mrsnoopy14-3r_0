@@ -19,6 +19,7 @@ import * as Location from 'expo-location';
 import { SCREEN_WIDTH as width } from '../utils/layout';
 import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
+import { rememberBooking } from '../utils/bookingCache';
 
 const CARD_MARGIN = 8;
 const COLS = Platform.OS === 'web' && width > 768 ? 4 : 2;
@@ -503,10 +504,11 @@ export function SchedulePickupScreen({ navigation }: any) {
       setIsSubmitted(true);
       const token = await getToken();
       showRedeemInfoOnce(`firstBookingRedeemInfo_${getStableUserSuffix(token)}`);
-      setTimeout(() => navigation.replace('OrderTracking', {
-        booking: createdBooking,
-        estimatedCoins: createdBooking?.estimatedKarmaCoins ?? cartCalculations.totalCoins,
-      }), 2500);
+      const bookingId = rememberBooking({
+        ...createdBooking,
+        estimatedKarmaCoins: createdBooking?.estimatedKarmaCoins ?? cartCalculations.totalCoins,
+      });
+      setTimeout(() => navigation.replace('OrderTracking', { bookingId }), 2500);
     };
 
     // With no response (timeout, dropped connection) the booking may still have been

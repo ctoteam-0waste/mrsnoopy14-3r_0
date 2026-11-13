@@ -11,6 +11,7 @@ import { DiwaliHeaderDecor, DiwaliStrip, DiwaliBackdrop } from '../components/fe
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
 import { bookingCoins, formatBookingCoins } from '../utils/bookingCoins';
+import { rememberBooking } from '../utils/bookingCache';
 
 export function OrdersScreen({ navigation, route }: any) {
   const styles = useStyles();
@@ -169,7 +170,7 @@ export function OrdersScreen({ navigation, route }: any) {
                     if (order.status === 'Completed' || order.status === 'Cancelled') {
                       navigation.navigate('BookingDetails', { booking: order.rawOrder });
                     } else {
-                      navigation.navigate('OrderTracking', { booking: order.rawOrder });
+                      navigation.navigate('OrderTracking', { bookingId: rememberBooking(order.rawOrder) });
                     }
                   }}
                 >

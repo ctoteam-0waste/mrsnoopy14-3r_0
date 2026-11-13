@@ -12,6 +12,7 @@ import {
 import { bookingService } from '../services/booking';
 import { useTheme, makeStyles } from '../theme';
 import { bookingCoins } from '../utils/bookingCoins';
+import { rememberBooking } from '../utils/bookingCache';
 
 const FALLBACK = {
   id: 'KC12345',
@@ -223,7 +224,7 @@ export function BookingDetailsScreen({ navigation, route }: any) {
           <View style={styles.ctaContainer}>
             <TouchableOpacity
               style={styles.trackBtn}
-              onPress={() => navigation.navigate('OrderTracking', { booking: passed })}
+              onPress={() => navigation.navigate('OrderTracking', { bookingId: rememberBooking(fullBooking || passed) })}
             >
               <Navigation size={16} color="white" />
               <Text style={styles.trackBtnText}>
