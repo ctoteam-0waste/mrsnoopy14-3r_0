@@ -17,8 +17,8 @@ const SUPPORT_EMAIL = 'info@0waste.co.in';
 export function WithdrawalDetailScreen({ navigation, route }: any) {
   const styles = useStyles();
   const { colors } = useTheme();
-  const id: string | undefined = route?.params?.id || route?.params?.withdrawal?._id;
-  const [withdrawal, setWithdrawal, slow] = useLiveWithdrawal(route?.params?.withdrawal || null);
+  const id: string | undefined = route?.params?.id;
+  const [withdrawal, setWithdrawal, slow] = useLiveWithdrawal(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>(withdrawal ? 'ready' : 'loading');
   const [methods, setMethods] = useState<PayoutMethod[]>([]);
 

@@ -41,9 +41,9 @@ const DONATION_OPTIONS = [
   },
 ];
 
-export function DonationScreen({ navigation, route }: any) {
+export function DonationScreen({ navigation }: any) {
   const styles = useStyles();
-  const [balance, setBalance] = useState<number>(route?.params?.balance || 0);
+  const [balance, setBalance] = useState<number>(0);
 
   useEffect(() => {
     profileService.getProfile()

@@ -86,7 +86,7 @@ export function RedeemHistoryScreen({ navigation }: any) {
                 <TouchableOpacity
                   key={req._id}
                   style={styles.card}
-                  onPress={() => navigation.navigate('Withdrawal', { id: req._id, withdrawal: req })}
+                  onPress={() => navigation.navigate('Withdrawal', { id: req._id })}
                   activeOpacity={0.85}
                   accessibilityRole="button"
                 >
