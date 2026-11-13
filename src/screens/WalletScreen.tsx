@@ -96,7 +96,7 @@ export function WalletScreen({ navigation, route }: any) {
     setFreezing(true);
     try {
       await streakService.purchaseFreeze();
-      showAlert('Streak saved!', 'Your streak is protected. Keep it going with a pickup, quiz, or referral today.');
+      showAlert('Streak saved!', 'Your streak is protected. Keep it going with a completed pickup today.');
       await fetchWalletData();
     } catch (error: any) {
       const msg = error?.response?.data?.message;
@@ -346,7 +346,7 @@ export function WalletScreen({ navigation, route }: any) {
               <TouchableOpacity onPress={() => setTierModalVisible(false)}><X size={22} color={colors.textMuted} /></TouchableOpacity>
             </View>
             <Text style={styles.sheetHint}>
-              Do a pickup, quiz, or referral any day to keep your streak. The longer it runs, the more your
+              Complete a verified pickup every day to keep your streak. The longer it runs, the more your
               <Text style={{ fontWeight: '800' }}> reward coins</Text> are worth. Pickup coins are always {PICKUP_RATE}:1.
             </Text>
             <View style={{ marginTop: 14 }}>
