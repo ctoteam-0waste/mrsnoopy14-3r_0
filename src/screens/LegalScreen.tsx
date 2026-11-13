@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, ShieldCheck, FileText, Trash2 } from 'lucide-react-native';
 import { TERMS, TERMS_OF_USE, PRIVACY, DATA_DELETION, LegalDoc, LegalSection } from '../data/legalContent';
 import { makeStyles } from '../theme';
+import { goBackOrHome } from '../utils/navBack';
 
 function SectionBlock({ section, index }: { section: LegalSection; index: number }) {
   const styles = useStyles();
@@ -48,7 +49,7 @@ export function LegalScreen({ route, navigation }: any) {
         <SafeAreaView edges={['top']}>
           <View style={styles.headerInner}>
             <View style={styles.headerTopRow}>
-              <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.backBtn} onPress={() => goBackOrHome(navigation)} activeOpacity={0.7}>
                 <ChevronLeft size={24} color="white" />
               </TouchableOpacity>
               <View style={styles.headerIconBox}>

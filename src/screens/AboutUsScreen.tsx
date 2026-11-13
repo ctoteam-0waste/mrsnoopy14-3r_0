@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ChevronLeft, Target, Eye, Recycle, Users, Truck, Coins, Sparkles } from 'lucide-react-native';
 import { useTheme, makeStyles } from '../theme';
+import { goBackOrHome } from '../utils/navBack';
 
 const STATS = [
   { value: '1.85L+', label: 'Citizens reached' },
@@ -30,7 +31,7 @@ export function AboutUsScreen({ navigation }: any) {
         <SafeAreaView edges={['top']}>
           <View style={styles.headerInner}>
             <View style={styles.headerTopRow}>
-              <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.backBtn} onPress={() => goBackOrHome(navigation)} activeOpacity={0.7}>
                 <ChevronLeft size={24} color="white" />
               </TouchableOpacity>
               <View style={styles.headerIconBox}>

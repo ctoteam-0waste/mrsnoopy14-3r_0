@@ -19,6 +19,10 @@ export function OrdersScreen({ navigation, route }: any) {
   const diwali = isDiwaliSeason();
   const { colors, isDark } = useTheme();
   const [activeTab, setActiveTab] = useState<'Active' | 'History'>(route?.params?.tab === 'History' ? 'History' : 'Active');
+  // Opened again with a tab (a cancelled-booking push) while Orders was already open.
+  useEffect(() => {
+    if (route?.params?.tab === 'History' || route?.params?.tab === 'Active') setActiveTab(route.params.tab);
+  }, [route?.params?.tab]);
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   // Bookings rated this session — gives instant UI feedback before the next refetch

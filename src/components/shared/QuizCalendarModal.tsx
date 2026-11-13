@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Leaf, Flame, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { StatModal } from './StatModal';
@@ -22,6 +22,10 @@ export function QuizCalendarModal({ visible, onClose, playedDates, streak }: {
   const { colors } = useTheme();
   const today = new Date();
   const [view, setView] = useState({ y: today.getFullYear(), m: today.getMonth() });
+  // Every time it opens, start on the current month (not the last one browsed).
+  useEffect(() => {
+    if (visible) { const now = new Date(); setView({ y: now.getFullYear(), m: now.getMonth() }); }
+  }, [visible]);
 
   const played = new Set(playedDates);
   const todayStr = ymd(today.getFullYear(), today.getMonth(), today.getDate());
