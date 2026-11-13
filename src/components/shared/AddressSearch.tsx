@@ -9,7 +9,7 @@ import { MapPin, ArrowLeft, Navigation2, Home, Briefcase, MapPinned, Pencil, X }
 import * as Location from 'expo-location';
 import { mapService, MapSuggestion } from '../../services/mapService';
 import { MapPicker } from './MapPicker';
-import { isWithinServiceArea } from '../../utils/serviceArea';
+import { isWithinServiceArea, GURUGRAM_CENTER } from '../../utils/serviceArea';
 import { useTheme, makeStyles } from '../../theme';
 
 export interface AddressDetails {
@@ -43,8 +43,11 @@ function composeFullAddress(
   return full;
 }
 
-// India centroid — used only when no GPS/profile coordinate is available yet.
-const DEFAULT_CENTER: [number, number] = [78.9629, 20.5937];
+// Used only when no GPS/profile coordinate is available yet. This was the India
+// centroid, which at street zoom opened the map on empty land in Madhya Pradesh,
+// outside the service area — Confirm stayed disabled, so a first-time user could
+// only add an address by searching. Start inside the service area instead.
+const DEFAULT_CENTER: [number, number] = [GURUGRAM_CENTER.lon, GURUGRAM_CENTER.lat];
 
 const LABELS = [
   { key: 'Home', icon: Home },
@@ -156,6 +159,27 @@ export function AddressSearch({ visible, onSelect, onCancel, userCoords, initial
       setCenter(start);
       reverseGeocodeCenter(start);
       setMapMounted(true);
+
+      // No coordinate passed in (e.g. first address from Profile): if location
+      // permission was already granted, move to the phone's last known position.
+      // Never prompts — the GPS button still asks when the user wants it.
+      if (start === DEFAULT_CENTER && Platform.OS !== 'web') {
+        let cancelled = false;
+        (async () => {
+          try {
+            const { status } = await Location.getForegroundPermissionsAsync();
+            if (status !== 'granted') return;
+            const loc = await Location.getLastKnownPositionAsync();
+            if (cancelled || !loc) return;
+            const coords: [number, number] = [loc.coords.longitude, loc.coords.latitude];
+            setCenter(coords);
+            reverseGeocodeCenter(coords);
+          } catch {
+            // Stay on the default centre; search and drag still work.
+          }
+        })();
+        return () => { cancelled = true; };
+      }
     } else {
       setMapMounted(false);
     }
