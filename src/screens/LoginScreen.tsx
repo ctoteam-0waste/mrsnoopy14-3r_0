@@ -21,6 +21,7 @@ import { useTheme, makeStyles } from '../theme';
 import { StatusBarFiller } from '../components/shared/StatusBarFiller';
 import { PhoneVerifyForm } from '../components/shared/PhoneVerifyForm';
 import { applyOtpInput, OTP_AUTOFILL } from '../utils/otpBoxes';
+import { isValidEmail } from '../utils/email';
 import { isDiwaliSeason } from '../utils/festive';
 import { DiwaliHeaderDecor, DiwaliBackdrop } from '../components/festive/Diwali';
 let GoogleSignin: any = null;
@@ -737,8 +738,7 @@ export function LoginScreen({ navigation, route }: any) {
         setEmailError('Email address cannot contain emojis.');
         return;
       }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(raw)) {
+      if (!isValidEmail(raw)) {
         setEmailError('Please enter a valid email address or mobile number.');
         return;
       }
@@ -800,7 +800,7 @@ export function LoginScreen({ navigation, route }: any) {
     const errs: { name?: string; email?: string; phone?: string; password?: string; general?: string } = {};
     if (!name.trim() || !email.trim() || !phone.trim() || !password) return;
     if (EMOJI_REGEX.test(email)) errs.email = 'Email address cannot contain emojis.';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) errs.email = 'Please enter a valid email address.';
+    else if (!isValidEmail(email)) errs.email = 'Please enter a valid email address.';
     if (!/^[a-zA-Z\s]+$/.test(name.trim())) errs.name = 'Full name should contain only letters.';
     if (!/^[6-9]\d{9}$/.test(phone.trim())) errs.phone = 'Please enter a valid Indian mobile number (must start with 6, 7, 8 or 9).';
     if (password.length < 8 || !/\d/.test(password)) errs.password = 'Password must be at least 8 characters and include a number.';
@@ -1256,7 +1256,7 @@ export function LoginScreen({ navigation, route }: any) {
               const raw = forgotPhone.trim();
               const isEmail = raw.includes('@');
               if (isEmail) {
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) {
+                if (!isValidEmail(raw)) {
                   showAlert('Invalid email', 'Please enter a valid email address.');
                   return;
                 }
