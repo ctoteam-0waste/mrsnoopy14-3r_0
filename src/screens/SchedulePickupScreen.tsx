@@ -867,12 +867,14 @@ export function SchedulePickupScreen({ navigation }: any) {
       <Text style={[styles.sectionTitle, { marginTop: 24 }]}>Special instructions <Text style={{fontWeight: '400', fontSize: 13, color: colors.textFaint}}>(optional)</Text></Text>
       <TextInput
         style={[styles.inputBox, { color: colors.text }]}
-        placeholder="E.g. Ring the bell twice, leave at the door..."
+        placeholder="E.g. Ring the bell twice, call when you arrive, use the side gate..."
         placeholderTextColor={colors.textFaint}
         value={instructions}
         onChangeText={setInstructions}
         multiline
       />
+      {/* T&C: someone aged 18 or over must hand over the material (W-14). */}
+      <Text style={styles.handoverNote}>Someone aged 18 or over needs to be there to hand over the items.</Text>
 
       <TouchableOpacity 
         style={[styles.submitBtn, isLoading && { opacity: 0.7 }]}
@@ -1039,6 +1041,7 @@ const useStyles = makeStyles((c) => ({
   estimateBigCoin: { opacity: 0.8 },
 
   inputBox: { backgroundColor: c.inputBg, borderRadius: 16, padding: 16, height: 100, textAlignVertical: 'top', color: c.text, fontSize: 14, fontWeight: '500', marginTop: 12, marginBottom: 24, elevation: 1, borderWidth: 1, borderColor: c.border },
+  handoverNote: { fontSize: 12, fontWeight: '600', color: c.textMuted, lineHeight: 17, marginTop: -14, marginBottom: 24 },
   submitBtn: { backgroundColor: '#15803d', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: 18, borderRadius: 16, gap: 10, elevation: 4 },
   submitBtnText: { color: 'white', fontSize: 16, fontWeight: '900' },
 
