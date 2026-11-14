@@ -3,6 +3,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, StatusBar, Modal, TextInput, KeyboardAvoidingView, Platform, Animated, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { WebFooter } from '../components/shared/WebFooter';
 import { showAlert } from '../utils/alert';
+import { showHelpAndSupport } from '../utils/support';
 import { ChevronLeft, User, MapPin, Flame, HeartHandshake, LogOut, FileText, Trophy, X, Mail, Phone, ShieldCheck, CheckCircle, CalendarDays, UserSquare2, Heart, Briefcase, Users, ArrowRight, Gift, Trash2, Bell, BellOff, Camera, UserX, SlidersHorizontal } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { openNotificationSettings } from '../utils/notifications';
@@ -806,10 +807,7 @@ export function ProfileScreen({ navigation }: any) {
                   icon={<HeartHandshake size={18} color={colors.textMuted} />}
                   bg={colors.surfaceAlt}
                   title="Help & support"
-                  onPress={() => showAlert(
-                    'Help & support',
-                    'Reach out to us anytime:\n\nEmail: info@0waste.co.in\nAddress: Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051'
-                  )}
+                  onPress={showHelpAndSupport}
                 />
                 <View style={styles.divider} />
                 <OptionRow icon={<FileText size={18} color={colors.textMuted} />} bg={colors.surfaceAlt} title="Terms & conditions" onPress={() => navigation.navigate('Legal', { type: 'terms' })} />
