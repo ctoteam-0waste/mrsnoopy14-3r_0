@@ -627,6 +627,13 @@ export function SchedulePickupScreen({ navigation }: any) {
             );
           })}
         </ScrollView>
+        {/* W-13: show the minimum before anything is added, not only in the cart bar. */}
+        <View style={styles.minOrderNote}>
+          <KarmaCoin size={14} />
+          <Text style={styles.minOrderNoteText}>
+            Minimum pickup: items worth {MIN_ORDER_VALUE.toLocaleString('en-IN')} KarmaCoins XP. Your total updates as you add items.
+          </Text>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={IS_WEB ? undefined : [styles.gridContent, cartCalculations.totalItems > 0 && { paddingBottom: insets.bottom + 170 }]}>
@@ -723,7 +730,7 @@ export function SchedulePickupScreen({ navigation }: any) {
             </View>
             {cartCalculations.totalCoins < MIN_ORDER_VALUE && (
               <Text style={styles.minOrderHint}>
-                Add {(MIN_ORDER_VALUE - cartCalculations.totalCoins).toLocaleString('en-IN')} more KC worth of items to schedule pickup
+                Add items worth {(MIN_ORDER_VALUE - cartCalculations.totalCoins).toLocaleString('en-IN')} more coins to book this pickup
               </Text>
             )}
           </View>
@@ -943,6 +950,8 @@ const useStyles = makeStyles((c) => ({
   stepContainer: { flex: 1 },
   filterSection: { paddingTop: 20, paddingBottom: 10, maxWidth: 900, width: '100%', alignSelf: 'center' },
   filterList: { paddingHorizontal: 20, gap: 10 },
+  minOrderNote: { flexDirection: 'row', alignItems: 'center', gap: 8, marginHorizontal: 20, marginTop: 12, backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10 },
+  minOrderNoteText: { flex: 1, color: c.textMuted, fontSize: 12.5, fontWeight: '600', lineHeight: 18 },
   filterChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: c.surface, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 100, borderWidth: 1, borderColor: c.border },
   filterText: { fontSize: 13, color: c.textMuted, fontWeight: '600' },
   filterChipActive: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 100, elevation: 4 },
