@@ -25,7 +25,7 @@ import { profileService } from '../services/profile';
 import { getLocalDateStr, getLocalYesterdayStr } from '../utils/quizDate';
 import { bookingService } from '../services/booking';
 import { BACKEND_BASE } from '../services/api';
-import { REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
+import { CASH_OUT_RATES, REDEEM_INFO_MESSAGE, showRedeemInfoOnce } from '../utils/redeemInfo';
 import { getStableUserSuffix } from '../utils/userId';
 import { isLaunchDay } from '../utils/launchDay';
 import { EARLY_BIRD_COINS } from '../utils/earlyBird';
@@ -228,7 +228,7 @@ export function DashboardScreen({ navigation, route }: any) {
       targetRef: balanceRef,
       scroll: 'top',
       title: 'Your KarmaCoins XP',
-      body: 'Every pickup and daily quiz adds coins here. Tap Wallet to see your history and redeem coins for cash (10 XP = ₹1).',
+      body: `Every pickup and daily quiz adds coins here. Tap Wallet to see your history and redeem coins for cash (${CASH_OUT_RATES}).`,
     },
     {
       targetRef: statsRef,
