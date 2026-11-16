@@ -11,8 +11,9 @@ const titleCase = (s: string) =>
   s.trim().toLowerCase().replace(/\b([a-z])/g, (_, c) => c.toUpperCase());
 
 // A pick-list field that opens a searchable modal. Used for both State and City.
-function Dropdown({ value, placeholder, options, onSelect, disabled }: {
+function Dropdown({ value, placeholder, options, onSelect, disabled, allowCustom = true }: {
   value: string; placeholder: string; options: string[]; onSelect: (v: string) => void; disabled?: boolean;
+  allowCustom?: boolean; // false: only listed values (State lists every state and UT)
 }) {
   const s = useStyles();
   const { colors } = useTheme();
@@ -66,7 +67,7 @@ function Dropdown({ value, placeholder, options, onSelect, disabled }: {
               ))}
               {/* Let the user commit whatever they typed when it isn't in the list
                   (e.g. a city we don't have) — no dead end. */}
-              {q.length > 0 && !hasExact && (
+              {allowCustom && q.length > 0 && !hasExact && (
                 <TouchableOpacity style={s.option} onPress={() => { onSelect(titleCase(q)); setOpen(false); }}>
                   <Text style={[s.optionText, s.optionActive]}>Use "{titleCase(q)}"</Text>
                 </TouchableOpacity>
@@ -99,7 +100,9 @@ export function StateCityFields({ state, city, setState, setCity }: {
     if (city && list.length && !list.includes(city)) setCityOther(true);
   }, [state, city]);
 
-  const stateOptions = [...INDIA_STATES, OTHER];
+  // W-28: every state and union territory is listed, so State has no "Other". A state
+  // saved earlier as free text still shows in the text input below (stateOther).
+  const stateOptions = INDIA_STATES;
   const cityList = state && INDIA_STATES_CITIES[state] ? INDIA_STATES_CITIES[state] : [];
   const cityOptions = [...cityList, OTHER];
 
@@ -120,7 +123,7 @@ export function StateCityFields({ state, city, setState, setCity }: {
         {stateOther ? (
           <TextInput style={s.input} placeholder="Enter your state" placeholderTextColor={colors.textFaint} value={state} onChangeText={setState} autoCapitalize="words" />
         ) : (
-          <Dropdown value={state} placeholder="Select state" options={stateOptions} onSelect={onStateSelect} />
+          <Dropdown value={state} placeholder="Select state" options={stateOptions} onSelect={onStateSelect} allowCustom={false} />
         )}
       </View>
 

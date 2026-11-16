@@ -16,6 +16,7 @@ import { addressService, SavedAddress, AddressLabel } from '../services/address'
 import { LinearGradient } from 'expo-linear-gradient';
 import { KarmaCoin } from '../components/shared/KarmaCoin';
 import { StateCityFields } from '../components/shared/StateCityFields';
+import { INDIA_STATES_CITIES } from '../data/indiaStatesCities';
 import { profileService } from '../services/profile';
 import { accountService } from '../services/account';
 import { AddressSearch, AddressDetails } from '../components/shared/AddressSearch';
@@ -187,37 +188,8 @@ export function ProfileScreen({ navigation }: any) {
   });
   const demoSlideAnim = useRef(new Animated.Value(0)).current;
 
-  const INDIAN_STATES: Record<string, string[]> = {
-    'Andhra Pradesh': ['Visakhapatnam', 'Vijayawada', 'Guntur', 'Nellore', 'Tirupati'],
-    'Arunachal Pradesh': ['Itanagar', 'Naharlagun', 'Pasighat'],
-    'Assam': ['Guwahati', 'Silchar', 'Dibrugarh', 'Jorhat', 'Nagaon'],
-    'Bihar': ['Patna', 'Gaya', 'Muzaffarpur', 'Bhagalpur', 'Darbhanga', 'Purnia', 'Arrah'],
-    'Chhattisgarh': ['Raipur', 'Bhilai', 'Bilaspur', 'Korba', 'Durg'],
-    'Delhi': ['New Delhi', 'Delhi'],
-    'Goa': ['Panaji', 'Margao', 'Vasco da Gama'],
-    'Gujarat': ['Ahmedabad', 'Surat', 'Vadodara', 'Rajkot', 'Gandhinagar'],
-    'Haryana': ['Gurugram', 'Faridabad', 'Panipat', 'Ambala', 'Hisar', 'Karnal'],
-    'Himachal Pradesh': ['Shimla', 'Manali', 'Dharamshala', 'Solan'],
-    'Jharkhand': ['Ranchi', 'Jamshedpur', 'Dhanbad', 'Bokaro', 'Deoghar'],
-    'Karnataka': ['Bengaluru', 'Mysuru', 'Hubli', 'Mangaluru', 'Belgaum'],
-    'Kerala': ['Thiruvananthapuram', 'Kochi', 'Kozhikode', 'Thrissur', 'Kollam'],
-    'Madhya Pradesh': ['Bhopal', 'Indore', 'Jabalpur', 'Gwalior', 'Ujjain'],
-    'Maharashtra': ['Mumbai', 'Pune', 'Nagpur', 'Thane', 'Nashik', 'Aurangabad'],
-    'Manipur': ['Imphal', 'Thoubal'],
-    'Meghalaya': ['Shillong', 'Tura'],
-    'Mizoram': ['Aizawl', 'Lunglei'],
-    'Nagaland': ['Kohima', 'Dimapur'],
-    'Odisha': ['Bhubaneswar', 'Cuttack', 'Rourkela', 'Puri'],
-    'Punjab': ['Chandigarh', 'Ludhiana', 'Amritsar', 'Jalandhar', 'Patiala'],
-    'Rajasthan': ['Jaipur', 'Jodhpur', 'Udaipur', 'Kota', 'Ajmer', 'Bikaner'],
-    'Sikkim': ['Gangtok', 'Namchi'],
-    'Tamil Nadu': ['Chennai', 'Coimbatore', 'Madurai', 'Salem', 'Tiruchirappalli'],
-    'Telangana': ['Hyderabad', 'Warangal', 'Nizamabad', 'Karimnagar'],
-    'Tripura': ['Agartala', 'Udaipur'],
-    'Uttar Pradesh': ['Lucknow', 'Noida', 'Kanpur', 'Agra', 'Varanasi', 'Ghaziabad', 'Meerut', 'Prayagraj'],
-    'Uttarakhand': ['Dehradun', 'Haridwar', 'Rishikesh', 'Nainital', 'Roorkee'],
-    'West Bengal': ['Kolkata', 'Howrah', 'Durgapur', 'Siliguri', 'Asansol'],
-  };
+  // Saved addresses use the same State -> City list as sign-up and Personal details (W-28).
+  const INDIAN_STATES: Record<string, string[]> = INDIA_STATES_CITIES;
   const ALL_STATES = Object.keys(INDIAN_STATES);
 
   // Address Modal State — declared BEFORE filteredStates/filteredCities to avoid TDZ crash
