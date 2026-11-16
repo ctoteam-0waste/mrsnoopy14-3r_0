@@ -28,6 +28,7 @@ const PROTECTED = [
   '/referral',
   '/schedulepickup',
   '/knowledgehub',
+  '/articledetail',
   '/donation',
   '/transfer',
   '/manageaccount',

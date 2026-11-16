@@ -12,10 +12,13 @@ export function ArticleDetailScreen({ route, navigation }: any) {
   const [liked, setLiked] = useState(false);
 
   const handleShare = async () => {
-    const message = `${article.title} — read it on KarmaVerse: https://karmaverse.earth`;
+    // Link to this article, not the homepage (W-24). Logged-out readers are sent to
+    // login first and then back to the article (see PROTECTED in utils/deepLink.ts).
+    const articleUrl = `https://karmaverse.earth/ArticleDetail?id=${encodeURIComponent(article.id)}`;
+    const message = `${article.title} — read it on KarmaVerse: ${articleUrl}`;
     try {
       if (Platform.OS === 'web' && (navigator as any)?.share) {
-        await (navigator as any).share({ title: article.title, text: message, url: 'https://karmaverse.earth' });
+        await (navigator as any).share({ title: article.title, text: `${article.title} — read it on KarmaVerse`, url: articleUrl });
       } else {
         await Share.share({ message });
       }
