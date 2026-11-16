@@ -71,6 +71,12 @@ function SelectionPills({ options, selected, onSelect }: { options: string[], se
 const cleanPhone = (p?: string) => String(p || '').replace(/\D/g, '').replace(/^91(?=\d{10}$)/, '');
 const isRealPhone = (p?: string) => /^[6-9]\d{9}$/.test(cleanPhone(p));
 
+// Personal details: one label for every empty value (W-19). 'Not Specified' is the app's
+// placeholder for an unset choice and 'Select Later' can come from sign-up; both read as empty.
+const NOT_SPECIFIED_LABEL = 'Not specified';
+const shownValue = (v?: string | null) =>
+  !v || v === 'Not Specified' || v === 'Select Later' ? NOT_SPECIFIED_LABEL : v;
+
 export function ProfileScreen({ navigation }: any) {
   const styles = useStyles();
   const { colors, isDark } = useTheme();
@@ -124,7 +130,7 @@ export function ProfileScreen({ navigation }: any) {
             ? (typeof data.address === 'object' ? data.address.fullAddress : data.address)
             : '',
           demographics: {
-            age: data.demographics?.age || data.age || 25,
+            age: data.demographics?.age || data.age || '',
             gender: data.demographics?.gender || data.gender || 'Not Specified',
             sexualOrientation: data.demographics?.sexualOrientation || data.sexualOrientation || 'Not Specified',
             maritalStatus: data.demographics?.maritalStatus || data.maritalStatus || 'Not Specified',
@@ -377,9 +383,28 @@ export function ProfileScreen({ navigation }: any) {
     }
   };
 
+  // Personal details: show missing State / City under the fields once the user has
+  // changed them, and keep Update & Save disabled until the form is complete.
+  const [demoTouched, setDemoTouched] = useState(false);
+  const [demoError, setDemoError] = useState('');
+  const [demoSaving, setDemoSaving] = useState(false);
+  const demoAge = parseInt(demoEditForm.age);
+  const demoComplete = !!demoEditForm.age && !isNaN(demoAge) && demoAge >= 13 && demoAge <= 100
+    && !!demoEditForm.state?.trim() && !!demoEditForm.city?.trim();
+  // Why Update & save is still grey: names what is missing (age, state, city are required).
+  const demoMissing = [
+    !demoEditForm.age || isNaN(demoAge) || demoAge < 13 || demoAge > 100 ? 'your age (13–100)' : '',
+    !demoEditForm.state?.trim() ? 'your state' : '',
+    !demoEditForm.city?.trim() ? 'your city' : '',
+  ].filter(Boolean);
+  const demoMissingText = demoMissing.length
+    ? `To save, add ${demoMissing.length > 1 ? `${demoMissing.slice(0, -1).join(', ')} and ${demoMissing[demoMissing.length - 1]}` : demoMissing[0]}.`
+    : '';
+
   const openDemoModal = () => {
+    setDemoError('');
     setDemoEditForm({
-      age: userProfile?.demographics?.age?.toString() || '25',
+      age: userProfile?.demographics?.age?.toString() || '',
       gender: userProfile?.demographics?.gender || 'Not Specified',
       // Absent/'Not Specified' → no chip pre-selected (SelectionPills matches exact value).
       sexualOrientation: userProfile?.demographics?.sexualOrientation && userProfile.demographics.sexualOrientation !== 'Not Specified'
@@ -669,7 +694,7 @@ export function ProfileScreen({ navigation }: any) {
                <Text style={{ color: colors.textFaint, fontSize: 13, textAlign: 'center' }}>Check your internet connection and try again.</Text>
                <TouchableOpacity
                  style={{ backgroundColor: '#16a34a', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 }}
-                 onPress={() => { setIsLoadingProfile(true); profileService.getProfile().then(data => { setUserProfile({ name: data.name || 'User', phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : '', email: data.email || '', coins: data.karmaCoins || data.coins || 0, address: data.address ? (typeof data.address === 'object' ? data.address.fullAddress : data.address) : '', demographics: { age: data.demographics?.age || data.age || 25, gender: data.demographics?.gender || data.gender || 'Not Specified', sexualOrientation: data.demographics?.sexualOrientation || data.sexualOrientation || 'Not Specified', maritalStatus: data.demographics?.maritalStatus || 'Not Specified', employment: data.demographics?.employment || 'Not Specified' } }); }).catch(() => {}).finally(() => setIsLoadingProfile(false)); }}
+                 onPress={() => { setIsLoadingProfile(true); profileService.getProfile().then(data => { setUserProfile({ name: data.name || 'User', phone: isRealPhone(data.phone) ? cleanPhone(data.phone) : '', email: data.email || '', coins: data.karmaCoins || data.coins || 0, address: data.address ? (typeof data.address === 'object' ? data.address.fullAddress : data.address) : '', demographics: { age: data.demographics?.age || data.age || '', gender: data.demographics?.gender || data.gender || 'Not Specified', sexualOrientation: data.demographics?.sexualOrientation || data.sexualOrientation || 'Not Specified', maritalStatus: data.demographics?.maritalStatus || 'Not Specified', employment: data.demographics?.employment || 'Not Specified' } }); }).catch(() => {}).finally(() => setIsLoadingProfile(false)); }}
                >
                  <Text style={{ color: 'white', fontWeight: '800' }}>Retry</Text>
                </TouchableOpacity>
@@ -869,7 +894,7 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={[styles.demoListIconBg, { backgroundColor: '#f0fdf4' }]}><CalendarDays size={20} color="#16a34a" /></View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.demoListLabel}>Age</Text>
-                      <Text style={styles.demoListValue}>{userProfile?.demographics?.age || '--'} Years Old</Text>
+                      <Text style={styles.demoListValue}>{userProfile?.demographics?.age ? `${userProfile.demographics.age} Years Old` : NOT_SPECIFIED_LABEL}</Text>
                     </View>
                   </View>
                   
@@ -877,7 +902,7 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={[styles.demoListIconBg, { backgroundColor: '#f0f9ff' }]}><UserSquare2 size={20} color="#0284c7" /></View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.demoListLabel}>Identity</Text>
-                      <Text style={styles.demoListValue}>{userProfile?.demographics?.gender || '--'}</Text>
+                      <Text style={styles.demoListValue}>{shownValue(userProfile?.demographics?.gender)}</Text>
                     </View>
                   </View>
 
@@ -893,7 +918,7 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={[styles.demoListIconBg, { backgroundColor: '#fff1f2' }]}><Heart size={20} color="#e11d48" /></View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.demoListLabel}>Marital Status</Text>
-                      <Text style={styles.demoListValue}>{userProfile?.demographics?.maritalStatus || '--'}</Text>
+                      <Text style={styles.demoListValue}>{shownValue(userProfile?.demographics?.maritalStatus)}</Text>
                     </View>
                   </View>
 
@@ -901,7 +926,7 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={[styles.demoListIconBg, { backgroundColor: '#fffbeb' }]}><Briefcase size={20} color="#d97706" /></View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.demoListLabel}>Employment</Text>
-                      <Text style={styles.demoListValue}>{userProfile?.demographics?.employment || '--'}</Text>
+                      <Text style={styles.demoListValue}>{shownValue(userProfile?.demographics?.employment)}</Text>
                     </View>
                   </View>
 
@@ -909,7 +934,7 @@ export function ProfileScreen({ navigation }: any) {
                     <View style={[styles.demoListIconBg, { backgroundColor: '#f0fdf4' }]}><MapPin size={20} color="#16a34a" /></View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.demoListLabel}>Location</Text>
-                      <Text style={styles.demoListValue}>{[userProfile?.demographics?.city || userProfile?.city, userProfile?.demographics?.state || userProfile?.state].filter(Boolean).join(', ') || '--'}</Text>
+                      <Text style={styles.demoListValue}>{[userProfile?.demographics?.city || userProfile?.city, userProfile?.demographics?.state || userProfile?.state].filter(Boolean).join(', ') || NOT_SPECIFIED_LABEL}</Text>
                     </View>
                   </View>
 
@@ -948,16 +973,18 @@ export function ProfileScreen({ navigation }: any) {
                     setState={(v) => setDemoEditForm(f => ({ ...f, state: v }))}
                     setCity={(v) => setDemoEditForm(f => ({ ...f, city: v }))}
                   />
-                  <TouchableOpacity style={[styles.primaryActionBtn, { marginTop: 12 }]} onPress={async () => {
-                      const parsedAge = parseInt(demoEditForm.age);
-                      if (!demoEditForm.age || isNaN(parsedAge) || parsedAge < 13 || parsedAge > 100) {
-                        showAlert('Invalid age', 'You must be at least 13 years old to use KarmaVerse.');
-                        return;
-                      }
-                      if (!demoEditForm.state?.trim() || !demoEditForm.city?.trim()) {
-                        showAlert('State and city required', 'Please select or enter your state and city.');
-                        return;
-                      }
+                  {!!demoMissingText && <Text style={styles.demoSaveHint}>{demoMissingText}</Text>}
+                  <TouchableOpacity
+                    style={[styles.primaryActionBtn, { marginTop: 12 }, (!demoComplete || demoSaving) && styles.primaryActionBtnDisabled]}
+                    disabled={!demoComplete || demoSaving}
+                    onPress={async () => {
+                      // Errors show inline: a pop-up from inside this sheet opens behind
+                      // it on iOS and freezes the screen.
+                      setDemoTouched(true);
+                      if (!demoComplete || demoSaving) return;
+                      const parsedAge = demoAge;
+                      setDemoError('');
+                      setDemoSaving(true);
                       try {
                         // Omit an empty sexualOrientation — the backend rejects '' (it
                         // must be one of the allowed values); no selection = don't send it.
@@ -966,12 +993,17 @@ export function ProfileScreen({ navigation }: any) {
                         await profileService.updateDemographics(payload);
                         setUserProfile({...userProfile, demographics: { ...demoEditForm, age: parsedAge }});
                         setIsDemoEditing(false);
-                      } catch (e) {
-                        showAlert('Error', 'Failed to update profile. Please try again.');
+                      } catch (e: any) {
+                        setDemoError(!e?.response
+                          ? 'No internet connection. Please try again.'
+                          : (e.response.data?.message || 'Could not save your details. Please try again.'));
+                      } finally {
+                        setDemoSaving(false);
                       }
                   }}>
-                    <Text style={styles.primaryActionText}>Update & Save</Text>
+                    {demoSaving ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryActionText}>Update & save</Text>}
                   </TouchableOpacity>
+                  {!!demoError && <Text style={[styles.fieldError, { textAlign: 'center', marginTop: -8 }]}>{demoError}</Text>}
                 </View>
               )}
             </ScrollView>
@@ -1415,6 +1447,7 @@ const useStyles = makeStyles((c) => ({
   demoInput: { height: 50, borderRadius: 12, backgroundColor: c.inputBg, borderWidth: 1, borderColor: c.border, paddingHorizontal: 16, fontSize: 15, color: c.text, fontWeight: '700' },
   inputError: { borderColor: '#ef4444', borderWidth: 1.5 },
   fieldError: { fontSize: 12, color: '#ef4444', fontWeight: '600', marginTop: 4, marginLeft: 2 },
+  demoSaveHint: { fontSize: 12.5, color: c.textMuted, fontWeight: '600', textAlign: 'center', marginBottom: -8 },
   suggestionsBox: { position: 'absolute', top: 78, left: 0, right: 0, maxHeight: 180, backgroundColor: c.surface, borderRadius: 12, borderWidth: 1, borderColor: c.border, shadowColor: c.shadow, shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.1, shadowRadius: 12, elevation: 8, zIndex: 100 },
   suggestionItem: { paddingHorizontal: 14, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: c.border },
   suggestionText: { fontSize: 14, fontWeight: '600', color: c.text },
