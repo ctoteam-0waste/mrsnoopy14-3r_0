@@ -1049,7 +1049,7 @@ export function LoginScreen({ navigation, route }: any) {
                 <Text style={styles.diwaliChipText}>🪔  Happy Diwali</Text>
               </LinearGradient>
             )}
-            <Text style={styles.title}>Welcome 👋</Text>
+            <Text role="heading" aria-level={1} style={styles.title}>Welcome 👋</Text>
             <Text style={styles.subtitle}>Enter your email or mobile number to get started</Text>
           </View>
           <InputField
@@ -1186,7 +1186,7 @@ export function LoginScreen({ navigation, route }: any) {
       return (
         <View style={styles.stepContent}>
           <View>
-            <Text style={styles.title}>Welcome back 👋</Text>
+            <Text role="heading" aria-level={1} style={styles.title}>Welcome back 👋</Text>
             <Text style={styles.subtitle}>Account found. Enter your password to continue.</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.primarySoft, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, marginTop: 10, borderWidth: 1, borderColor: colors.border }}>
               <CheckCircle2 size={16} color={colors.primary} />
@@ -1225,7 +1225,7 @@ export function LoginScreen({ navigation, route }: any) {
         return (
           <View style={styles.stepContent}>
             <View>
-              <Text style={styles.title}>Forgot password 🔐</Text>
+              <Text role="heading" aria-level={1} style={styles.title}>Forgot password 🔐</Text>
               <Text style={styles.subtitle}>Enter your registered mobile number or email</Text>
             </View>
             <InputField
@@ -1291,7 +1291,7 @@ export function LoginScreen({ navigation, route }: any) {
         return (
           <View style={styles.stepContent}>
             <View>
-              <Text style={styles.title}>Enter OTP 📩</Text>
+              <Text role="heading" aria-level={1} style={styles.title}>Enter OTP 📩</Text>
               <Text style={styles.subtitle}>OTP sent to +91 {forgotPhone}</Text>
             </View>
             <InputField
@@ -1366,7 +1366,7 @@ export function LoginScreen({ navigation, route }: any) {
         return (
           <View style={styles.stepContent}>
             <View>
-              <Text style={styles.title}>New password 🔑</Text>
+              <Text role="heading" aria-level={1} style={styles.title}>New password 🔑</Text>
               <Text style={styles.subtitle}>Set a new password for {identifier}</Text>
             </View>
             <InputField
@@ -1417,7 +1417,7 @@ export function LoginScreen({ navigation, route }: any) {
           )}
           <SignupJourneyProgress stage={0} />
             <View>
-              <Text style={styles.title}>Create your account 🌱</Text>
+              <Text role="heading" aria-level={1} style={styles.title}>Create your account 🌱</Text>
               <Text style={styles.subtitle}>Join us and earn KarmaCoins XP!</Text>
             </View>
             <InputField
@@ -1515,7 +1515,7 @@ export function LoginScreen({ navigation, route }: any) {
             <View style={styles.otpIconBg}>
               <Lock size={28} color={colors.primary} />
             </View>
-            <Text style={styles.otpTitle}>Verify your mobile number</Text>
+            <Text role="heading" aria-level={1} style={styles.otpTitle}>Verify your mobile number</Text>
             <Text style={styles.otpSubtitle}>We've sent a 6-digit OTP to</Text>
             <Text style={styles.otpEmail}>+91 {phone}</Text>
 
@@ -1699,7 +1699,7 @@ export function LoginScreen({ navigation, route }: any) {
         <ScrollView style={{flex: 1, marginHorizontal: 0}} contentContainerStyle={[styles.scrollStepContent, { paddingBottom: insets.bottom + 40 }]} showsVerticalScrollIndicator={false}>
           <SignupJourneyProgress stage={2} />
           <View style={styles.demoHeader}>
-            <Text style={styles.demoTitle}>Personalize profile</Text>
+            <Text role="heading" aria-level={1} style={styles.demoTitle}>Personalize profile</Text>
             <Text style={styles.demoSubtitle}>Help us tailor the best eco-rewards directly for you.</Text>
           </View>
 
@@ -1818,7 +1818,7 @@ export function LoginScreen({ navigation, route }: any) {
               the baked-in tagline in logo-nav.png went blurry at header size.
               Text renders sharp at every screen density. */}
           <View style={styles.logoCard}>
-            <Image source={require('../../assets/logo-icon.webp')} style={styles.logoIconImg} resizeMode="contain" />
+            <Image aria-label="KarmaVerse logo" source={require('../../assets/logo-icon.webp')} style={styles.logoIconImg} resizeMode="contain" />
             <View>
               <Text style={styles.logoWordText}>
                 <Text style={{ color: '#ffffff' }}>Karma</Text>

@@ -30,7 +30,7 @@ export function NewsletterCard({ item }: { item: Newsletter }) {
   return (
     <View style={[s.card, wide && s.cardWide]}>
       <TouchableOpacity onPress={() => openPdf(item.pdf)} activeOpacity={0.9} style={[s.coverWrap, wide ? s.coverWide : s.coverNarrow]} accessibilityRole="link" accessibilityLabel={`Open the ${item.month} newsletter`}>
-        <Image source={item.cover} style={s.cover} resizeMode="cover" />
+        <Image aria-label={`${item.month} newsletter cover`} source={item.cover} style={s.cover} resizeMode="cover" />
       </TouchableOpacity>
 
       <View style={[s.body, wide && { paddingLeft: 32 }]}>
@@ -76,7 +76,7 @@ export function NewsletterStrip({ item }: { item: Newsletter }) {
   const narrow = width < 640;
   return (
     <TouchableOpacity style={s.strip} onPress={() => openPdf(item.pdf)} activeOpacity={0.9} accessibilityRole="link">
-      <Image source={item.cover} style={s.stripCover} resizeMode="cover" />
+      <Image aria-label={`${item.month} newsletter cover`} source={item.cover} style={s.stripCover} resizeMode="cover" />
       <View style={{ flex: 1 }}>
         <Text style={s.stripLabel}>NEW · {item.month.toUpperCase()} NEWSLETTER</Text>
         <Text style={s.stripTitle} numberOfLines={2}>

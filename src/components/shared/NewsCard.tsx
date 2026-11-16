@@ -27,7 +27,7 @@ export function NewsCard({ item, style }: { item: NewsItem; style?: any }) {
       accessibilityRole="link"
     >
       {item.image && !imageFailed ? (
-        <Image source={{ uri: item.image }} resizeMode="cover" style={s.image} onError={() => setImageFailed(true)} />
+        <Image aria-label={item.title} source={{ uri: item.image }} resizeMode="cover" style={s.image} onError={() => setImageFailed(true)} />
       ) : (
         <LinearGradient colors={['#052e16', '#166534']} style={[s.image, s.fallback]}>
           <Newspaper size={34} color="rgba(255,255,255,0.85)" />

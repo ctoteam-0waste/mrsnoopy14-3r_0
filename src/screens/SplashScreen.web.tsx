@@ -258,7 +258,7 @@ export function SplashScreen({ navigation, route }: any) {
                 out the same way as the original artwork (icon left, wordmark on
                 top, tagline underneath) — the tagline is real text here instead
                 of the tiny raster copy, so it stays crisp at navbar scale. */}
-            <Image source={require('../../assets/logo-icon.webp')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
+            <Image aria-label="KarmaVerse logo" source={require('../../assets/logo-icon.webp')} resizeMode="contain" style={[s.navIconImg, isMobile && { width: 48, height: 50 }]} />
             <View>
               {/* Solid crisp text instead of the hollow/outlined wordmark image
                   (the raster "Karma" was outline-only and read faintly on dark). */}
@@ -342,7 +342,7 @@ export function SplashScreen({ navigation, route }: any) {
                 ghost reserves its final height so the tagline/CTA below never shift as
                 it types (fixes the hero CLS / layout shift). */}
             <View style={s.heroTitleWrap}>
-              <Text style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleGhost]}>
+              <Text role="heading" aria-level={1} style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleGhost]}>
                 {HEADLINE_TEXT}
               </Text>
               <Text style={[s.heroTitle, isMobile && { fontSize: 34 }, s.heroTitleLive]} aria-hidden>
@@ -401,7 +401,7 @@ export function SplashScreen({ navigation, route }: any) {
               ].map((h, i) => (
                 <View key={i} style={s.heroHighlightCard}>
                   <View style={s.heroHighlightIconBg}><h.icon size={18} color="#4ade80" /></View>
-                  <Text style={s.heroHighlightTitle}>{h.title}</Text>
+                  <Text role="heading" aria-level={3} style={s.heroHighlightTitle}>{h.title}</Text>
                   <Text style={s.heroHighlightDesc}>{h.desc}</Text>
                 </View>
               ))}
@@ -422,7 +422,7 @@ export function SplashScreen({ navigation, route }: any) {
         <View style={[s.section, { backgroundColor: '#f8fafc' }]}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>ECOSYSTEM</Text>
-            <Text style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>One platform connecting every sustainability stakeholder</Text>
+            <Text role="heading" aria-level={2} style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>One platform connecting every sustainability stakeholder</Text>
             <Text style={[s.sectionIntro, isMobile && { fontSize: 15 }]}>
               KarmaVer$e connects citizens, housing societies, schools, corporates, NGOs, recyclers,
               pickup partners, and sustainable brands — creating one unified ecosystem where every
@@ -455,7 +455,7 @@ export function SplashScreen({ navigation, route }: any) {
         <View style={s.section} onLayout={(e) => { sectionY.current.howItWorks = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>FLOW</Text>
-            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Sustainable actions, AI-enabled rewards</Text>
+            <Text role="heading" aria-level={2} style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Sustainable actions, AI-enabled rewards</Text>
 
             <View style={[s.stepsRow, isMobile && { flexDirection: 'column' }]}>
               {[
@@ -469,7 +469,7 @@ export function SplashScreen({ navigation, route }: any) {
                     <step.icon size={26} color={step.color} />
                   </View>
                   <View style={s.stepNum}><Text style={s.stepNumText}>{step.num}</Text></View>
-                  <Text style={s.stepTitle}>{step.title}</Text>
+                  <Text role="heading" aria-level={3} style={s.stepTitle}>{step.title}</Text>
                   <Text style={s.stepDesc}>{step.desc}</Text>
                 </Card>
               ))}
@@ -482,7 +482,7 @@ export function SplashScreen({ navigation, route }: any) {
           {showRewardsCoinShower && <CoinShower onDone={() => setShowRewardsCoinShower(false)} />}
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>REWARDS</Text>
-            <Text style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Turn good karma into great rewards</Text>
+            <Text role="heading" aria-level={2} style={[s.sectionTitle, isMobile && { fontSize: 28 }]}>Turn good karma into great rewards</Text>
 
             <View style={[s.rewardsVisualRow, isMobile && { flexDirection: 'column', gap: 20 }]}>
               <View style={{ flex: 1 }}>
@@ -504,9 +504,9 @@ export function SplashScreen({ navigation, route }: any) {
                 { img: require('../../assets/rewards/plant-tree.webp'), title: 'Plant a Tree', desc: 'Convert coins into real trees, real impact' },
               ].map((r, i) => (
                 <Card key={i} delay={i * 70} style={[s.rewardCard, { width: isMobile ? '100%' : '31%' }]}>
-                  <Image source={r.img} resizeMode="cover" style={s.rewardImg} />
+                  <Image aria-label={r.title} source={r.img} resizeMode="cover" style={s.rewardImg} />
                   <View style={s.rewardBody}>
-                    <Text style={s.featTitle}>{r.title}</Text>
+                    <Text role="heading" aria-level={3} style={s.featTitle}>{r.title}</Text>
                     <Text style={s.featDesc}>{r.desc}</Text>
                   </View>
                 </Card>
@@ -519,7 +519,7 @@ export function SplashScreen({ navigation, route }: any) {
         <View style={[s.section, { backgroundColor: '#f8fafc' }]} onLayout={(e) => { sectionY.current.learning = e.nativeEvent.layout.y; }}>
           <View style={[s.container, isMobile && { paddingHorizontal: 20 }]}>
             <Text style={s.sectionLabel}>LEARNING & ENGAGEMENT</Text>
-            <Text style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>Learn. Act. Earn.</Text>
+            <Text role="heading" aria-level={2} style={[s.sectionTitle, { marginBottom: 16 }, isMobile && { fontSize: 28 }]}>Learn. Act. Earn.</Text>
             <Text style={[s.sectionIntro, isMobile && { fontSize: 15 }]}>
               Refer friends, play the daily eco-quiz, join community campaigns, take on challenges,
               and explore our learning modules and knowledge hub. Every step turns into real-world impact.
@@ -539,7 +539,7 @@ export function SplashScreen({ navigation, route }: any) {
                   <View style={[s.featIconBg, { backgroundColor: l.color + '15' }]}>
                     <l.icon size={26} color={l.color} />
                   </View>
-                  <Text style={s.featTitle}>{l.title}</Text>
+                  <Text role="heading" aria-level={3} style={s.featTitle}>{l.title}</Text>
                   <Text style={s.featDesc}>{l.desc}</Text>
                 </Card>
               ))}
@@ -554,7 +554,7 @@ export function SplashScreen({ navigation, route }: any) {
               <View style={[s.newsHeadRow, isMobile && { flexDirection: 'column', alignItems: 'flex-start', gap: 16 }]}>
                 <View style={{ flex: 1 }}>
                   <Text style={s.sectionLabel}>LATEST NEWS</Text>
-                  <Text style={[s.sectionTitle, { marginBottom: 0 }, isMobile && { fontSize: 28 }]}>KarmaVer$e in the news</Text>
+                  <Text role="heading" aria-level={2} style={[s.sectionTitle, { marginBottom: 0 }, isMobile && { fontSize: 28 }]}>KarmaVer$e in the news</Text>
                 </View>
                 <TouchableOpacity style={s.newsAllBtn} onPress={() => navigation.navigate('News')} activeOpacity={0.85}>
                   <Text style={s.newsAllText}>View all news</Text>
@@ -578,7 +578,7 @@ export function SplashScreen({ navigation, route }: any) {
           <View style={[s.container, s.footerContent, isMobile && { flexDirection: 'column', gap: 28, paddingHorizontal: 20 }]}>
             <View style={[s.footerBrand, isMobile && { width: '100%' }]}>
               <View style={s.footerLogoRow}>
-                <Image source={require('../../assets/logo-nav.png')} resizeMode="contain" style={s.footerLogoImg} />
+                <Image aria-label="KarmaVerse logo" source={require('../../assets/logo-nav.png')} resizeMode="contain" style={s.footerLogoImg} />
               </View>
               <Text style={s.footerDesc}>
                 3RZeroWaste® was founded to do waste management differently — turning India's growing waste into value through the circular economy. KarmaVerse is its sustainability rewards ecosystem.
@@ -603,7 +603,7 @@ export function SplashScreen({ navigation, route }: any) {
 
             <View style={[s.footerLinksRow, isMobile && { flexDirection: 'column', gap: 24 }]}>
               <View style={s.footerLinks}>
-                <Text style={s.footerLinkTitle}>Product</Text>
+                <Text role="heading" aria-level={3} style={s.footerLinkTitle}>Product</Text>
                 <TouchableOpacity onPress={() => scrollToSection('howItWorks')}>
                   <Text style={s.footerLink}>Flow</Text>
                 </TouchableOpacity>
@@ -616,7 +616,7 @@ export function SplashScreen({ navigation, route }: any) {
               </View>
 
               <View style={s.footerLinks}>
-                <Text style={s.footerLinkTitle}>Company</Text>
+                <Text role="heading" aria-level={3} style={s.footerLinkTitle}>Company</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('AboutUs')}>
                   <Text style={s.footerLink}>About us</Text>
                 </TouchableOpacity>
@@ -635,7 +635,7 @@ export function SplashScreen({ navigation, route }: any) {
               </View>
 
               <View style={s.footerLinks}>
-                <Text style={s.footerLinkTitle}>Contact us</Text>
+                <Text role="heading" aria-level={3} style={s.footerLinkTitle}>Contact us</Text>
                 <TouchableOpacity style={s.footerContactRow} onPress={() => Linking.openURL('mailto:info@0waste.co.in')}>
                   <Mail size={14} color="#4ade80" />
                   <Text style={s.footerLink}>info@0waste.co.in</Text>
