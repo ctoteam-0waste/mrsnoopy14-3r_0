@@ -51,12 +51,46 @@ function renderLegalDocHtml(doc) {
   return html;
 }
 
+const PLAY_URL = 'https://play.google.com/store/apps/details?id=com.karmacredits.app';
+// Within 160 characters so search results show it whole.
+const HOME_DESCRIPTION =
+  'KarmaVerse by 3R ZeroWaste is a climate-action app from India. Earn KarmaCoins XP reward points for everyday sustainable actions and redeem them for rewards.';
+
+// Plain questions people (and AI assistants) ask. Used for FAQPage JSON-LD and the no-JS text.
+const GENERAL_FAQS = [
+  [
+    'What is KarmaVerse?',
+    'KarmaVerse by 3R ZeroWaste is a climate-action app from India. Members earn KarmaCoins XP for everyday sustainable actions, from doorstep recycling pickups to eco-quizzes, and redeem them for rewards.',
+  ],
+  [
+    'Is KarmaCoins XP a cryptocurrency?',
+    'No. KarmaCoins XP are in-app reward points in the KarmaVerse app. They are not a cryptocurrency, token, NFT or blockchain asset.',
+  ],
+  [
+    'Is KarmaVerse the same as the Karmaverse crypto game?',
+    'No. KarmaVerse by 3R ZeroWaste (karmaverse.earth) is a sustainability rewards app and is unrelated to the crypto game of a similar name that uses a KNOT token.',
+  ],
+  [
+    'Who is behind KarmaVerse?',
+    '3R ZeroWaste, a sustainability and waste-management company in India. In FY 2025–26 it managed 9,63,379 kg of waste, avoided 22,83,208 kg of CO₂ emissions and engaged 18.5 lakh+ citizens through sustainability and awareness programmes.',
+  ],
+  [
+    'Is the KarmaVerse app available on Android?',
+    'Yes. The KarmaVerse app is available on Android through Google Play.',
+  ],
+  [
+    'How do I earn rewards for sustainable actions?',
+    'Open KarmaVerse and take part in everyday sustainable actions, such as booking a doorstep recycling pickup or playing the eco-quiz. You earn KarmaCoins XP, which you can redeem for rewards.',
+  ],
+];
+
 const orgJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: '3R ZeroWaste',
   legalName: '3R ZeroWaste Private Limited',
   url: 'https://0waste.co.in/',
+  sameAs: ['https://www.instagram.com/3rzerowasteindia/'],
   logo: `${SITE}/apple-touch-icon.png`,
   email: 'info@0waste.co.in',
   telephone: '+91-70931-98828',
@@ -74,23 +108,25 @@ const pages = [
   {
     urlPath: '', // home — already correct in the base file, but re-run for consistency
     outPath: 'index.html',
-    title: 'KarmaVerse — Turning Sustainable Gestures into Rewards',
+    title: 'KarmaVerse by 3R ZeroWaste — Climate-Action Rewards App',
     // Kept within 160 characters so search results show it whole.
-    description:
-      "KarmaVerse is India's sustainability rewards app. Earn KarmaCoins XP reward points for everyday eco-friendly actions and redeem them for real rewards.",
+    description: HOME_DESCRIPTION,
     jsonLd: [
       orgJsonLd,
       {
         '@context': 'https://schema.org',
         '@type': 'SoftwareApplication',
         name: 'KarmaVerse',
+        alternateName: 'KarmaVerse by 3R ZeroWaste',
         url: `${SITE}/`,
         applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'Android, iOS, Web',
+        operatingSystem: 'Android, Web',
+        installUrl: PLAY_URL,
+        sameAs: [PLAY_URL],
         description:
-          "KarmaVerse is India's sustainability rewards ecosystem. Earn KarmaCoins XP for everyday eco-friendly actions — from doorstep recycling pickups to eco-quizzes — and redeem them for real rewards while creating measurable environmental impact.",
+          'KarmaVerse by 3R ZeroWaste is a climate-action app from India. Members earn KarmaCoins XP (in-app reward points) for everyday sustainable actions, from doorstep recycling pickups to eco-quizzes, and redeem them for rewards.',
         disambiguatingDescription:
-          'KarmaVerse (karmaverse.earth) is a real-world sustainability rewards app operated by 3R ZeroWaste in India. KarmaCoins XP are in-app reward points, not a cryptocurrency or token. It has no connection to any blockchain, NFT, GameFi or crypto project of a similar name (such as "Karma Coin").',
+          'KarmaVerse by 3R ZeroWaste (karmaverse.earth) is a sustainability rewards app from India. KarmaCoins XP are in-app reward points, not a cryptocurrency, token or NFT. It has no connection to any blockchain or crypto game of a similar name (such as the "Karmaverse" game with the KNOT token, or "Karma Coin").',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
         publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
@@ -98,6 +134,7 @@ const pages = [
         '@context': 'https://schema.org',
         '@type': 'FAQPage',
         mainEntity: [
+          ...GENERAL_FAQS.map(([q, a]) => faq(q, a)),
           faq(
             'Is doorstep pickup really free?',
             'Yes — doorstep pickup is 100% free, with no cost to the user, ever.'
@@ -116,7 +153,7 @@ const pages = [
           ),
           faq(
             'What can I redeem KarmaCoins XP for?',
-            'Eco-friendly products, tree planting, or charitable donations.'
+            'KarmaCoins XP can be redeemed for rewards in the KarmaVerse app.'
           ),
           faq(
             'How does the referral program work?',
@@ -125,16 +162,16 @@ const pages = [
         ],
       },
     ],
-    noscriptBody: `<h1>KarmaVerse — Turning Sustainable Gestures into Rewards</h1>
+    noscriptBody: `<h1>KarmaVerse by 3R ZeroWaste — Climate-Action Rewards App</h1>
     <p>
-      KarmaVerse is India's sustainability rewards ecosystem, built by 3R ZeroWaste.
-      Complete everyday sustainable actions — like doorstep recycling pickups for plastic,
-      paper, metal, e-waste, textile and more — and earn KarmaCoins XP. Every action is
-      verified, and coins are credited instantly, redeemable for eco-friendly products,
-      gift cards, discounts, tree planting, or charitable donations.
+      KarmaVerse by 3R ZeroWaste is a climate-action app from India that rewards everyday
+      sustainable actions. Members earn KarmaCoins XP, which are in-app reward points (not a
+      cryptocurrency), for actions from doorstep recycling pickups to eco-quizzes, and can
+      redeem them for rewards. The app is available on Android.
     </p>
     <h2>Frequently asked questions</h2>
     <dl>
+      ${GENERAL_FAQS.map(([q, a]) => `<dt>${escapeHtml(q)}</dt>\n      <dd>${escapeHtml(a)}</dd>`).join('\n      ')}
       <dt>Is doorstep pickup really free?</dt>
       <dd>Yes — doorstep pickup is 100% free, with no cost to the user, ever.</dd>
       <dt>Where is doorstep pickup available?</dt>
@@ -144,7 +181,7 @@ const pages = [
       <dt>How do I earn KarmaCoins XP?</dt>
       <dd>Schedule a pickup, an agent collects and verifies your waste on the spot, and KarmaCoins XP are credited to your wallet instantly.</dd>
       <dt>What can I redeem KarmaCoins XP for?</dt>
-      <dd>Eco-friendly products, tree planting, or charitable donations.</dd>
+      <dd>KarmaCoins XP can be redeemed for rewards in the KarmaVerse app.</dd>
       <dt>How does the referral program work?</dt>
       <dd>When a friend signs up with your referral code, you both get 1,000 KarmaCoins XP.</dd>
     </dl>`,
@@ -163,7 +200,7 @@ const pages = [
         '@context': 'https://schema.org',
         '@type': 'Blog',
         name: 'KarmaVerse Blog',
-        url: `${SITE}/blog`,
+        url: `${SITE}/blog/`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
         publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
@@ -184,7 +221,7 @@ const pages = [
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         name: 'Log In or Sign Up',
-        url: `${SITE}/login`,
+        url: `${SITE}/login/`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
       },
     ],
@@ -206,7 +243,7 @@ const pages = [
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         name: 'Privacy Policy',
-        url: `${SITE}/legal/privacy`,
+        url: `${SITE}/legal/privacy/`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
         publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
@@ -225,7 +262,7 @@ const pages = [
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         name: 'Terms & Conditions',
-        url: `${SITE}/legal/terms`,
+        url: `${SITE}/legal/terms/`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
         publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
@@ -244,7 +281,7 @@ const pages = [
         '@context': 'https://schema.org',
         '@type': 'WebPage',
         name: 'Data Deletion',
-        url: `${SITE}/legal/data-deletion`,
+        url: `${SITE}/legal/data-deletion/`,
         isPartOf: { '@type': 'WebSite', name: 'KarmaVerse', url: `${SITE}/` },
         publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
