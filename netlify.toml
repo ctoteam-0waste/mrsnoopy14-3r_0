@@ -47,10 +47,121 @@
   to = "/legal/privacy/"
   status = 301
 
-# Real prerendered files (/, /login, /legal/privacy, /legal/terms, /legal/data-deletion) are served as-is —
-# Netlify only falls through to this catch-all for routes with no matching static file,
-# which covers every other in-app screen (all client-side routed via React Navigation).
+# Real prerendered files (/, /login, /legal/privacy, /legal/terms, /legal/data-deletion) are served as-is.
+# Netlify only falls through to the rules below for paths with no matching static file.
+#
+# In-app screens (client-side routed by React Navigation) get the app shell with 200. Keep this
+# list in step with the `linking` config in src/navigation/RootNavigator.tsx. Shared links:
+# /r/CODE (referrals), /festival/<slug>, /blog/<slug>, /legal/<type>, /register?ref=.
+[[redirects]]
+  from = "/Dashboard"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Orders"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Wallet"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Store"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Profile"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/SchedulePickup"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/KnowledgeHub"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/ArticleDetail"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Quiz"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Referral"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/OrderTracking"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/BookingDetails"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Redeem"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/RedeemHistory"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Donation"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/Transfer"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/AboutUs"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/news"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/blog/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/legal/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/feedback"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/unsubscribe"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/preferences"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/register"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/r/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/festival/*"
+  to = "/index.html"
+  status = 200
+
+# Everything else still gets the app shell, so a person sees the app's own "not found" screen
+# (and a screen missing from the list above keeps working for people), but with a real 404
+# status, so search engines stop indexing made-up URLs as copies of the homepage.
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200
+  status = 404

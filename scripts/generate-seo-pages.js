@@ -75,8 +75,9 @@ const pages = [
     urlPath: '', // home — already correct in the base file, but re-run for consistency
     outPath: 'index.html',
     title: 'KarmaVerse — Turning Sustainable Gestures into Rewards',
+    // Kept within 160 characters so search results show it whole.
     description:
-      "KarmaVerse is India's sustainability rewards ecosystem. Earn KarmaCoins XP for everyday eco-friendly actions — from doorstep recycling pickups to eco-quizzes — and redeem them for real rewards while creating measurable environmental impact.",
+      "KarmaVerse is India's sustainability rewards app. Earn KarmaCoins XP reward points for everyday eco-friendly actions and redeem them for real rewards.",
     jsonLd: [
       orgJsonLd,
       {
@@ -89,7 +90,7 @@ const pages = [
         description:
           "KarmaVerse is India's sustainability rewards ecosystem. Earn KarmaCoins XP for everyday eco-friendly actions — from doorstep recycling pickups to eco-quizzes — and redeem them for real rewards while creating measurable environmental impact.",
         disambiguatingDescription:
-          'KarmaVerse (karmaverse.earth) is a real-world recycling and sustainability rewards app operated by 3R ZeroWaste in India. It has no connection to any blockchain, NFT, or GameFi project of a similar name.',
+          'KarmaVerse (karmaverse.earth) is a real-world sustainability rewards app operated by 3R ZeroWaste in India. KarmaCoins XP are in-app reward points, not a cryptocurrency or token. It has no connection to any blockchain, NFT, GameFi or crypto project of a similar name (such as "Karma Coin").',
         offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
         publisher: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
       },
@@ -256,6 +257,30 @@ const pages = [
 // Canonicals and sitemap entries must use the trailing-slash URL that actually returns 200.
 const pageUrl = (urlPath) => (urlPath ? `${SITE}/${urlPath}/` : `${SITE}/`);
 
+// <lastmod>: the date the files behind each page last changed in git (not the build date,
+// which would claim every page changed on every deploy). Left out when git history isn't
+// available (e.g. a shallow clone), rather than guessed.
+const PAGE_SOURCES = {
+  '': ['public/index.html', 'scripts/generate-seo-pages.js'],
+  blog: ['src/screens/BlogScreen.tsx', 'scripts/generate-seo-pages.js'],
+  login: ['src/screens/LoginScreen.tsx', 'scripts/generate-seo-pages.js'],
+  'legal/privacy': ['src/data/legalContent.ts'],
+  'legal/terms': ['src/data/legalContent.ts'],
+  'legal/data-deletion': ['src/data/legalContent.ts'],
+};
+function lastmodOf(urlPath) {
+  const files = PAGE_SOURCES[urlPath];
+  if (!files) return '';
+  try {
+    const out = require('child_process')
+      .execFileSync('git', ['log', '-1', '--format=%cs', '--', ...files], { cwd: path.join(__dirname, '..'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
+      .trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : '';
+  } catch {
+    return '';
+  }
+}
+
 function renderPage(base, page) {
   const canonical = pageUrl(page.urlPath);
   let html = base;
@@ -310,7 +335,8 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 ${pages
   .map(
     (p) => `  <url>
-    <loc>${pageUrl(p.urlPath)}</loc>
+    <loc>${pageUrl(p.urlPath)}</loc>${lastmodOf(p.urlPath) ? `
+    <lastmod>${lastmodOf(p.urlPath)}</lastmod>` : ''}
     <changefreq>weekly</changefreq>
     <priority>${p.urlPath === '' ? '1.0' : '0.6'}</priority>
   </url>`

@@ -1,36 +1,45 @@
 # KarmaVerse
 
-> India's first circular economy rewards platform — schedule free doorstep pickups for plastic, paper, metal, e-waste & more, and earn KarmaCoins XP for every kg you recycle. Built by 3R ZeroWaste.
+> KarmaVerse is a climate-action rewards app from India, built by 3R ZeroWaste. People earn KarmaCoins XP (in-app reward points) for everyday sustainable actions, such as recycling with a free doorstep pickup or playing the daily eco-quiz, and redeem them for real rewards.
 
-KarmaVerse is a mobile and web app that lets households request free doorstep
-recycling pickups (plastic, paper, metal, e-waste, textile, cardboard, and more). A verified
-agent collects, weighs, and confirms the items on the spot, and KarmaCoins XP are credited to
-the user's wallet immediately. Coins are redeemable for eco-friendly products, tree planting,
-or charitable donations. It is operated by 3R ZeroWaste, a waste-management company based in
-Gurugram, Haryana, India.
+KarmaVerse (karmaverse.earth) is a sustainability rewards app for Android and the web. It turns
+everyday sustainable actions into KarmaCoins XP, so that acting for the planet is easy, visible and
+rewarding. It is operated by 3R ZeroWaste Private Limited, a sustainability and waste-management
+company based in Gurugram, Haryana, India.
+
+KarmaCoins XP are reward points inside the KarmaVerse app. They are not a cryptocurrency, token or
+digital asset, and KarmaVerse has no connection to any blockchain, NFT, GameFi or crypto project with
+a similar name (such as "Karma Coin" or other "Karmaverse" projects).
+
+## What people can do in KarmaVerse
+
+- Recycle from home: book a free doorstep pickup for items in 10 categories (home appliances and electronics, phones and computers, mixed e-waste, plastic, paper and cardboard, metals, glass, batteries, footwear, and textiles). Items are weighed on the spot and KarmaCoins XP are credited in the app.
+- Learn: play the daily eco-quiz to earn more KarmaCoins XP.
+- Invite friends: when a new user signs up with a referral code, both people get 1,000 KarmaCoins XP.
+- Redeem: KarmaCoins XP are redeemable for rewards.
 
 ## Key facts
 
-- Doorstep pickup is 100% free — no cost to the user, ever
-- Service area: Gurugram, Haryana and nearby areas within 50 km of central Gurugram (the app checks each address)
-- Pickups are rewarded in KarmaCoins XP only — no cash at the doorstep
-- 10 categories accepted: home appliances and electronics, phones and computers, mixed e-waste, plastic, paper and cardboard, metals, glass, batteries, footwear, and textiles
-- 1.85 Lakh+ (185,000+) citizens reached with recycling awareness so far
-- Rewards: KarmaCoins XP earned per kg recycled, redeemable for products, tree planting, or donations
-- Referral program: when a new user signs up with a referral code, both the referrer and the new user get 1,000 KarmaCoins XP
-- Also includes a daily eco-quiz for additional KarmaCoins XP
-- Operator: 3R ZeroWaste, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051, India
+- Pickups are free and are rewarded in KarmaCoins XP only (no cash at the doorstep).
+- Pickup service area: Gurugram, Haryana and nearby areas within 50 km of central Gurugram (the app checks each address).
+- The KarmaVerse app is available on Android (Google Play: search "KarmaVerse").
+- 3R ZeroWaste, the company behind KarmaVerse, has engaged 18.5 lakh+ citizens through sustainability and awareness programmes (FY 2025–26).
+- In FY 2025–26, 3R ZeroWaste managed 9,63,379 kg of waste and diverted it toward resource recovery, avoiding 22,83,208 kg of CO2 emissions.
+- 3R ZeroWaste operates across 50+ cities in India, and in the UK through a sister concern.
+- Operator: 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051, India.
 
 ## Pages
 
-- [Home](https://karmaverse.earth/): product overview, how it works, features, and sign-up.
-- [Log in or sign up](https://karmaverse.earth/login)
-- [Privacy policy](https://karmaverse.earth/legal/privacy)
-- [Terms & conditions](https://karmaverse.earth/legal/terms)
+- [Home](https://karmaverse.earth/): what KarmaVerse is, how it works, and sign-up.
+- [Blog](https://karmaverse.earth/blog/): articles on sustainable living.
+- [Log in or sign up](https://karmaverse.earth/login/)
+- [Privacy policy](https://karmaverse.earth/legal/privacy/)
+- [Terms & conditions](https://karmaverse.earth/legal/terms/)
 
 ## Related
 
-- [3R ZeroWaste](https://0waste.co.in/): the parent company operating KarmaVerse.
+- [3R ZeroWaste](https://0waste.co.in/): the parent company operating KarmaVerse (ESG, EPR, circular economy and climate services).
+- [KarmaVerse on 3R ZeroWaste's site](https://0waste.co.in/karmaverse)
 
 ## Contact
 
