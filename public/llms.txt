@@ -43,6 +43,10 @@ a similar name (such as "Karma Coin" or other "Karmaverse" projects).
 
 - [Home](https://karmaverse.earth/): what KarmaVerse is, how it works, and sign-up.
 - [Blog](https://karmaverse.earth/blog/): articles on sustainable living.
+- [KarmaVerse FAQ](https://karmaverse.earth/faq/): what KarmaVerse is, who makes it, how to earn rewards, book a pickup, and which platforms it is on.
+- [A sustainability rewards app for India](https://karmaverse.earth/sustainability-rewards-app/): how households earn KarmaCoins XP for recycling and other sustainable actions.
+- [Recyclables pickup in Gurugram and Manesar](https://karmaverse.earth/waste-pickup-gurugram/): how to book a doorstep pickup of dry recyclables and e-waste and earn KarmaCoins XP.
+- [KarmaCoins XP: reward points, not crypto](https://karmaverse.earth/karmacoins-xp/): what KarmaCoins XP are and why they are not a cryptocurrency or related to the Karmaverse blockchain game.
 - [Log in or sign up](https://karmaverse.earth/login/)
 - [Privacy policy](https://karmaverse.earth/legal/privacy/)
 - [Terms & conditions](https://karmaverse.earth/legal/terms/)
