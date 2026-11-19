@@ -46,6 +46,7 @@ a similar name (such as "Karma Coin" or other "Karmaverse" projects).
 - [Log in or sign up](https://karmaverse.earth/login/)
 - [Privacy policy](https://karmaverse.earth/legal/privacy/)
 - [Terms & conditions](https://karmaverse.earth/legal/terms/)
+- [Data deletion](https://karmaverse.earth/legal/data-deletion/): how to request deletion of your account and data.
 
 ## Related
 
