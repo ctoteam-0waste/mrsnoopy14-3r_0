@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Register your society · KarmaVerse</title>
+<meta name="description" content="Bring free doorstep recycling pickups to your housing society in Gurugram. Residents earn KarmaCoins for every kg they recycle. Register your society with KarmaVerse by 3R ZeroWaste." />
+<meta property="og:title" content="Make your society a zero-waste society · KarmaVerse" />
+<meta property="og:description" content="Free doorstep recycling pickups for your housing society. Residents earn KarmaCoins for every kg recycled." />
+<meta property="og:image" content="https://karmaverse.earth/og-image.png" />
+<meta property="og:url" content="https://karmaverse.earth/society/" />
+<meta name="theme-color" content="#052e16" />
+<link rel="icon" href="/favicon-192.png" />
+<link rel="canonical" href="https://karmaverse.earth/society/" />
+<style>
+  :root {
+    --forest: #052e16; --leaf: #16a34a; --mint: #4ade80; --mint-soft: #dcfce7;
+    --ink: #0f172a; --muted: #475569; --line: #e2e8f0; --bg: #f7faf8; --card: #ffffff; --err: #b91c1c;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.5; }
+  a { color: var(--leaf); }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+  header.top { background: var(--forest); }
+  header.top .wrap { display: flex; align-items: center; gap: 10px; height: 60px; }
+  header.top img { width: 32px; height: 32px; border-radius: 8px; }
+  header.top b { color: #fff; font-size: 18px; letter-spacing: -0.3px; }
+  header.top span { color: var(--mint); font-size: 12px; font-weight: 700; margin-left: auto; }
+  .hero { background: linear-gradient(180deg, var(--forest), #0b3d20); color: #fff; padding: 40px 0 56px; }
+  .hero .pill { display: inline-block; background: rgba(74,222,128,.15); color: var(--mint); border: 1px solid rgba(74,222,128,.35);
+    border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 700; }
+  .hero h1 { font-size: clamp(28px, 6vw, 44px); line-height: 1.15; letter-spacing: -1px; margin: 14px 0 12px; font-weight: 900; }
+  .hero h1 em { color: var(--mint); font-style: normal; }
+  .hero p { color: rgba(255,255,255,.8); font-size: 17px; max-width: 620px; margin: 0; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-top: -32px; padding-bottom: 48px; }
+  @media (min-width: 880px) { .grid { grid-template-columns: 1fr 1.1fr; align-items: start; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: 0 6px 24px rgba(5,46,22,.06); }
+  .card h2 { font-size: 20px; margin: 0 0 14px; letter-spacing: -0.3px; }
+  ol.steps { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+  ol.steps li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; }
+  ol.steps .n { width: 36px; height: 36px; border-radius: 50%; background: var(--mint-soft); color: var(--forest);
+    display: grid; place-items: center; font-weight: 800; }
+  ol.steps b { display: block; }
+  ol.steps small { color: var(--muted); font-size: 14px; }
+  ul.why { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+  ul.why li { padding-left: 26px; position: relative; color: var(--muted); font-size: 15px; }
+  ul.why li::before { content: "✓"; position: absolute; left: 0; color: var(--leaf); font-weight: 900; }
+  form { display: grid; gap: 14px; }
+  .row { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 560px) { .row.two { grid-template-columns: 1fr 1fr; } }
+  label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+  label .opt { color: var(--muted); font-weight: 500; }
+  input, select, textarea { font: inherit; font-size: 16px; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px;
+    background: #fff; color: var(--ink); width: 100%; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--mint); outline-offset: 1px; border-color: var(--leaf); }
+  textarea { min-height: 80px; resize: vertical; }
+  .consent { display: grid; grid-template-columns: 22px 1fr; gap: 10px; font-weight: 500; color: var(--muted); font-size: 14px; }
+  .consent input { width: 20px; height: 20px; margin-top: 2px; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  button { font: inherit; font-weight: 800; font-size: 17px; background: var(--leaf); color: #fff; border: 0; border-radius: 12px;
+    padding: 14px 18px; cursor: pointer; }
+  button:hover { background: #15803d; }
+  button[disabled] { opacity: .6; cursor: wait; }
+  .msg { border-radius: 10px; padding: 12px 14px; font-size: 15px; display: none; }
+  .msg.err { display: block; background: #fef2f2; color: var(--err); border: 1px solid #fecaca; }
+  .done { display: none; text-align: center; padding: 18px 6px; }
+  .done .big { font-size: 44px; }
+  .done h2 { margin: 6px 0 8px; }
+  .done p { color: var(--muted); margin: 0 0 10px; }
+  footer { color: var(--muted); font-size: 13px; padding: 0 0 32px; text-align: center; }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #e2e8f0; --muted: #94a3b8; --line: #1e293b; --bg: #0b1410; --card: #0f1d16; --mint-soft: #14532d; }
+    ol.steps .n { color: var(--mint); }
+    input, select, textarea { background: #0b1410; border-color: #334155; color: var(--ink); }
+    .msg.err { background: #2a1111; border-color: #7f1d1d; color: #fca5a5; }
+  }
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <img src="/logo-icon.webp" alt="" />
+  <b>KarmaVerse</b>
+  <span>by 3R ZeroWaste</span>
+</div></header>
+
+<section class="hero"><div class="wrap">
+  <span class="pill">Now serving Gurugram</span>
+  <h1>Make your society a <em>zero-waste</em> society</h1>
+  <p>Free doorstep recycling pickups for your housing society. Residents earn KarmaCoins for every kg they recycle. Register below and our team will get in touch.</p>
+</div></section>
+
+<main class="wrap grid">
+  <section class="card">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><span class="n">1</span><div><b>Register your society</b><small>Takes a minute. Residents, RWA members and facility managers can all sign up.</small></div></li>
+      <li><span class="n">2</span><div><b>We call you</b><small>Our Gurugram team calls to understand your society and plan a start date.</small></div></li>
+      <li><span class="n">3</span><div><b>Pickups begin</b><small>Residents book free doorstep pickups of dry waste in the KarmaVerse app and earn KarmaCoins.</small></div></li>
+    </ol>
+    <ul class="why">
+      <li>Free doorstep pickups: plastic, paper, metal, e-waste and more</li>
+      <li>KarmaCoins for residents on every kg recycled</li>
+      <li>Less waste going to landfill from your society</li>
+    </ul>
+  </section>
+
+  <section class="card" aria-live="polite">
+    <div id="formBox">
+      <h2>Register your society</h2>
+      <form id="f" novalidate>
+        <div class="row two">
+          <label>Your name<input name="contactName" required minlength="2" maxlength="80" autocomplete="name" /></label>
+          <label>You are a
+            <select name="role" required>
+              <option value="resident">Resident</option>
+              <option value="rwa_member">RWA / committee member</option>
+              <option value="facility_manager">Facility manager</option>
+              <option value="builder">Builder / developer</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
+        </div>
+        <label>Society name<input name="societyName" required minlength="2" maxlength="120" placeholder="e.g. Green Valley Apartments" /></label>
+        <div class="row two">
+          <label>Sector / locality<input name="locality" required minlength="2" maxlength="120" placeholder="e.g. Sector 57" /></label>
+          <label>City<input name="city" required minlength="2" maxlength="60" value="Gurugram" autocomplete="address-level2" /></label>
+        </div>
+        <div class="row two">
+          <label>Mobile number<input name="phone" required inputmode="tel" autocomplete="tel" maxlength="16" placeholder="10-digit mobile" /></label>
+          <label>Approx. households <span class="opt">(optional)</span><input name="households" inputmode="numeric" maxlength="5" placeholder="e.g. 300" /></label>
+        </div>
+        <label>Email <span class="opt">(optional)</span><input name="email" type="email" maxlength="120" autocomplete="email" /></label>
+        <label>Anything we should know? <span class="opt">(optional)</span><textarea name="message" maxlength="500"></textarea></label>
+        <div class="hp" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off" /></label></div>
+        <label class="consent"><input type="checkbox" name="consent" value="yes" required />
+          <span>I agree that 3R ZeroWaste may call or message me about bringing KarmaVerse to my society. See our <a href="/legal/privacy/">privacy policy</a>.</span></label>
+        <div id="msg" class="msg" role="alert"></div>
+        <button id="btn" type="submit">Register my society</button>
+      </form>
+    </div>
+    <div id="done" class="done">
+      <div class="big">🌱</div>
+      <h2>Thank you!</h2>
+      <p>We've received your registration. Our team will call you soon.</p>
+      <p>Meanwhile, share this page with your neighbours: the more residents ask, the faster your society gets started.</p>
+      <p><a id="share" href="#">Share on WhatsApp</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>© 3R ZeroWaste Private Limited · <a href="/">karmaverse.earth</a> · <a href="/legal/privacy/">Privacy</a></footer>
+
+<script>
+(function () {
+  var host = location.hostname;
+  var API = (host === 'karmaverse.earth' || host === 'www.karmaverse.earth')
+    ? 'https://api.karmaverse.earth'
+    : 'https://karmacoin-backend-11.onrender.com';
+  var src = (new URLSearchParams(location.search).get('src') || '').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
+  var f = document.getElementById('f'), btn = document.getElementById('btn'), msg = document.getElementById('msg');
+  var pageUrl = 'https://karmaverse.earth/society/';
+  document.getElementById('share').href = 'https://wa.me/?text=' + encodeURIComponent(
+    'Let\'s get free doorstep recycling pickups for our society with KarmaVerse. Register here: ' + pageUrl + '?src=whatsapp');
+
+  function showError(t) { msg.textContent = t; msg.className = 'msg err'; }
+
+  f.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.className = 'msg';
+    var phone = f.phone.value.replace(/[\s-]/g, '').replace(/^(\+91|0091|91(?=\d{10}$)|0(?=\d{10}$))/, '');
+    if (!f.contactName.value.trim() || !f.societyName.value.trim() || !f.locality.value.trim() || !f.city.value.trim())
+      return showError('Please fill in your name, society, sector/locality and city.');
+    if (!/^[6-9]\d{9}$/.test(phone)) return showError('Please enter a valid 10-digit mobile number.');
+    if (f.households.value && !/^\d{1,5}$/.test(f.households.value.trim())) return showError('Households should be a number, e.g. 300.');
+    if (!f.consent.checked) return showError('Please tick the box so we can contact you.');
+
+    var body = new URLSearchParams(new FormData(f));
+    if (src) body.set('source', src);
+    btn.disabled = true; btn.textContent = 'Sending…';
+    fetch(API + '/api/v1/public/society-interest', { method: 'POST', body: body })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+      .then(function (res) {
+        if (res.ok) {
+          document.getElementById('formBox').style.display = 'none';
+          document.getElementById('done').style.display = 'block';
+        } else if (res.status === 429) {
+          showError('Too many registrations from this connection. Please try again in an hour.');
+        } else {
+          showError((res.j && res.j.message) || 'Something went wrong. Please try again.');
+        }
+      })
+      .catch(function () { showError('Could not connect. Please check your internet and try again.'); })
+      .then(function () { btn.disabled = false; btn.textContent = 'Register my society'; });
+  });
+})();
+</script>
+</body>
+</html>
