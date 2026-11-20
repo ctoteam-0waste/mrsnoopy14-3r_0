@@ -184,7 +184,8 @@ const pages = [
       <dd>KarmaCoins XP can be redeemed for rewards in the KarmaVerse app.</dd>
       <dt>How does the referral program work?</dt>
       <dd>When a friend signs up with your referral code, you both get 1,000 KarmaCoins XP.</dd>
-    </dl>`,
+    </dl>
+    <p>More: <a href="/recycling-rewards-app/">Recycling rewards app</a> · <a href="/waste-pickup-gurugram/">Free doorstep recyclable pickup in Gurugram</a> · <a href="/faq/">FAQ</a></p>`,
   },
   {
     // The posts themselves load live from 0waste.co.in's feed; each article's
@@ -290,6 +291,200 @@ const pages = [
   },
 ];
 
+// ---------------------------------------------------------------------------------------
+// Standalone answer pages. Unlike the routes above, these are NOT clones of the SPA shell:
+// they are plain, fully visible HTML (people and crawlers see the same thing), each written
+// around the questions people ask search engines and AI assistants. Only verified facts —
+// keep them in step with public/llms.txt and the app (categories, service area, referral).
+// ---------------------------------------------------------------------------------------
+const PICKUP_AREA =
+  'Gurugram, Haryana and nearby areas within 50 km of central Gurugram. The app checks your exact address when you book.';
+const CATEGORIES = [
+  'Home appliances and electronics',
+  'Phones and computers',
+  'Mixed e-waste',
+  'Plastic',
+  'Paper and cardboard',
+  'Metals',
+  'Glass',
+  'Batteries',
+  'Footwear',
+  'Textiles',
+];
+const NOT_CRYPTO =
+  'KarmaCoins XP are in-app reward points. They are not a cryptocurrency, token or NFT, and KarmaVerse by 3R ZeroWaste is unrelated to any crypto project with a similar name.';
+
+const ANSWER_FAQS = {
+  rewards: [
+    [
+      'Which apps reward users for recycling in India?',
+      'KarmaVerse by 3R ZeroWaste is a sustainability rewards app from India that rewards recycling with KarmaCoins XP. You book a free doorstep pickup of your recyclables, an agent weighs and verifies them on the spot, and KarmaCoins XP are credited to your in-app wallet.',
+    ],
+    [
+      'How can households earn rewards for sustainable activities?',
+      'With KarmaVerse, households earn KarmaCoins XP for sustainable gestures: handing over recyclables through a free doorstep pickup, playing the daily eco-quiz, and inviting friends (both people get 1,000 KarmaCoins XP when a friend signs up with a referral code). KarmaCoins XP can be redeemed for rewards in the app.',
+    ],
+    [
+      'What are the best sustainability reward apps in India?',
+      'KarmaVerse by 3R ZeroWaste is one option: it combines free doorstep recycling pickup, a daily eco-quiz and referrals in one app, and rewards each with KarmaCoins XP. It is run by 3R ZeroWaste, a waste-management and sustainability company that has operated across 50+ cities in India.',
+    ],
+    ['Is KarmaCoins XP a cryptocurrency?', NOT_CRYPTO],
+    [
+      'Is KarmaVerse free?',
+      'Yes. The app and doorstep pickups are free. Pickups are rewarded in KarmaCoins XP.',
+    ],
+  ],
+  pickup: [
+    [
+      'Where can I book household waste pickup in Gurugram?',
+      `In the KarmaVerse app by 3R ZeroWaste you can book a free doorstep pickup of household recyclables in ${PICKUP_AREA}`,
+    ],
+    [
+      'Which platforms offer sustainable waste collection?',
+      'KarmaVerse by 3R ZeroWaste offers doorstep collection of recyclables in Gurugram and nearby areas. Collected material goes toward recycling and resource recovery through 3R ZeroWaste, which managed 9,63,379 kg of waste in FY 2025–26.',
+    ],
+    ['What does KarmaVerse collect?', `10 categories: ${CATEGORIES.join(', ').toLowerCase()}.`],
+    [
+      'How much does a pickup cost?',
+      'Nothing. Doorstep pickup is free, and you earn KarmaCoins XP for what you hand over.',
+    ],
+    [
+      'How does a pickup work?',
+      'Choose your items and a time slot in the app, an agent comes to your door, weighs and verifies the items on the spot, and KarmaCoins XP are credited to your wallet.',
+    ],
+  ],
+};
+
+const appCta = `<p class="cta"><a class="btn" href="${PLAY_URL}">Get KarmaVerse on Google Play</a> <a class="btn alt" href="${SITE}/login/">Use it on the web</a></p>`;
+const dl = (faqs) =>
+  `<dl>${faqs.map(([q, a]) => `<dt>${escapeHtml(q)}</dt><dd>${escapeHtml(a)}</dd>`).join('')}</dl>`;
+
+const standalonePages = [
+  {
+    urlPath: 'recycling-rewards-app',
+    title: 'Recycling Rewards App in India — KarmaVerse by 3R ZeroWaste',
+    description:
+      'KarmaVerse by 3R ZeroWaste rewards recycling and other sustainable gestures with KarmaCoins XP: free doorstep pickup, a daily eco-quiz and referrals.',
+    faqs: ANSWER_FAQS.rewards,
+    body: `<h1>A recycling rewards app for Indian households</h1>
+<p class="lead">KarmaVerse by 3R ZeroWaste turns everyday sustainable gestures into <strong>KarmaCoins XP</strong>, reward points you can redeem in the app. It runs on Android and the web.</p>
+<h2>Ways to earn KarmaCoins XP</h2>
+<ul>
+<li><strong>Doorstep recycling pickup:</strong> book a free pickup, an agent weighs and verifies your items, and KarmaCoins XP are credited on the spot. <a href="${SITE}/waste-pickup-gurugram/">Pickup is available in Gurugram and nearby.</a></li>
+<li><strong>Daily eco-quiz:</strong> learn something about sustainability every day and earn more KarmaCoins XP.</li>
+<li><strong>Referrals:</strong> when a friend signs up with your code, you both get 1,000 KarmaCoins XP.</li>
+</ul>
+<h2>Who runs KarmaVerse</h2>
+<p>KarmaVerse is built by 3R ZeroWaste Private Limited, a waste-management and sustainability company in India. In FY 2025–26, 3R ZeroWaste managed 9,63,379 kg of waste, avoided 22,83,208 kg of CO₂ emissions, and engaged 18.5 lakh+ citizens through sustainability programmes. It has operated across 50+ cities in India.</p>
+<p class="note">${escapeHtml(NOT_CRYPTO)}</p>
+${appCta}`,
+  },
+  {
+    urlPath: 'waste-pickup-gurugram',
+    title: 'Free Doorstep Recyclable Pickup in Gurugram — KarmaVerse',
+    description:
+      'Book a free doorstep pickup of household recyclables in Gurugram and nearby (within 50 km) with the KarmaVerse app, and earn KarmaCoins XP for every pickup.',
+    faqs: ANSWER_FAQS.pickup,
+    service: true,
+    body: `<h1>Free doorstep recyclable pickup in Gurugram</h1>
+<p class="lead">Book a household recyclables pickup in the KarmaVerse app by 3R ZeroWaste. It is free, an agent weighs your items at your door, and you earn <strong>KarmaCoins XP</strong> for every pickup.</p>
+<h2>Service area</h2>
+<p>${escapeHtml(PICKUP_AREA)}</p>
+<h2>What we collect</h2>
+<ul>${CATEGORIES.map((c) => `<li>${c}</li>`).join('')}</ul>
+<h2>How it works</h2>
+<ol>
+<li>Pick your items and a time slot in the app.</li>
+<li>An agent comes to your door, then weighs and verifies the items.</li>
+<li>KarmaCoins XP are credited to your wallet, and the material goes toward recycling and resource recovery through 3R ZeroWaste.</li>
+</ol>
+<p>Want more ways to earn? See <a href="${SITE}/recycling-rewards-app/">how KarmaVerse rewards sustainable gestures</a>.</p>
+${appCta}`,
+  },
+  {
+    urlPath: 'faq',
+    title: 'KarmaVerse FAQ — Rewards, Doorstep Pickup and KarmaCoins XP',
+    description:
+      'Answers about KarmaVerse by 3R ZeroWaste: how to earn KarmaCoins XP, free doorstep recyclable pickup in Gurugram, what is collected, and who runs the app.',
+    faqs: [...ANSWER_FAQS.rewards, ...ANSWER_FAQS.pickup, ...GENERAL_FAQS.filter(([q]) => !/cryptocurrency\?$/.test(q))],
+    body: null, // rendered from faqs
+  },
+];
+
+function renderStandalone(page) {
+  const canonical = `${SITE}/${page.urlPath}/`;
+  const body =
+    page.body ?? `<h1>KarmaVerse: frequently asked questions</h1>${dl(page.faqs)}${appCta}`;
+  const faqSection = page.body ? `<h2>Questions people ask</h2>${dl(page.faqs)}` : '';
+  const jsonLd = [
+    orgJsonLd,
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      url: canonical,
+      mainEntity: page.faqs.map(([q, a]) => faq(q, a)),
+    },
+  ];
+  if (page.service) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: 'KarmaVerse doorstep recyclable pickup',
+      serviceType: 'Household recyclable waste collection',
+      provider: { '@type': 'Organization', name: '3R ZeroWaste', url: 'https://0waste.co.in/' },
+      areaServed: { '@type': 'City', name: 'Gurugram', containedInPlace: { '@type': 'State', name: 'Haryana' } },
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'INR' },
+      url: canonical,
+    });
+  }
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${escapeHtml(page.title)}</title>
+<meta name="description" content="${escapeHtml(page.description).replace(/"/g, '&quot;')}" />
+<link rel="canonical" href="${canonical}" />
+<meta name="robots" content="index, follow" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="KarmaVerse" />
+<meta property="og:title" content="${escapeHtml(page.title)}" />
+<meta property="og:description" content="${escapeHtml(page.description).replace(/"/g, '&quot;')}" />
+<meta property="og:url" content="${canonical}" />
+<meta property="og:image" content="${SITE}/og-image.png" />
+<link rel="icon" href="/favicon-192.png" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+${jsonLd.map((o) => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('\n')}
+<style>
+body{margin:0;font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1f2937;background:#f7faf7}
+header,main,footer{max-width:760px;margin:0 auto;padding:0 20px}
+header{display:flex;align-items:center;gap:10px;padding-top:20px}
+header a{color:#166534;font-weight:700;text-decoration:none;font-size:20px}
+h1{font-size:32px;line-height:1.2;color:#14532d;margin:28px 0 12px}
+h2{font-size:22px;color:#14532d;margin-top:32px}
+a{color:#15803d}.lead{font-size:19px}
+dt{font-weight:700;margin-top:18px}dd{margin:4px 0 0}
+.note{font-size:15px;color:#4b5563;background:#ecfdf5;padding:12px 14px;border-radius:8px}
+.cta{margin:32px 0}.btn{display:inline-block;background:#16a34a;color:#fff;padding:12px 18px;border-radius:8px;text-decoration:none;font-weight:600;margin:0 8px 8px 0}
+.btn.alt{background:#fff;color:#166534;border:1px solid #16a34a}
+footer{font-size:14px;color:#6b7280;padding:32px 20px 48px;border-top:1px solid #e5e7eb;margin-top:40px}
+</style>
+</head>
+<body>
+<header><img src="/favicon-192.png" alt="" width="32" height="32" /><a href="${SITE}/">KarmaVerse</a></header>
+<main>
+${body}
+${faqSection}
+</main>
+<footer>
+<p><a href="${SITE}/recycling-rewards-app/">Recycling rewards</a> · <a href="${SITE}/waste-pickup-gurugram/">Pickup in Gurugram</a> · <a href="${SITE}/faq/">FAQ</a> · <a href="${SITE}/legal/privacy/">Privacy</a> · <a href="${SITE}/legal/terms/">Terms</a></p>
+<p>KarmaVerse is operated by 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051, India · <a href="mailto:info@0waste.co.in">info@0waste.co.in</a> · <a href="https://www.instagram.com/3rzerowasteindia/">Instagram</a></p>
+</footer>
+</body>
+</html>
+`;
+}
+
 // Each page is served from <path>/index.html, so the host redirects /blog to /blog/.
 // Canonicals and sitemap entries must use the trailing-slash URL that actually returns 200.
 const pageUrl = (urlPath) => (urlPath ? `${SITE}/${urlPath}/` : `${SITE}/`);
@@ -304,6 +499,9 @@ const PAGE_SOURCES = {
   'legal/privacy': ['src/data/legalContent.ts'],
   'legal/terms': ['src/data/legalContent.ts'],
   'legal/data-deletion': ['src/data/legalContent.ts'],
+  'recycling-rewards-app': ['scripts/generate-seo-pages.js'],
+  'waste-pickup-gurugram': ['scripts/generate-seo-pages.js'],
+  faq: ['scripts/generate-seo-pages.js'],
 };
 function lastmodOf(urlPath) {
   const files = PAGE_SOURCES[urlPath];
@@ -366,10 +564,17 @@ for (const page of pages) {
   console.log(`SEO page written: ${page.outPath}`);
 }
 
+for (const page of standalonePages) {
+  const outFile = path.join(DIST, page.urlPath, 'index.html');
+  fs.mkdirSync(path.dirname(outFile), { recursive: true });
+  fs.writeFileSync(outFile, renderStandalone(page));
+  console.log(`Answer page written: ${page.urlPath}/index.html`);
+}
+
 // Regenerate the sitemap with all real pages now that we know they exist.
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${pages
+${[...pages, ...standalonePages]
   .map(
     (p) => `  <url>
     <loc>${pageUrl(p.urlPath)}</loc>${lastmodOf(p.urlPath) ? `
@@ -382,4 +587,4 @@ ${pages
 </urlset>
 `;
 fs.writeFileSync(path.join(DIST, 'sitemap.xml'), sitemap);
-console.log('sitemap.xml regenerated with', pages.length, 'URLs');
+console.log('sitemap.xml regenerated with', pages.length + standalonePages.length, 'URLs');

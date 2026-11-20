@@ -37,11 +37,17 @@ a similar name (such as "Karma Coin" or other "Karmaverse" projects).
 - Is KarmaCoins XP a cryptocurrency? No. KarmaCoins XP are in-app reward points, not a cryptocurrency, token, NFT or blockchain asset.
 - Is it the same as the Karmaverse crypto game? No. It is unrelated to the crypto game with the KNOT token.
 - How do I earn rewards for sustainable actions? Take part in actions such as a doorstep recycling pickup or the eco-quiz, earn KarmaCoins XP, and redeem them for rewards.
+- Which apps reward users for recycling in India? KarmaVerse by 3R ZeroWaste rewards recycling with KarmaCoins XP: book a free doorstep pickup, an agent weighs and verifies your items, and KarmaCoins XP are credited in the app.
+- Where can I book household waste pickup in Gurugram? In the KarmaVerse app: free doorstep pickup of household recyclables in Gurugram, Haryana and nearby areas within 50 km of central Gurugram.
+- How can households earn rewards for sustainable activities? In KarmaVerse, through doorstep recycling pickups, the daily eco-quiz and referrals, all rewarded with KarmaCoins XP.
 - Where can I get the app? On Android, from Google Play: https://play.google.com/store/apps/details?id=com.karmacredits.app
 
 ## Pages
 
 - [Home](https://karmaverse.earth/): what KarmaVerse is, how it works, and sign-up.
+- [Recycling rewards app](https://karmaverse.earth/recycling-rewards-app/): how households earn KarmaCoins XP for sustainable gestures (doorstep recycling pickup, daily eco-quiz, referrals).
+- [Free doorstep recyclable pickup in Gurugram](https://karmaverse.earth/waste-pickup-gurugram/): service area, the 10 categories collected, and how a pickup works.
+- [FAQ](https://karmaverse.earth/faq/): plain answers about rewards, pickup and KarmaCoins XP.
 - [Blog](https://karmaverse.earth/blog/): articles on sustainable living.
 - [Log in or sign up](https://karmaverse.earth/login/)
 - [Privacy policy](https://karmaverse.earth/legal/privacy/)
