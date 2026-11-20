@@ -182,7 +182,9 @@ export function QuizScreen({ navigation }: any) {
     const checkNet = () => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 5000);
-      fetch(`${BACKEND_BASE}/`, { method: 'HEAD', cache: 'no-store', signal: controller.signal })
+      // /health is the backend's real liveness route (200). The root `/` has no route and
+      // answered 404, which logged a console error every 5 s while the quiz was open.
+      fetch(`${BACKEND_BASE}/health`, { method: 'HEAD', cache: 'no-store', signal: controller.signal })
         .then(() => {
           clearTimeout(timer);
           if (isOfflineRef.current) {

@@ -48,19 +48,32 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
   const [agentLocation, setAgentLocation] = useState<{ lat: number; lng: number } | null>(null);
   const { addNotification } = useNotifications();
 
+  const tokenRef = useRef<string | null>(null);
+
   const connectSocket = useCallback(async () => {
     const token = await getToken();
     if (!token) return;
 
-    if (socketRef.current?.connected) return;
+    // Keep a socket that is connected OR still connecting/reconnecting (`active`) with the
+    // same token. The old check looked at `connected` only, so a second call (login screen
+    // `reconnect()`, a remount) tore down a socket mid-handshake, and the browser logged
+    // "WebSocket is closed before the connection is established" for each one.
+    const current = socketRef.current;
+    if (current && tokenRef.current === token && (current.connected || current.active)) return;
 
-    if (socketRef.current) {
-      socketRef.current.disconnect();
+    if (current) {
+      current.removeAllListeners();
+      current.disconnect();
+      setIsConnected(false);
     }
+    tokenRef.current = token;
 
     const socket = io(SOCKET_URL, {
       auth: { token },
       transports: ['websocket', 'polling'],
+      // If the WebSocket can't open (proxy, network, a backend waking from sleep), fall
+      // back to HTTP long-polling instead of retrying WebSocket only.
+      tryAllTransports: true,
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 2000,
@@ -147,6 +160,7 @@ export function UserSocketProvider({ children }: { children: React.ReactNode }) 
         socketRef.current.disconnect();
         socketRef.current = null;
       }
+      tokenRef.current = null;
     };
   }, []);
 
