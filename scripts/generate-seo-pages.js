@@ -154,6 +154,7 @@ function answerPage({ slug, title, description, h1, intro, sections, faqs }) {
       },
     ],
     noscriptBody,
+    standalone: true,
   };
 }
 
@@ -213,6 +214,10 @@ const ANSWER_PAGES = [
         'Yes. KarmaVerse is free to use, and doorstep pickup has no cost to you.',
       ],
       [
+        'Does KarmaVerse track my carbon footprint?',
+        'KarmaVerse is not a carbon-footprint calculator. It rewards actions that cut emissions, such as recycling e-waste, plastic and metals so the material is recovered instead of landfilled. Across its programmes, 3R ZeroWaste reports avoiding 22,83,208 kg of CO₂ emissions in FY 2025–26.',
+      ],
+      [
         'Which platforms is KarmaVerse on?',
         'The KarmaVerse app is available on Android through Google Play, and KarmaVerse is also on the web at karmaverse.earth. There is no iOS app yet.',
       ],
@@ -254,15 +259,19 @@ const ANSWER_PAGES = [
     faqs: [
       [
         'What are the best sustainability reward apps in India?',
-        'Different apps suit different people, so we do not rank them. KarmaVerse by 3R ZeroWaste is one option: it rewards everyday sustainable actions with KarmaCoins XP that can be redeemed for rewards.',
+        'Different apps suit different people, so we do not rank them. One option is KarmaVerse by 3R ZeroWaste (karmaverse.earth), a free climate-action rewards app from Gurugram for Android and the web. It rewards everyday sustainable actions, such as recycling from home and the daily eco-quiz, with KarmaCoins XP reward points that can be redeemed for rewards.',
+      ],
+      [
+        'What are the best environmental reward platforms in India?',
+        'KarmaVerse by 3R ZeroWaste is an environmental reward platform from India. Members earn KarmaCoins XP for verified sustainable actions, such as recycling items collected from their door and the daily eco-quiz, and redeem the points for rewards in the app. It is run by 3R ZeroWaste, which in FY 2025–26 managed 9,63,379 kg of waste and avoided 22,83,208 kg of CO₂ emissions.',
       ],
       [
         'How can households earn rewards for sustainable activities?',
         'In KarmaVerse, a household can book a doorstep recycling pickup or play the eco-quiz. Each earns KarmaCoins XP, which can be redeemed for rewards in the app.',
       ],
       [
-        'Are there apps that reward recycling?',
-        'Yes. KarmaVerse rewards recycling: book a doorstep pickup, hand over your items, and earn KarmaCoins XP once they are collected and verified.',
+        'Which apps reward users for recycling?',
+        'KarmaVerse by 3R ZeroWaste rewards recycling. In Gurugram and Manesar you book a free pickup in the app, your items are weighed and verified at your door, and KarmaCoins XP reward points are credited to your wallet. Accepted items include electronics, phones, batteries, plastic, paper, metals, glass, footwear and textiles.',
       ],
       [
         'Is KarmaVerse available on iPhone?',
@@ -305,8 +314,12 @@ const ANSWER_PAGES = [
     ],
     faqs: [
       [
-        'How do I book a doorstep pickup in Gurugram?',
-        'Open the KarmaVerse app, choose to schedule a pickup, select your items and enter your address. An agent then collects and verifies them at your door.',
+        'Where can I book household waste pickup in Gurugram?',
+        'You can book a free household pickup of dry recyclables and e-waste in Gurugram and Manesar in the KarmaVerse app by 3R ZeroWaste (Android and karmaverse.earth). Choose to schedule a pickup, select your items and enter your address; the app checks that it is within the service area (about 50 km of central Gurugram). An agent collects and verifies the items at your door and you earn KarmaCoins XP. Wet kitchen waste is collected by the municipal (MCG) door-to-door service, not by KarmaVerse.',
+      ],
+      [
+        'Which platforms offer sustainable waste collection?',
+        'In Gurugram and Manesar, KarmaVerse by 3R ZeroWaste offers free doorstep collection of recyclables and e-waste, and sends the material towards resource recovery instead of landfill. 3R ZeroWaste works across 50+ cities in India, and in FY 2025–26 it managed 9,63,379 kg of waste and avoided 22,83,208 kg of CO₂ emissions.',
       ],
       [
         'Does KarmaVerse collect e-waste?',
@@ -645,10 +658,75 @@ function renderPage(base, page) {
   return html;
 }
 
+// Answer pages are plain documents, not copies of the app shell. The app has no route for
+// them, so a cloned shell would boot into its "not found" screen for anyone running JS;
+// a standalone page reads the same for people, search engines and AI answer engines.
+function renderStandalone(page) {
+  const canonical = pageUrl(page.urlPath);
+  const attr = (s) => escapeHtml(s).replace(/"/g, '&quot;');
+  const ld = page.jsonLd
+    .map((obj) => `  <script type="application/ld+json">\n${JSON.stringify(obj, null, 2)}\n  </script>`)
+    .join('\n');
+  const updated = lastmodOf(page.urlPath);
+  const body = page.noscriptBody.replace(
+    /<p><a href="([^"]*)">Get it on Google Play<\/a><\/p>/,
+    '<p class="cta"><a href="$1">Get KarmaVerse on Google Play</a></p>'
+  );
+  return `<!DOCTYPE html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${escapeHtml(page.title)}</title>
+  <meta name="description" content="${attr(page.description)}" />
+  <link rel="canonical" href="${canonical}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="KarmaVerse" />
+  <meta property="og:title" content="${attr(page.title)}" />
+  <meta property="og:description" content="${attr(page.description)}" />
+  <meta property="og:url" content="${canonical}" />
+  <meta property="og:image" content="${SITE}/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#065f46" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+${ld}
+  <style>
+    body { margin: 0; font: 17px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1f2937; background: #f8faf9; }
+    header, main, footer { max-width: 760px; margin: 0 auto; padding-left: 16px; padding-right: 16px; }
+    header { padding-top: 18px; padding-bottom: 18px; }
+    header a { color: #065f46; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+    header img { width: 36px; height: 36px; border-radius: 9px; }
+    main { background: #fff; border-radius: 16px; padding-top: 24px; padding-bottom: 32px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 12px; color: #064e3b; }
+    h2 { font-size: 1.25rem; margin: 28px 0 8px; color: #064e3b; }
+    a { color: #047857; }
+    dt { font-weight: 700; margin-top: 16px; }
+    dd { margin: 4px 0 0; }
+    .cta a { display: inline-block; background: #047857; color: #fff; padding: 10px 18px; border-radius: 999px; text-decoration: none; font-weight: 600; }
+    .meta { color: #6b7280; font-size: .9rem; }
+    footer { color: #6b7280; font-size: .9rem; padding-top: 20px; padding-bottom: 32px; }
+  </style>
+</head>
+<body>
+  <header><a href="/"><img src="/apple-touch-icon.png" alt="" />KarmaVerse by 3R ZeroWaste</a></header>
+  <main>
+    ${body}
+    ${updated ? `<p class="meta">Last updated: ${updated}</p>` : ''}
+  </main>
+  <footer>
+    <p>KarmaVerse is made by 3R ZeroWaste Private Limited, Plot 62, Sector 8, IMT Manesar, Gurugram, Haryana 122051, India. In FY 2025–26, 3R ZeroWaste managed 9,63,379 kg of waste, avoided 22,83,208 kg of CO₂ emissions and engaged 18.5 lakh+ citizens through sustainability programmes. Contact: <a href="mailto:info@0waste.co.in">info@0waste.co.in</a> · <a href="https://0waste.co.in/">0waste.co.in</a> · <a href="https://www.instagram.com/3rzerowasteindia/">Instagram</a></p>
+    <p><a href="/legal/privacy/">Privacy</a> · <a href="/legal/terms/">Terms</a></p>
+  </footer>
+</body>
+</html>
+`;
+}
+
 for (const page of pages) {
   const outFile = path.join(DIST, page.outPath);
   fs.mkdirSync(path.dirname(outFile), { recursive: true });
-  fs.writeFileSync(outFile, renderPage(baseHtml, page));
+  fs.writeFileSync(outFile, page.standalone ? renderStandalone(page) : renderPage(baseHtml, page));
   console.log(`SEO page written: ${page.outPath}`);
 }
 
