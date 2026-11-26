@@ -75,8 +75,8 @@ const GENERAL_FAQS = [
     '3R ZeroWaste, a sustainability and waste-management company in India. In FY 2025–26 it managed 9,63,379 kg of waste, avoided 22,83,208 kg of CO₂ emissions and engaged 18.5 lakh+ citizens through sustainability and awareness programmes.',
   ],
   [
-    'Is the KarmaVerse app available on Android?',
-    'Yes. The KarmaVerse app is available on Android through Google Play.',
+    'Which platforms is KarmaVerse available on?',
+    'KarmaVerse is live on all 3 platforms: the website (karmaverse.earth), the App Store for iPhone and Google Play for Android.',
   ],
   [
     'How do I earn rewards for sustainable actions?',
@@ -219,7 +219,7 @@ const ANSWER_PAGES = [
       ],
       [
         'Which platforms is KarmaVerse on?',
-        'The KarmaVerse app is available on Android through Google Play, and KarmaVerse is also on the web at karmaverse.earth. There is no iOS app yet.',
+        'KarmaVerse is live on all 3 platforms: the website (karmaverse.earth), the App Store for iPhone and Google Play for Android.',
       ],
     ],
   }),
@@ -259,7 +259,7 @@ const ANSWER_PAGES = [
     faqs: [
       [
         'What are the best sustainability reward apps in India?',
-        'Different apps suit different people, so we do not rank them. One option is KarmaVerse by 3R ZeroWaste (karmaverse.earth), a free climate-action rewards app from Gurugram for Android and the web. It rewards everyday sustainable actions, such as recycling from home and the daily eco-quiz, with KarmaCoins XP reward points that can be redeemed for rewards.',
+        'Different apps suit different people, so we do not rank them. One option is KarmaVerse by 3R ZeroWaste (karmaverse.earth), a free climate-action rewards app from India, live on the web, the App Store (iPhone) and Google Play (Android). It rewards everyday sustainable actions, such as recycling from home and the daily eco-quiz, with KarmaCoins XP reward points that can be redeemed for rewards.',
       ],
       [
         'What are the best environmental reward platforms in India?',
@@ -275,7 +275,7 @@ const ANSWER_PAGES = [
       ],
       [
         'Is KarmaVerse available on iPhone?',
-        'Not yet. The KarmaVerse app is available on Android, and KarmaVerse is also on the web at karmaverse.earth.',
+        'Yes. KarmaVerse is on the App Store for iPhone. It is live on all 3 platforms: the website (karmaverse.earth), the App Store (iPhone) and Google Play (Android).',
       ],
     ],
   }),
@@ -291,7 +291,7 @@ const ANSWER_PAGES = [
     sections: [
       {
         heading: 'How to book a pickup',
-        html: '<ol><li>Open the KarmaVerse app on Android and log in or create a free account.</li><li>Choose to schedule a pickup.</li><li>Select the items you want to recycle.</li><li>Enter your address in Gurugram or Manesar. The app checks that your address is covered.</li><li>Confirm your booking.</li></ol>',
+        html: '<ol><li>Open the KarmaVerse app (App Store, Google Play or karmaverse.earth) and log in or create a free account.</li><li>Choose to schedule a pickup.</li><li>Select the items you want to recycle.</li><li>Enter your address in Gurugram or Manesar. The app checks that your address is covered.</li><li>Confirm your booking.</li></ol>',
       },
       {
         heading: 'What you can hand over',
@@ -315,7 +315,7 @@ const ANSWER_PAGES = [
     faqs: [
       [
         'Where can I book household waste pickup in Gurugram?',
-        'You can book a free household pickup of dry recyclables and e-waste in Gurugram and Manesar in the KarmaVerse app by 3R ZeroWaste (Android and karmaverse.earth). Choose to schedule a pickup, select your items and enter your address; the app checks that it is within the service area (about 50 km of central Gurugram). An agent collects and verifies the items at your door and you earn KarmaCoins XP. Wet kitchen waste is collected by the municipal (MCG) door-to-door service, not by KarmaVerse.',
+        'You can book a free household pickup of dry recyclables and e-waste in Gurugram and Manesar in the KarmaVerse app by 3R ZeroWaste (App Store, Google Play and karmaverse.earth). Choose to schedule a pickup, select your items and enter your address; the app checks that it is within the service area (about 50 km of central Gurugram). An agent collects and verifies the items at your door and you earn KarmaCoins XP. Wet kitchen waste is collected by the municipal (MCG) door-to-door service, not by KarmaVerse.',
       ],
       [
         'Which platforms offer sustainable waste collection?',
@@ -413,7 +413,7 @@ const pages = [
         alternateName: 'KarmaVerse by 3R ZeroWaste',
         url: `${SITE}/`,
         applicationCategory: 'LifestyleApplication',
-        operatingSystem: 'Android, Web',
+        operatingSystem: 'iOS, Android, Web',
         installUrl: PLAY_URL,
         sameAs: [PLAY_URL],
         description:
@@ -460,7 +460,7 @@ const pages = [
       KarmaVerse by 3R ZeroWaste is a climate-action app from India that rewards everyday
       sustainable actions. Members earn KarmaCoins XP, which are in-app reward points (not a
       cryptocurrency), for actions from doorstep recycling pickups to eco-quizzes, and can
-      redeem them for rewards. The app is available on Android.
+      redeem them for rewards. KarmaVerse is live on the website (karmaverse.earth), the App Store (iPhone) and Google Play (Android).
     </p>
     <h2>Frequently asked questions</h2>
     <dl>
