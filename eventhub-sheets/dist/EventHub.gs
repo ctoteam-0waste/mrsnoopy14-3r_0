@@ -16,7 +16,12 @@
 
 function apiAdminMe_(p, user) {
   var role = roleOf_(user);
-  if (!role) throw httpError_(403, 'You do not have access to this.');
+  if (!role) {
+    // Recorded so the team can see which KarmaVerse account (email and user ID) to add
+    // to the Admins tab when someone is refused. Only on this check, so it stays small.
+    audit_(user.email || user.id, 'admin.denied', 'admin', user.id, null, { email: user.email, userId: user.id, name: user.name });
+    throw httpError_(403, 'You do not have access to this. Signed in as ' + (user.email || 'an account with no email') + '.');
+  }
   return { role: role, name: user.name, email: user.email };
 }
 

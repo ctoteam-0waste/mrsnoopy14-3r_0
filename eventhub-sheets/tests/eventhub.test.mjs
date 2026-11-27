@@ -44,6 +44,20 @@ beforeEach(() => {
 });
 
 // ===========================================================================
+describe('admin access', () => {
+  test('a refused admin.me records the account to add to the Admins tab', () => {
+    const u = makeUser({ email: 'Someone@0Waste.co.in' });
+    const r = s.post({ action: 'admin.me', token: login(u) });
+    assert.equal(r.status, 403);
+    assert.match(r.error || r.message || JSON.stringify(r), /someone@0waste\.co\.in/);
+    const log = s.rows('AUDIT').find((x) => x['Action'] === 'admin.denied');
+    assert.ok(log, 'audit row written');
+    assert.equal(log['Entity ID'], u._id);
+    makeAdmin({ ...u, email: 'someone@0waste.co.in' }, 'owner');
+    assert.equal(s.post({ action: 'admin.me', token: tokens[u._id] }).data.role, 'owner');
+  });
+});
+
 describe('setup', () => {
   test('creates every tab, the draft challenge with 7 tasks, folders and triggers', () => {
     const names = [...s.g.sheets.keys()].sort();
