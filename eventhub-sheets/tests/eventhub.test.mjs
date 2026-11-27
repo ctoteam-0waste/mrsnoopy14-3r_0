@@ -55,6 +55,31 @@ describe('setup', () => {
     assert.deepEqual(s.g.triggers.map((t) => t.getHandlerFunction()).sort(), ['flushMailQueue', 'onSheetEdit', 'rebuildLeaderboardsIfChanged']);
   });
 
+  test('seeds into the top of each tab, not below the empty checkbox rows', () => {
+    const events = s.g.sheets.get('Events');
+    assert.equal(events.data[1][0], 'E-GIC2026A'); // row 2
+    assert.equal(s.rows('CATEGORIES').length, 5);
+    assert.ok(events.getLastRow() <= 3, `last used row is ${events.getLastRow()}`);
+  });
+
+  test('moves rows stranded below old FALSE-filled checkbox rows back to the top', () => {
+    // A sheet set up by the old code: FALSE in every checkbox cell, real rows at 1001+.
+    const sh = s.g.sheets.get('Events');
+    const hdr = sh.data[0];
+    const pub = hdr.indexOf('Published');
+    const real = sh.data.slice(1, 3).map((r) => r.slice());
+    sh.data.length = 1;
+    for (let r = 2; r <= 1000; r++) sh.set(r, pub + 1, false);
+    real.forEach((line, i) => line.forEach((v, c) => sh.set(1001 + i, c + 1, v)));
+    sh.set(1001, hdr.indexOf('Short description') + 1, '=HYPERLINK("x")'); // text that looks like a formula
+    s.ctx.setupEventHub();
+    assert.equal(sh.data[1][0], 'E-GIC2026A');
+    assert.equal(sh.data[2][0], 'E-7DOK2026A');
+    assert.equal(sh.getLastRow(), 3);
+    assert.equal(s.rows('EVENTS').length, 2);
+    assert.deepEqual(s.g.formulaWrites, []);
+  });
+
   test('is safe to run again and keeps team edits', () => {
     ev('Title', 'Edited by team');
     s.ctx.setupEventHub();

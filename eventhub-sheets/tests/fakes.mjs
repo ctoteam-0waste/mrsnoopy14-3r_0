@@ -38,7 +38,8 @@ export function createGoogle({ profiles = {}, bookings = {} } = {}) {
     setFontWeight() { return this; }
     setDataValidation() { return this; }
     setNumberFormat() { return this; }
-    insertCheckboxes() { return this; }
+    // Real Sheets writes FALSE into every cell, which makes the rows count as used.
+    insertCheckboxes() { for (let r = 0; r < this.nr; r++) for (let c = 0; c < this.nc; c++) this.sheet.set(this.row + r, this.col + c, false); return this; }
     getRow() { return this.row; }
     getColumn() { return this.col; }
     getNumRows() { return this.nr; }

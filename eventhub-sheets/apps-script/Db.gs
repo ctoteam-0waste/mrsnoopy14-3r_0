@@ -37,7 +37,7 @@ function rowObject_(header, values, rowNumber) {
 }
 
 function isBlankRow_(r) {
-  return r.every(function (c) { return c === '' || c === null; });
+  return r.every(function (c) { return c === '' || c === null || c === false; });
 }
 
 /** Reads a whole tab. Each row object also carries `_row` (its sheet row number). */

@@ -1030,7 +1030,7 @@ function rowObject_(header, values, rowNumber) {
 }
 
 function isBlankRow_(r) {
-  return r.every(function (c) { return c === '' || c === null; });
+  return r.every(function (c) { return c === '' || c === null || c === false; });
 }
 
 /** Reads a whole tab. Each row object also carries `_row` (its sheet row number). */
@@ -3625,7 +3625,7 @@ function setupEventHub() {
   props.setProperty('SPREADSHEET_ID', ss.getId());
   try { ss.setSpreadsheetTimeZone(CONFIG.TIME_ZONE); } catch (err) { /* keep existing */ }
 
-  Object.keys(TABS).forEach(function (k) { ensureTab_(ss, TABS[k]); });
+  Object.keys(TABS).forEach(function (k) { ensureTab_(ss, TABS[k]); compactTab_(ss, TABS[k]); });
   var blank = ss.getSheetByName('Sheet1');
   if (blank && blank.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(blank);
   HDR_ = {};
@@ -3638,6 +3638,24 @@ function setupEventHub() {
   ensureTriggers_();
   clearCaches();
   return 'EventHub is set up.';
+}
+
+/**
+ * Sheets set up before 27 Nov 2026 had FALSE in every empty checkbox cell, so new rows
+ * were added from row 1001. Clears those empty rows and moves the real ones up to row 2.
+ */
+function compactTab_(ss, tab) {
+  var sh = ss.getSheetByName(tab.name);
+  var last = sh.getLastRow();
+  var width = sh.getLastColumn();
+  if (last < 2 || !width) return;
+  var range = sh.getRange(2, 1, last - 1, width);
+  var values = range.getValues();
+  var kept = values.filter(function (r) { return !isBlankRow_(r); });
+  if (kept.length === values.length) return;
+  range.clearContent();
+  // safeText_ keeps any participant text that starts with = + - @ as plain text.
+  if (kept.length) sh.getRange(2, 1, kept.length, width).setValues(kept.map(function (r) { return r.map(safeText_); }));
 }
 
 function ensureTab_(ss, tab) {
@@ -3655,7 +3673,9 @@ function ensureTab_(ss, tab) {
   hdr.forEach(function (h, i) {
     var col = sh.getRange(2, i + 1, rows, 1);
     if (TEXT_COLUMNS.indexOf(h) !== -1) col.setNumberFormat('@');
-    if (BOOLEAN_COLUMNS.indexOf(h) !== -1) col.insertCheckboxes();
+    // Checkbox validation only: insertCheckboxes() writes FALSE into every empty row, so
+    // Sheets counts them as used and appendRow() lands below row 1000.
+    if (BOOLEAN_COLUMNS.indexOf(h) !== -1) col.setDataValidation(SpreadsheetApp.newDataValidation().requireCheckbox().build());
     var dd = DROPDOWNS[tab.name] && DROPDOWNS[tab.name][h];
     if (dd) col.setDataValidation(SpreadsheetApp.newDataValidation().requireValueInList(dd, true).setAllowInvalid(false).build());
   });
