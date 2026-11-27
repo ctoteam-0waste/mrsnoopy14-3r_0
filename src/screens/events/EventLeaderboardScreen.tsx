@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
@@ -6,7 +6,8 @@ import { useTheme, makeStyles } from '../../theme';
 import { setPageMeta } from '../../utils/pageMeta';
 import { WebFooter } from '../../components/shared/WebFooter';
 import { eventHub, LeaderboardPage, fmtDate } from '../../services/eventhub';
-import { EventHubHeader, StateView, useColumns } from '../../components/events/EventUI';
+import { EventHubHeader, StateView, useColumns, Pop, FadeIn, CountUp, useReducedMotion } from '../../components/events/EventUI';
+import { Animated, Easing } from 'react-native';
 
 type Scope = 'event' | 'day' | 'overall';
 
@@ -86,15 +87,17 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
                       const medal = MEDALS[i];
                       return (
                         <View key={r.rank} style={[styles.podiumCol, i === 0 && { marginTop: 0 }]}>
-                          <View style={[styles.medal, { backgroundColor: medal.bg, borderColor: medal.ring }]}>
-                            <Text style={[styles.medalText, { color: medal.ink }]}>{r.rank}</Text>
-                          </View>
+                          <Pop delay={700 + (i === 0 ? 400 : i === 1 ? 200 : 0)}>
+                            <View style={[styles.medal, { backgroundColor: medal.bg, borderColor: medal.ring }]}>
+                              <Text style={[styles.medalText, { color: medal.ink }]}>{r.rank}</Text>
+                            </View>
+                          </Pop>
                           <Text style={styles.podiumName} numberOfLines={1}>{r.name}</Text>
                           <Text style={styles.podiumSub} numberOfLines={1}>{r.college}</Text>
-                          <View style={[styles.podiumBlock, { height: [96, 72, 56][i], backgroundColor: medal.bg }]}>
-                            <Text style={[styles.podiumPts, { color: medal.ink }]}>{r.points}</Text>
+                          <RiseBlock height={[96, 72, 56][i]} delay={i === 0 ? 400 : i === 1 ? 200 : 0} style={[styles.podiumBlock, { backgroundColor: medal.bg }]}>
+                            <CountUp value={r.points} style={[styles.podiumPts, { color: medal.ink }]} />
                             <Text style={[styles.podiumUnit, { color: medal.ink }]}>pts</Text>
-                          </View>
+                          </RiseBlock>
                         </View>
                       );
                     })}
@@ -108,8 +111,8 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
                     {!isPhone && <Text style={[styles.cCity, styles.thText]}>City</Text>}
                     <Text style={[styles.cPts, styles.thText]}>Points</Text>
                   </View>
-                  {data.rows.map((r) => (
-                    <View key={r.rank} style={[styles.tr, r.rank <= 3 && styles.top3]}>
+                  {data.rows.map((r, idx) => (
+                    <FadeIn key={r.rank} delay={Math.min(idx, 12) * 50} distance={10} style={[styles.tr, r.rank <= 3 && styles.top3]}>
                       <Text style={[styles.cRank, styles.rank, r.rank <= 3 && { color: colors.primary }]}>{r.rank}</Text>
                       <View style={styles.cName}>
                         <Text style={styles.name} numberOfLines={1}>{r.name}</Text>
@@ -118,7 +121,7 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
                       {!isPhone && <Text style={[styles.cCollege, styles.cell]} numberOfLines={1}>{r.college}</Text>}
                       {!isPhone && <Text style={[styles.cCity, styles.cell]} numberOfLines={1}>{r.city}</Text>}
                       <Text style={[styles.cPts, styles.pts]}>{r.points}</Text>
-                    </View>
+                    </FadeIn>
                   ))}
                 </View>
                 <View style={styles.pager}>
@@ -139,6 +142,17 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+/** A podium step that grows up from the floor. */
+function RiseBlock({ height, delay, style, children }: { height: number; delay: number; style: any; children: React.ReactNode }) {
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (reduced) { v.setValue(1); return; }
+    Animated.timing(v, { toValue: 1, duration: 800, delay, easing: Easing.out(Easing.back(1.4)), useNativeDriver: false }).start();
+  }, [v, delay, reduced]);
+  return <Animated.View style={[style, { height: v.interpolate({ inputRange: [0, 1], outputRange: [8, height] }), overflow: 'hidden' }]}>{children}</Animated.View>;
 }
 
 const useStyles = makeStyles((c) => ({

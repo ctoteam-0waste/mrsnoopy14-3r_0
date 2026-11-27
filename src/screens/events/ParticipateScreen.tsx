@@ -8,7 +8,8 @@ import { setPageMeta } from '../../utils/pageMeta';
 import { trackEvent } from '../../utils/analytics';
 import { WebFooter } from '../../components/shared/WebFooter';
 import { eventHub, MyEvent, MyTask, fmtDate, isLoginError, pickImageFile, compressImage, downloadBase64 } from '../../services/eventhub';
-import { EventHubHeader, StateView, PrimaryButton, SectionTitle, Field, Notice, Chip, StatusPill, goLogin, ProgressRing, Contours } from '../../components/events/EventUI';
+import { EventHubHeader, StateView, PrimaryButton, SectionTitle, Field, Notice, Chip, StatusPill, goLogin, ProgressRing, Contours, FadeIn, CountUp, PulseRing, Pop } from '../../components/events/EventUI';
+import { LaunchConfetti } from '../../components/shared/LaunchConfetti';
 
 type Registered = Extract<MyEvent, { event: any }>;
 
@@ -23,6 +24,7 @@ export function ParticipateScreen({ navigation, route }: any) {
   const [notRegistered, setNotRegistered] = useState(false);
   const [pickup, setPickup] = useState<{ busy: boolean; msg: string; tone: 'info' | 'good' | 'bad' }>({ busy: false, msg: '', tone: 'info' });
   const [cert, setCert] = useState<{ busy: boolean; msg: string; tone: 'info' | 'good' | 'bad' }>({ busy: false, msg: '', tone: 'info' });
+  const [party, setParty] = useState(0); // bumps on each successful submission to replay the confetti
 
   const load = useCallback(async (quiet = false) => {
     if (!quiet) { setError(null); setData(null); }
@@ -87,7 +89,7 @@ export function ParticipateScreen({ navigation, route }: any) {
                   <LinearGradient colors={['#022c16', '#065f46', '#15803d']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
                     <Contours color="#bbf7d0" opacity={0.25} />
                     <ProgressRing value={data.points.total} max={data.maxScore} size={128} stroke={11}>
-                      <Text style={styles.ringNum}>{data.points.total}</Text>
+                      <CountUp value={data.points.total} style={styles.ringNum} />
                       <Text style={styles.ringSub}>of {data.maxScore} pts</Text>
                     </ProgressRing>
                     <View style={{ flex: 1, minWidth: 180, gap: 10 }}>
@@ -95,10 +97,10 @@ export function ParticipateScreen({ navigation, route }: any) {
                         <StatusPill status={data.event.status} onImage />
                         <Text style={styles.heroMuted}>Ends {fmtDate(data.event.endAt, true)}</Text>
                       </View>
-                      <Text style={styles.heroTitle}>{heroLine(data)}</Text>
+                      <FadeIn delay={300}><Text style={styles.heroTitle}>{heroLine(data)}</Text></FadeIn>
                       <View style={styles.heroStats}>
-                        <View style={styles.heroStat}><Text style={styles.heroStatNum}>{data.approvedTasks}/{data.totalTasks}</Text><Text style={styles.heroStatLabel}>approved</Text></View>
-                        <View style={styles.heroStat}><Text style={styles.heroStatNum}>{data.pendingTasks}</Text><Text style={styles.heroStatLabel}>in review</Text></View>
+                        <View style={styles.heroStat}><CountUp value={data.approvedTasks} suffix={`/${data.totalTasks}`} style={styles.heroStatNum} /><Text style={styles.heroStatLabel}>approved</Text></View>
+                        <View style={styles.heroStat}><CountUp value={data.pendingTasks} style={styles.heroStatNum} /><Text style={styles.heroStatLabel}>in review</Text></View>
                         <TouchableOpacity style={styles.heroStat} onPress={() => navigation.navigate('EventLeaderboard', { slug })} accessibilityRole="link">
                           <Text style={styles.heroStatNum}>{data.rank ? `#${data.rank}` : '–'}</Text>
                           <View style={styles.row}><Trophy size={11} color="#bbf7d0" /><Text style={styles.heroStatLabel}>rank</Text></View>
@@ -116,15 +118,15 @@ export function ParticipateScreen({ navigation, route }: any) {
                   <SectionTitle eyebrow="Your journey">Daily tasks</SectionTitle>
                   <View>
                     {data.tasks.map((t, i) => (
-                      <View key={t.id} style={styles.tl}>
+                      <FadeIn key={t.id} delay={150 + i * 90} style={styles.tl}>
                         <View style={styles.tlRail}>
                           <JourneyNode task={t} />
                           {i < data.tasks.length - 1 && <View style={[styles.tlLine, t.submission?.status === 'approved' && styles.tlLineDone]} />}
                         </View>
                         <View style={{ flex: 1, minWidth: 0, paddingBottom: 14 }}>
-                          <TaskCard slug={slug} task={t} onChanged={() => load(true)} onLogin={() => goLogin(navigation, 'EventParticipate', { slug })} />
+                          <TaskCard slug={slug} task={t} onChanged={() => load(true)} onCelebrate={() => setParty((n) => n + 1)} onLogin={() => goLogin(navigation, 'EventParticipate', { slug })} />
                         </View>
-                      </View>
+                      </FadeIn>
                     ))}
                   </View>
 
@@ -166,6 +168,7 @@ export function ParticipateScreen({ navigation, route }: any) {
         </View>
         {Platform.OS === 'web' && <WebFooter />}
       </ScrollView>
+      {party > 0 && <LaunchConfetti key={party} />}
     </SafeAreaView>
   );
 }
@@ -183,11 +186,17 @@ function JourneyNode({ task }: { task: MyTask }) {
   const styles = useStyles();
   const { colors } = useTheme();
   const st = task.submission?.status;
-  if (st === 'approved') return <View style={[styles.node, styles.nodeDone]}><Check size={16} color="#ffffff" strokeWidth={3} /></View>;
+  if (st === 'approved') return <Pop style={{ marginTop: 14 }}><View style={[styles.node, styles.nodeDone, { marginTop: 0 }]}><Check size={16} color="#ffffff" strokeWidth={3} /></View></Pop>;
   if (st === 'pending') return <View style={[styles.node, styles.nodePending]}><Clock size={15} color="#b45309" /></View>;
   if (st === 'rejected') return <View style={[styles.node, styles.nodeBad]}><XCircle size={15} color={colors.danger} /></View>;
   if (task.state === 'locked') return <View style={styles.node}><Lock size={14} color={colors.textFaint} /></View>;
-  if (task.state === 'open') return <View style={[styles.node, styles.nodeOpen]}><Text style={styles.nodeTextOpen}>{task.day}</Text></View>;
+  if (task.state === 'open') {
+    return (
+      <View style={{ marginTop: 14 }}>
+        <PulseRing size={34} color={colors.primary}><View style={[styles.node, styles.nodeOpen, { marginTop: 0 }]}><Text style={styles.nodeTextOpen}>{task.day}</Text></View></PulseRing>
+      </View>
+    );
+  }
   return <View style={styles.node}><Text style={styles.nodeText}>{task.day}</Text></View>;
 }
 
@@ -202,7 +211,7 @@ function Stat({ label, value, sub }: { label: string; value: string; sub: string
   );
 }
 
-function TaskCard({ slug, task, onChanged, onLogin }: { slug: string; task: MyTask; onChanged: () => void; onLogin: () => void }) {
+function TaskCard({ slug, task, onChanged, onLogin, onCelebrate }: { slug: string; task: MyTask; onChanged: () => void; onLogin: () => void; onCelebrate?: () => void }) {
   const styles = useStyles();
   const { colors } = useTheme();
   const s = task.submission;
@@ -237,6 +246,7 @@ function TaskCard({ slug, task, onChanged, onLogin }: { slug: string; task: MyTa
       trackEvent('eventhub_submit', { item_id: slug, day: task.day });
       setMsg({ tone: 'good', text: r.submission.status === 'approved' ? 'Submitted and approved.' : 'Submitted. We will review it soon; points are added once it is approved.' });
       setText(''); setLink(''); setImage(null); setOpen(false);
+      onCelebrate?.();
       onChanged();
     } catch (e: any) {
       if (isLoginError(e)) { onLogin(); return; }
@@ -314,7 +324,7 @@ function TaskCard({ slug, task, onChanged, onLogin }: { slug: string; task: MyTa
         </View>
       )}
       {!!msg && (msg.tone === 'good' ? (
-        <View style={styles.celebrate} accessibilityLiveRegion="polite"><PartyPopper size={20} color={colors.success} /><Text style={styles.celebrateText}>{msg.text}</Text></View>
+        <Pop><View style={styles.celebrate} accessibilityLiveRegion="polite"><PartyPopper size={20} color={colors.success} /><Text style={styles.celebrateText}>{msg.text}</Text></View></Pop>
       ) : <Notice tone={msg.tone}>{msg.text}</Notice>)}
     </View>
   );

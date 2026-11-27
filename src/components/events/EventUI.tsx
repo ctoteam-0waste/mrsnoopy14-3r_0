@@ -41,12 +41,137 @@ export function useColumns(min = 320) {
   return { cols: Math.max(1, Math.min(3, Math.floor(inner / min))), width, isWide: width >= 900, isPhone: width < 600 };
 }
 
-function useReducedMotion() {
+export function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled?.().then(setReduced).catch(() => {});
   }, []);
   return reduced;
+}
+
+// The native driver isn't available on web; there the same animations run in JS.
+const ND = Platform.OS !== 'web';
+
+// ── motion ───────────────────────────────────────────────────────────────────
+// Every animation below starts from a visible-enough state, is short, and is
+// skipped entirely when the device asks for reduced motion.
+
+/** Fades and slides its children in, optionally after a delay (for staggered lists). */
+export function FadeIn({ children, delay = 0, distance = 18, duration = 520, style }: {
+  children: React.ReactNode; delay?: number; distance?: number; duration?: number; style?: any;
+}) {
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (reduced) { v.setValue(1); return; }
+    Animated.timing(v, { toValue: 1, duration, delay, easing: Easing.out(Easing.cubic), useNativeDriver: ND }).start();
+  }, [v, reduced, delay, duration]);
+  return (
+    <Animated.View style={[style, { opacity: v, transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [distance, 0] }) }] }]}>
+      {children}
+    </Animated.View>
+  );
+}
+
+/** Counts a number up from 0 when it first appears (and to any new value after). */
+export function useCountUp(target: number, duration = 1100) {
+  const reduced = useReducedMotion();
+  const [val, setVal] = useState(reduced ? target : 0);
+  const from = useRef(0);
+  useEffect(() => {
+    if (reduced || !isFinite(target)) { setVal(target); return; }
+    const start = Date.now();
+    const a = from.current;
+    let raf: any;
+    const step = () => {
+      const t = Math.min(1, (Date.now() - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setVal(a + (target - a) * eased);
+      if (t < 1) raf = requestAnimationFrame(step);
+      else from.current = target;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, reduced]);
+  return val;
+}
+
+export function CountUp({ value, style, prefix = '', suffix = '', format = true }: { value: number; style?: any; prefix?: string; suffix?: string; format?: boolean }) {
+  const v = Math.round(useCountUp(value));
+  return <Text style={style}>{prefix}{format ? v.toLocaleString('en-IN') : v}{suffix}</Text>;
+}
+
+/** A bar that grows to its width when it appears. */
+export function GrowBar({ fraction, color, height = 6, track, delay = 0 }: { fraction: number; color: string; height?: number; track: string; delay?: number }) {
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(0)).current;
+  const f = Math.max(0, Math.min(1, fraction));
+  useEffect(() => {
+    if (reduced) { v.setValue(f); return; }
+    Animated.timing(v, { toValue: f, duration: 900, delay, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
+  }, [v, f, reduced, delay]);
+  return (
+    <View style={{ height, borderRadius: height / 2, backgroundColor: track, overflow: 'hidden' }}>
+      <Animated.View style={{ height, borderRadius: height / 2, backgroundColor: color, width: v.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }} />
+    </View>
+  );
+}
+
+/** Slow continuous loop between 0 and 1 and back (for drifting art and floating icons). */
+function useBreath(duration: number) {
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (reduced) return;
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(v, { toValue: 1, duration, easing: Easing.inOut(Easing.sin), useNativeDriver: ND }),
+      Animated.timing(v, { toValue: 0, duration, easing: Easing.inOut(Easing.sin), useNativeDriver: ND }),
+    ]));
+    loop.start();
+    return () => loop.stop();
+  }, [v, duration, reduced]);
+  return v;
+}
+
+/** Gentle up-and-down float. */
+export function Float({ children, distance = 8, duration = 2600, style }: { children: React.ReactNode; distance?: number; duration?: number; style?: any }) {
+  const v = useBreath(duration);
+  return <Animated.View style={[style, { transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [0, -distance] }) }] }]}>{children}</Animated.View>;
+}
+
+/** A soft ring that keeps pulsing out from behind its child (today's task, live things). */
+export function PulseRing({ size, color, children }: { size: number; color: string; children: React.ReactNode }) {
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (reduced) return;
+    const loop = Animated.loop(Animated.timing(v, { toValue: 1, duration: 1800, easing: Easing.out(Easing.ease), useNativeDriver: ND }));
+    loop.start();
+    return () => loop.stop();
+  }, [v, reduced]);
+  return (
+    <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
+      {!reduced && (
+        <Animated.View style={{
+          position: 'absolute', width: size, height: size, borderRadius: size / 2, backgroundColor: color,
+          opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.45, 0] }),
+          transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [1, 1.9] }) }],
+        }} />
+      )}
+      {children}
+    </View>
+  );
+}
+
+/** Pops in with a little overshoot (medals, badges). */
+export function Pop({ children, delay = 0, style }: { children: React.ReactNode; delay?: number; style?: any }) {
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(reduced ? 1 : 0)).current;
+  useEffect(() => {
+    if (reduced) { v.setValue(1); return; }
+    Animated.spring(v, { toValue: 1, delay, friction: 5, tension: 120, useNativeDriver: ND }).start();
+  }, [v, reduced, delay]);
+  return <Animated.View style={[style, { opacity: v.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 1, 1] }), transform: [{ scale: v.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1] }) }] }]}>{children}</Animated.View>;
 }
 
 /** Ticks once a second until the target passes. */
@@ -195,7 +320,19 @@ export function Chip({ label, tone = 'neutral' }: { label: string; tone?: 'neutr
 export function Contours({ color = '#ffffff', opacity = 0.12, width = 600, height = 300 }: { color?: string; opacity?: number; width?: number; height?: number }) {
   const cx = width * 0.82;
   const cy = height * 0.35;
+  // The lines drift and breathe very slowly, like wind over a hillside.
+  const b = useBreath(9000);
   return (
+    <Animated.View
+      pointerEvents="none"
+      style={{
+        position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+        transform: [
+          { scale: b.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }) },
+          { rotate: b.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '2.5deg'] }) },
+        ],
+      }}
+    >
     <Svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMidYMid slice" style={{ position: 'absolute', inset: 0 } as any} pointerEvents="none">
       {[1, 2, 3, 4, 5, 6, 7].map((i) => (
         <Path
@@ -208,6 +345,7 @@ export function Contours({ color = '#ffffff', opacity = 0.12, width = 600, heigh
         />
       ))}
     </Svg>
+    </Animated.View>
   );
 }
 
@@ -228,9 +366,9 @@ export function Banner({ uri, height, title, category, radius = 0, iconTop }: { 
   return (
     <LinearGradient colors={[t.from, t.to]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ height, borderRadius: radius, overflow: 'hidden' }} accessibilityLabel={title}>
       <Contours color={t.ink} opacity={0.35} />
-      <View style={{ position: 'absolute', ...iconPos, opacity: iconTop ? 0.75 : 0.9 }}>
+      <Float style={{ position: 'absolute', ...iconPos, opacity: iconTop ? 0.75 : 0.9 }} distance={iconSize * 0.07}>
         <t.Icon size={iconSize} color={t.ink} strokeWidth={1.1} />
-      </View>
+      </Float>
     </LinearGradient>
   );
 }
@@ -246,13 +384,31 @@ export function Countdown({ at, label, onDark }: { at: string; label: string; on
     <View style={{ gap: 8 }} accessibilityLabel={`${label} ${c.days} days ${c.hours} hours ${c.minutes} minutes`}>
       <Text style={[styles.countLabel, onDark && { color: '#bbf7d0' }]}>{label.toUpperCase()}</Text>
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        {cells.map(([v, u]) => (
-          <View key={u} style={[styles.countCell, onDark && styles.countCellDark]}>
-            <Text style={[styles.countNum, onDark && { color: '#ffffff' }]}>{String(v).padStart(2, '0')}</Text>
-            <Text style={[styles.countUnit, onDark && { color: '#bbf7d0' }]}>{u}</Text>
-          </View>
-        ))}
+        {cells.map(([v, u]) => <CountCell key={u} value={v} unit={u} onDark={onDark} />)}
       </View>
+    </View>
+  );
+}
+
+/** One countdown digit box; the number drops in each time it changes. */
+function CountCell({ value, unit, onDark }: { value: number; unit: string; onDark?: boolean }) {
+  const styles = useStyles();
+  const reduced = useReducedMotion();
+  const v = useRef(new Animated.Value(1)).current;
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    if (reduced) return;
+    v.setValue(0);
+    Animated.timing(v, { toValue: 1, duration: 320, easing: Easing.out(Easing.back(2)), useNativeDriver: ND }).start();
+  }, [value, v, reduced]);
+  return (
+    <View style={[styles.countCell, onDark && styles.countCellDark, { overflow: 'hidden' }]}>
+      <Animated.Text style={[styles.countNum, onDark && { color: '#ffffff' }, {
+        opacity: v.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] }),
+        transform: [{ translateY: v.interpolate({ inputRange: [0, 1], outputRange: [-14, 0] }) }],
+      }]}>{String(value).padStart(2, '0')}</Animated.Text>
+      <Text style={[styles.countUnit, onDark && { color: '#bbf7d0' }]}>{unit}</Text>
     </View>
   );
 }
@@ -260,12 +416,13 @@ export function Countdown({ at, label, onDark }: { at: string; label: string; on
 /** Thin bar showing how far through its dates a live event is. */
 export function TimeBar({ event }: { event: EventCard }) {
   const styles = useStyles();
+  const { colors } = useTheme();
   if (event.status !== 'live') return null;
   const p = eventProgress(event);
   const day = Math.min(event.durationDays, Math.floor(p * event.durationDays) + 1);
   return (
     <View style={{ gap: 5 }}>
-      <View style={styles.timeTrack}><View style={[styles.timeFill, { width: `${Math.max(4, p * 100)}%` as any }]} /></View>
+      <GrowBar fraction={Math.max(0.04, p)} color={colors.primary} track={colors.surfaceAlt} delay={250} />
       <Text style={styles.timeText}>Day {day} of {event.durationDays}</Text>
     </View>
   );
@@ -277,7 +434,9 @@ export function ProgressRing({ value, max, size = 120, stroke = 10, color = '#4a
 }) {
   const r = (size - stroke) / 2;
   const circ = 2 * Math.PI * r;
-  const p = Math.max(0, Math.min(1, value / Math.max(1, max)));
+  // The ring fills up from empty when it first appears.
+  const animated = useCountUp(value, 1400);
+  const p = Math.max(0, Math.min(1, animated / Math.max(1, max)));
   return (
     <View style={{ width: size, height: size, alignItems: 'center', justifyContent: 'center' }}>
       <Svg width={size} height={size} style={{ position: 'absolute', transform: [{ rotate: '-90deg' }] } as any}>
@@ -375,9 +534,9 @@ export function Grid({ children, cols }: { children: React.ReactNode; cols: numb
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap }}>
       {items.map((child, i) => (
-        <View key={i} style={{ width: itemWidth, maxWidth: '100%' }}>
+        <FadeIn key={i} delay={Math.min(i, 8) * 90} style={{ width: itemWidth, maxWidth: '100%' }}>
           {child}
-        </View>
+        </FadeIn>
       ))}
     </View>
   );
@@ -391,14 +550,7 @@ export function StateView({ loading, error, onRetry, empty, emptyText, onLogin, 
 }) {
   const styles = useStyles();
   const { colors } = useTheme();
-  if (loading) {
-    return (
-      <View style={styles.skeletonWrap} accessibilityLabel="Loading">
-        {[0, 1, 2].map((i) => <View key={i} style={[styles.skeleton, { opacity: 1 - i * 0.25 }]} />)}
-        <ActivityIndicator size="small" color={colors.primary} />
-      </View>
-    );
-  }
+  if (loading) return <Skeleton />;
   if (error) {
     return (
       <View style={styles.stateBox}>
@@ -421,6 +573,21 @@ export function StateView({ loading, error, onRetry, empty, emptyText, onLogin, 
     );
   }
   return <>{children}</>;
+}
+
+/** Placeholder blocks that gently pulse while content loads. */
+function Skeleton() {
+  const styles = useStyles();
+  const { colors } = useTheme();
+  const b = useBreath(900);
+  return (
+    <View style={styles.skeletonWrap} accessibilityLabel="Loading">
+      {[0, 1, 2].map((i) => (
+        <Animated.View key={i} style={[styles.skeleton, { opacity: b.interpolate({ inputRange: [0, 1], outputRange: [1 - i * 0.25, 0.45 - i * 0.1] }) }]} />
+      ))}
+      <ActivityIndicator size="small" color={colors.primary} />
+    </View>
+  );
 }
 
 export function PrimaryButton({ label, onPress, disabled, busy, icon, quiet, danger, light, style }: {

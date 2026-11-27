@@ -10,8 +10,9 @@ import { WebFooter } from '../../components/shared/WebFooter';
 import { eventHub, EventDetail, MyEvent, fmtDate, fmtRange, hasLogin, isLoginError } from '../../services/eventhub';
 import {
   EventHubHeader, StateView, StatusPill, Banner, PrimaryButton, SectionTitle, Field, Notice, Countdown, TimeBar,
-  goLogin, useColumns, nextMoment, categoryTheme, MAX_WIDTH,
+  goLogin, useColumns, nextMoment, categoryTheme, MAX_WIDTH, FadeIn, GrowBar, PulseRing, CountUp,
 } from '../../components/events/EventUI';
+import { LaunchConfetti } from '../../components/shared/LaunchConfetti';
 
 const ACCEPT_ICON: Record<string, any> = { text: PenLine, image: Camera, link: Link2 };
 const ACCEPT_LABEL: Record<string, string> = { text: 'Text', image: 'Photo', link: 'Link' };
@@ -100,18 +101,18 @@ export function EventDetailScreen({ navigation, route }: any) {
                   <Banner uri={ev.bannerUrl} height={isWide ? 420 : 360} title={ev.title} category={ev.category} iconTop />
                   <LinearGradient colors={['rgba(2,20,10,0)', 'rgba(2,20,10,0.55)', 'rgba(2,20,10,0.92)']} style={styles.heroShade} />
                   <View style={[styles.heroBody, isWide && { padding: 36 }]}>
-                    <View style={styles.row}>
+                    <FadeIn delay={100} style={styles.row}>
                       <StatusPill status={ev.status} onImage />
                       <View style={styles.heroCat}><t.Icon size={12} color="#052e16" /><Text style={styles.heroCatText}>{ev.category}</Text></View>
                       {registered && <View style={styles.heroCat}><CheckCircle2 size={12} color="#15803d" /><Text style={styles.heroCatText}>You're registered</Text></View>}
-                    </View>
-                    <Text style={[styles.title, isWide && { fontSize: 44, lineHeight: 48 }]} accessibilityRole="header">{ev.title}</Text>
-                    <Text style={styles.summary}>{ev.summary}</Text>
-                    <View style={[styles.row, { marginTop: 4 }]}>
+                    </FadeIn>
+                    <FadeIn delay={220} distance={26}><Text style={[styles.title, isWide && { fontSize: 44, lineHeight: 48 }]} accessibilityRole="header">{ev.title}</Text></FadeIn>
+                    <FadeIn delay={360}><Text style={styles.summary}>{ev.summary}</Text></FadeIn>
+                    <FadeIn delay={480} style={[styles.row, { marginTop: 4 }]}>
                       {primary(true)}
                       <PrimaryButton label="Share" icon={<Share2 size={16} color="#ffffff" />} onPress={share} style={styles.ghostBtn} />
                       <PrimaryButton label="Leaderboard" icon={<Trophy size={16} color="#ffffff" />} onPress={() => navigation.navigate('EventLeaderboard', { slug })} style={styles.ghostBtn} />
-                    </View>
+                    </FadeIn>
                   </View>
                 </View>
                 {!!shareMsg && <View style={{ marginTop: 12 }}><Notice>{shareMsg}</Notice></View>}
@@ -124,13 +125,13 @@ export function EventDetailScreen({ navigation, route }: any) {
                       { icon: <Clock size={18} color={colors.primary} />, k: 'Register by', v: fmtDate(ev.regClosesAt), s: fmtDate(ev.regClosesAt, true).split(', ').pop() || '' },
                       { icon: <Users size={18} color={colors.primary} />, k: 'Joined', v: ev.participants.toLocaleString('en-IN'), s: ev.maxParticipants ? `of ${ev.maxParticipants.toLocaleString('en-IN')} places` : 'no limit' },
                       { icon: <Award size={18} color={colors.primary} />, k: 'Up to', v: `${ev.maxScore} pts`, s: ev.fee },
-                    ].map((f) => (
-                      <View key={f.k} style={styles.fact}>
+                    ].map((f, i) => (
+                      <FadeIn key={f.k} delay={200 + i * 90} style={styles.fact}>
                         <View style={styles.factIcon}>{f.icon}</View>
                         <Text style={styles.factKey}>{f.k}</Text>
                         <Text style={styles.factVal}>{f.v}</Text>
                         <Text style={styles.factSub}>{f.s}</Text>
-                      </View>
+                      </FadeIn>
                     ))}
                   </View>
                   {moment && (
@@ -155,11 +156,17 @@ export function EventDetailScreen({ navigation, route }: any) {
                             const open = task.state === 'open';
                             const last = i === ev.tasks.length - 1;
                             return (
-                              <View key={task.id} style={styles.tl}>
+                              <FadeIn key={task.id} delay={i * 80} style={styles.tl}>
                                 <View style={styles.tlRail}>
-                                  <View style={[styles.tlNode, open && styles.tlNodeOpen, task.state === 'closed' && styles.tlNodeDone]}>
-                                    {task.state === 'locked' ? <Lock size={14} color={colors.textFaint} /> : <Text style={[styles.tlNodeText, open && { color: '#ffffff' }]}>{task.day}</Text>}
-                                  </View>
+                                  {open ? (
+                                    <PulseRing size={36} color={colors.primary}>
+                                      <View style={[styles.tlNode, styles.tlNodeOpen]}><Text style={[styles.tlNodeText, { color: '#ffffff' }]}>{task.day}</Text></View>
+                                    </PulseRing>
+                                  ) : (
+                                    <View style={[styles.tlNode, task.state === 'closed' && styles.tlNodeDone]}>
+                                      {task.state === 'locked' ? <Lock size={14} color={colors.textFaint} /> : <Text style={styles.tlNodeText}>{task.day}</Text>}
+                                    </View>
+                                  )}
                                   {!last && <View style={styles.tlLine} />}
                                 </View>
                                 <View style={[styles.tlCard, open && styles.tlCardOpen]}>
@@ -177,7 +184,7 @@ export function EventDetailScreen({ navigation, route }: any) {
                                     {!!task.bonus && <View style={[styles.proof, styles.proofBonus]}><Truck size={12} color="#a16207" /><Text style={[styles.proofText, { color: '#a16207' }]}>+{task.bonus} pickup bonus</Text></View>}
                                   </View>
                                 </View>
-                              </View>
+                              </FadeIn>
                             );
                           })}
                         </View>
@@ -224,8 +231,8 @@ export function EventDetailScreen({ navigation, route }: any) {
                           { l: 'Verified KarmaVerse pickup', v: ev.pickupBonus },
                         ].filter((x) => x.v > 0).map((x) => (
                           <View key={x.l} style={{ gap: 5 }}>
-                            <View style={styles.rowBetween}><Text style={styles.ptsLabel}>{x.l}</Text><Text style={styles.ptsVal}>{x.v}</Text></View>
-                            <View style={styles.ptsTrack}><View style={[styles.ptsFill, { width: `${(x.v / Math.max(1, ev.maxScore)) * 100}%` as any }]} /></View>
+                            <View style={styles.rowBetween}><Text style={styles.ptsLabel}>{x.l}</Text><CountUp value={x.v} style={styles.ptsVal} /></View>
+                            <GrowBar fraction={x.v / Math.max(1, ev.maxScore)} color={colors.primary} track={colors.surfaceAlt} delay={300} />
                           </View>
                         ))}
                         <Text style={styles.factSub}>Ties go to whoever reached the score first.</Text>
@@ -360,6 +367,7 @@ function RegisterModal({ ev, me, onClose, onDone, onLogin, onParticipate }: {
           <ScrollView contentContainerStyle={{ gap: 14, paddingBottom: 6 }} keyboardShouldPersistTaps="handled">
             {done ? (
               <>
+                <FadeIn distance={10}><View style={{ alignItems: 'center', paddingVertical: 6 }}><PulseRing size={64} color={colors.primary}><View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' }}><CheckCircle2 size={34} color="#ffffff" /></View></PulseRing></View></FadeIn>
                 <Notice tone="good">{done.already ? 'You were already registered for this event.' : `Registration confirmed.${done.emailed ? ' A confirmation email is on its way.' : ''}`}</Notice>
                 <Text style={styles.body}>Each task opens on its day. Submit your proof on the participation page, and the KarmaVerse team will review it.</Text>
                 <PrimaryButton label="Go to my challenge" onPress={onParticipate} />
@@ -383,6 +391,7 @@ function RegisterModal({ ev, me, onClose, onDone, onLogin, onParticipate }: {
             )}
           </ScrollView>
         </View>
+        {done && !done.already && <LaunchConfetti />}
       </KeyboardAvoidingView>
     </Modal>
   );

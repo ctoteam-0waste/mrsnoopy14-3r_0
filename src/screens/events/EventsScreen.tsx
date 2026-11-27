@@ -9,7 +9,7 @@ import { WebFooter } from '../../components/shared/WebFooter';
 import { eventHub, EventCard, EventStatus, fmtRange } from '../../services/eventhub';
 import {
   EventHubHeader, EventCardView, Grid, StateView, StatusPill, Banner, PrimaryButton, SectionTitle, Contours, Countdown,
-  LiveDot, useColumns, MAX_WIDTH, ctaLabel, nextMoment, categoryTheme,
+  LiveDot, useColumns, MAX_WIDTH, ctaLabel, nextMoment, categoryTheme, FadeIn, CountUp, Float,
 } from '../../components/events/EventUI';
 
 type When = 'any' | 'week' | 'month' | 'later';
@@ -124,25 +124,33 @@ export function EventsScreen({ navigation }: any) {
                 <LiveDot color="#4ade80" size={7} />
                 <Text style={styles.heroBadgeText}>{stats.live ? `${stats.live} live now` : 'KarmaVerse EventHub'}</Text>
               </View>
-              <Text style={[styles.heroTitle, isWide && styles.heroTitleWide]}>
-                Participate.{'\n'}Take action.{'\n'}<Text style={styles.heroAccent}>Create impact.</Text>{'\n'}Earn recognition.
-              </Text>
-              <Text style={styles.heroText}>Free challenges for students and the KarmaVerse community. Do real green actions, get them verified, climb the leaderboard and earn certificates.</Text>
-              <View style={styles.row}>
+              <View>
+                {['Participate.', 'Take action.', 'Create impact.', 'Earn recognition.'].map((line, i) => (
+                  <FadeIn key={line} delay={120 + i * 140} distance={24}>
+                    <Text style={[styles.heroTitle, isWide && styles.heroTitleWide, i === 2 && styles.heroAccent]}>{line}</Text>
+                  </FadeIn>
+                ))}
+              </View>
+              <FadeIn delay={720}><Text style={styles.heroText}>Free challenges for students and the KarmaVerse community. Do real green actions, get them verified, climb the leaderboard and earn certificates.</Text></FadeIn>
+              <FadeIn delay={860} style={styles.row}>
                 <PrimaryButton light label="Explore events" icon={<ArrowRight size={16} color={colors.primaryDeep} />} onPress={explore} />
                 <PrimaryButton label="My events" onPress={() => navigation.navigate('MyEvents')} style={styles.ghostBtn} />
-              </View>
+              </FadeIn>
             </View>
             <View style={[styles.statsCol, !isWide && styles.statsRow]}>
-              {[
-                [String(stats.live), 'live events'],
-                [String(stats.upcoming), 'coming up'],
-                [stats.people.toLocaleString('en-IN'), 'people taking part'],
-              ].map(([v, l]) => (
-                <View key={l} style={[styles.stat, !isWide && { flex: 1 }]}>
-                  <Text style={[styles.statNum, isPhone && { fontSize: 26 }]}>{events ? v : '–'}</Text>
-                  <Text style={styles.statLabel}>{l}</Text>
-                </View>
+              {([
+                [stats.live, 'live events'],
+                [stats.upcoming, 'coming up'],
+                [stats.people, 'people taking part'],
+              ] as [number, string][]).map(([v, l], i) => (
+                <FadeIn key={l} delay={300 + i * 150} style={!isWide ? { flex: 1 } : undefined}>
+                  <Float distance={4} duration={2400 + i * 500}>
+                    <View style={styles.stat}>
+                      {events ? <CountUp value={v} style={[styles.statNum, isPhone && { fontSize: 26 }]} /> : <Text style={[styles.statNum, isPhone && { fontSize: 26 }]}>–</Text>}
+                      <Text style={styles.statLabel}>{l}</Text>
+                    </View>
+                  </Float>
+                </FadeIn>
               ))}
             </View>
           </LinearGradient>
@@ -150,13 +158,13 @@ export function EventsScreen({ navigation }: any) {
           {/* How it works: a real sequence, so the steps are numbered. */}
           <View style={[styles.steps, isWide && { flexDirection: 'row' }]}>
             {STEPS.map((s, i) => (
-              <View key={s.t} style={[styles.step, isWide && { flex: 1 }]}>
+              <FadeIn key={s.t} delay={500 + i * 110} style={[styles.step, isWide && { flex: 1 }]}>
                 <View style={styles.stepNum}><Text style={styles.stepNumText}>{i + 1}</Text></View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.stepTitle}>{s.t}</Text>
                   <Text style={styles.stepText}>{s.d}</Text>
                 </View>
-              </View>
+              </FadeIn>
             ))}
           </View>
 
@@ -165,6 +173,7 @@ export function EventsScreen({ navigation }: any) {
             {featured && !filtering && (
               <>
                 <SectionTitle eyebrow="Featured">Don't miss this one</SectionTitle>
+                <FadeIn delay={150} distance={30}>
                 <Pressable
                   onPress={() => open(featured)}
                   accessibilityRole="link"
@@ -186,6 +195,7 @@ export function EventsScreen({ navigation }: any) {
                     </View>
                   </LinearGradient>
                 </Pressable>
+                </FadeIn>
               </>
             )}
 
