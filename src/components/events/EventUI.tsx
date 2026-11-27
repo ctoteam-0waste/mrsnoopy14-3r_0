@@ -669,6 +669,11 @@ export function Notice({ tone = 'info', children }: { tone?: 'info' | 'good' | '
   );
 }
 
+/** "1 pt", "15 pts". */
+export function pts(n: number): string {
+  return `${n} ${n === 1 ? 'pt' : 'pts'}`;
+}
+
 /** Sends the user to Login and brings them back to this exact screen afterwards. */
 export function goLogin(navigation: any, name: string, params?: Record<string, any>) {
   rememberReturnTo(name, params);

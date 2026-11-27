@@ -8,7 +8,7 @@ import { setPageMeta } from '../../utils/pageMeta';
 import { trackEvent } from '../../utils/analytics';
 import { WebFooter } from '../../components/shared/WebFooter';
 import { eventHub, MyEvent, MyTask, fmtDate, isLoginError, pickImageFile, compressImage, downloadBase64 } from '../../services/eventhub';
-import { EventHubHeader, StateView, PrimaryButton, SectionTitle, Field, Notice, Chip, StatusPill, goLogin, ProgressRing, Contours, FadeIn, CountUp, PulseRing, Pop } from '../../components/events/EventUI';
+import { EventHubHeader, StateView, PrimaryButton, SectionTitle, Field, Notice, Chip, StatusPill, goLogin, ProgressRing, Contours, FadeIn, CountUp, PulseRing, Pop, pts } from '../../components/events/EventUI';
 import { LaunchConfetti } from '../../components/shared/LaunchConfetti';
 
 type Registered = Extract<MyEvent, { event: any }>;
@@ -257,7 +257,7 @@ function TaskCard({ slug, task, onChanged, onLogin, onCelebrate }: { slug: strin
   };
 
   const statusChip = () => {
-    if (s?.status === 'approved') return <Chip tone="good" label={`Approved · ${s.points} pts`} />;
+    if (s?.status === 'approved') return <Chip tone="good" label={`Approved · ${pts(s.points)}`} />;
     if (s?.status === 'pending') return <Chip tone="warn" label="Waiting for review" />;
     if (s?.status === 'rejected') return <Chip tone="bad" label="Needs changes" />;
     if (task.state === 'locked') return <Chip label={`Opens ${fmtDate(task.opensAt)}`} />;
@@ -275,7 +275,7 @@ function TaskCard({ slug, task, onChanged, onLogin, onCelebrate }: { slug: strin
         <View style={styles.day}><Text style={styles.dayText}>Day {task.day}</Text></View>
         <View style={{ flex: 1, minWidth: 0, gap: 4 }}>
           <Text style={styles.taskTitle}>{task.title}</Text>
-          <View style={styles.row}>{statusChip()}<Text style={styles.muted}>{task.points} pts{task.qualityMax ? ` + up to ${task.qualityMax} quality` : ''}</Text></View>
+          <View style={styles.row}>{statusChip()}<Text style={styles.muted}>{pts(task.points)}{task.qualityMax ? ` + up to ${task.qualityMax} quality` : ''}</Text></View>
         </View>
         {icon}
       </View>

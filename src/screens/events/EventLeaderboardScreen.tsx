@@ -31,6 +31,7 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
   const [data, setData] = useState<LeaderboardPage | null>(null);
   const [days, setDays] = useState<number[]>([]);
   const [title, setTitle] = useState(isOverall ? 'Overall leaderboard' : 'Leaderboard');
+  const [eventTitle, setEventTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -39,7 +40,7 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
     try {
       const d = await eventHub.leaderboard(slug, scope, scope === 'day' ? day : undefined, page);
       setData(d);
-      if (d.event) { setDays(Array.from(new Set(d.event.days)).sort((a, b) => a - b)); setTitle(d.event.title); }
+      if (d.event) { setDays(Array.from(new Set(d.event.days)).sort((a, b) => a - b)); setTitle(d.event.title); setEventTitle(d.event.title); }
     } catch (e: any) {
       setError(e?.message || "Couldn't load the leaderboard.");
     }
@@ -47,9 +48,10 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => setPageMeta({
-    title: `${title}: leaderboard | KarmaVerse EventHub`,
+    // "7 Days of Karma: leaderboard" once the event name is known, else just "Leaderboard".
+    title: `${eventTitle && !isOverall ? `${eventTitle}: leaderboard` : title} | KarmaVerse EventHub`,
     description: 'Ranked by verified points. Ties go to whoever reached the score first.',
-  }), [title]);
+  }), [title, eventTitle, isOverall]);
 
   const tab = (label: string, s: Scope) => (
     <TouchableOpacity key={s} onPress={() => { setScope(s); setPage(1); }} style={[styles.tab, scope === s && styles.tabOn]} accessibilityRole="tab" accessibilityState={{ selected: scope === s }}>
@@ -96,7 +98,7 @@ export function EventLeaderboardScreen({ navigation, route }: any) {
                           <Text style={styles.podiumSub} numberOfLines={1}>{r.college}</Text>
                           <RiseBlock height={[96, 72, 56][i]} delay={i === 0 ? 400 : i === 1 ? 200 : 0} style={[styles.podiumBlock, { backgroundColor: medal.bg }]}>
                             <CountUp value={r.points} style={[styles.podiumPts, { color: medal.ink }]} />
-                            <Text style={[styles.podiumUnit, { color: medal.ink }]}>pts</Text>
+                            <Text style={[styles.podiumUnit, { color: medal.ink }]}>{r.points === 1 ? 'pt' : 'pts'}</Text>
                           </RiseBlock>
                         </View>
                       );

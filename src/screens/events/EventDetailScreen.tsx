@@ -10,7 +10,7 @@ import { WebFooter } from '../../components/shared/WebFooter';
 import { eventHub, EventDetail, MyEvent, fmtDate, fmtRange, hasLogin, isLoginError } from '../../services/eventhub';
 import {
   EventHubHeader, StateView, StatusPill, Banner, PrimaryButton, SectionTitle, Field, Notice, Countdown, TimeBar,
-  goLogin, useColumns, nextMoment, categoryTheme, MAX_WIDTH, FadeIn, GrowBar, PulseRing, CountUp,
+  goLogin, useColumns, nextMoment, categoryTheme, MAX_WIDTH, FadeIn, GrowBar, PulseRing, CountUp, pts,
 } from '../../components/events/EventUI';
 import { LaunchConfetti } from '../../components/shared/LaunchConfetti';
 
@@ -124,7 +124,7 @@ export function EventDetailScreen({ navigation, route }: any) {
                       { icon: <Calendar size={18} color={colors.primary} />, k: 'Dates', v: fmtRange(ev.startAt, ev.endAt), s: `${ev.durationDays} days` },
                       { icon: <Clock size={18} color={colors.primary} />, k: 'Register by', v: fmtDate(ev.regClosesAt), s: fmtDate(ev.regClosesAt, true).split(', ').pop() || '' },
                       { icon: <Users size={18} color={colors.primary} />, k: 'Joined', v: ev.participants.toLocaleString('en-IN'), s: ev.maxParticipants ? `of ${ev.maxParticipants.toLocaleString('en-IN')} places` : 'no limit' },
-                      { icon: <Award size={18} color={colors.primary} />, k: 'Up to', v: `${ev.maxScore} pts`, s: ev.fee },
+                      { icon: <Award size={18} color={colors.primary} />, k: 'Up to', v: pts(ev.maxScore), s: ev.fee },
                     ].map((f, i) => (
                       <FadeIn key={f.k} delay={200 + i * 90} style={styles.fact}>
                         <View style={styles.factIcon}>{f.icon}</View>
@@ -172,7 +172,7 @@ export function EventDetailScreen({ navigation, route }: any) {
                                 <View style={[styles.tlCard, open && styles.tlCardOpen]}>
                                   <View style={styles.rowBetween}>
                                     <Text style={styles.tlDay}>DAY {task.day}{open ? ' · OPEN NOW' : task.state === 'locked' ? ` · OPENS ${fmtDate(task.opensAt).toUpperCase()}` : ''}</Text>
-                                    <Text style={styles.tlPts}>+{task.points}{task.qualityMax ? `–${task.points + task.qualityMax}` : ''} pts</Text>
+                                    <Text style={styles.tlPts}>+{task.qualityMax ? `${task.points}–${pts(task.points + task.qualityMax)}` : pts(task.points)}</Text>
                                   </View>
                                   <Text style={styles.tlTitle}>{task.title}</Text>
                                   <Text style={styles.tlText}>{task.instructions}</Text>
@@ -269,7 +269,7 @@ export function EventDetailScreen({ navigation, route }: any) {
         <View style={styles.sticky}>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={styles.stickyTitle} numberOfLines={1}>{ev.title}</Text>
-            <Text style={styles.stickySub} numberOfLines={1}>{ev.fee} · up to {ev.maxScore} pts</Text>
+            <Text style={styles.stickySub} numberOfLines={1}>{ev.fee} · up to {pts(ev.maxScore)}</Text>
           </View>
           {primary()}
         </View>

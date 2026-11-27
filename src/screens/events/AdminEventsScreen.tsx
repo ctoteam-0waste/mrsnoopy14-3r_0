@@ -8,7 +8,7 @@ import {
   eventHubAdmin, AdminEvent, AdminTask, QueueItem, Participant, Analytics, EventCard, Accepts,
   fmtDate, isLoginError, downloadText, pickImageFile, compressImage,
 } from '../../services/eventhub';
-import { EventHubHeader, StateView, PrimaryButton, SectionTitle, Field, Notice, Chip, StatusPill, goLogin } from '../../components/events/EventUI';
+import { EventHubHeader, StateView, PrimaryButton, SectionTitle, Field, Notice, Chip, StatusPill, goLogin, pts } from '../../components/events/EventUI';
 
 type Tab = 'review' | 'participants' | 'analytics' | 'event' | 'tasks' | 'certificates' | 'audit';
 type Role = 'reviewer' | 'admin' | 'owner';
@@ -277,7 +277,7 @@ function ReviewCard({ item, selected, onToggle, onDone }: { item: QueueItem; sel
               <Text style={[styles.chipText, quality === q && styles.chipTextOn]}>{q}</Text>
             </TouchableOpacity>
           ))}
-          <Text style={styles.muted}>= {item.points + quality} pts if approved</Text>
+          <Text style={styles.muted}>= {pts(item.points + quality)} if approved</Text>
         </View>
       )}
       <Field id={`reason-${item.id}`} label="Reason (needed to reject; shown to the participant)" value={reason} onChangeText={setReason} maxLength={300} placeholder="e.g. The photo doesn't show sorted waste" />
@@ -335,7 +335,7 @@ function ParticipantsTab({ eventId }: { eventId: string }) {
                   <Text style={styles.cardTitle}>{p.name}</Text>
                   <Text style={styles.muted}>{p.college} · {p.city}</Text>
                   <Chip tone={p.status === 'registered' ? 'good' : 'bad'} label={p.status} />
-                  <Text style={styles.points}>{p.points} pts</Text>
+                  <Text style={styles.points}>{pts(p.points)}</Text>
                 </TouchableOpacity>
                 {openId === p.userId && <ParticipantDetail eventId={eventId} p={p} onChanged={load} />}
               </View>
