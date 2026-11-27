@@ -1,0 +1,11 @@
+{
+  "name": "karmaverse-eventhub-sheets",
+  "private": true,
+  "description": "Google Sheets + Apps Script backend for KarmaVerse EventHub. The code that runs is apps-script/*.gs; this package only runs its tests under Node with fake Google services.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/eventhub.test.mjs",
+    "build:qr": "node scripts/build-qr.mjs",
+    "bundle": "node scripts/bundle.mjs"
+  }
+}

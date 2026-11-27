@@ -44,6 +44,7 @@ export function WebFooter() {
         ? navigation.navigate('KnowledgeHub')
         : navigation.navigate('Splash', { scrollTo: 'learning' }),
     },
+    { label: 'Events & challenges', onPress: () => navigation.navigate('Events') },
     { label: 'Daily quiz', onPress: () => navigation.navigate('Quiz') },
     { label: 'Knowledge hub', onPress: () => navigation.navigate('KnowledgeHub') },
     { label: 'Blog', onPress: () => navigation.navigate('Blog') },

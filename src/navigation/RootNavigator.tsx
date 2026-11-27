@@ -19,6 +19,11 @@ import { NotFoundScreen } from '../screens/NotFoundScreen';
 // Public blog (posts are read live from 0waste.co.in's feed).
 import { BlogScreen } from '../screens/BlogScreen';
 import { BlogPostScreen } from '../screens/BlogPostScreen';
+// EventHub public pages (events are listed and shared while logged out).
+import { EventsScreen } from '../screens/events/EventsScreen';
+import { EventDetailScreen } from '../screens/events/EventDetailScreen';
+import { EventLeaderboardScreen } from '../screens/events/EventLeaderboardScreen';
+import { CertificateVerifyScreen } from '../screens/events/CertificateVerifyScreen';
 import { navigationRef } from './navRef';
 import { capturePendingAppLink, capturePendingDeepLink, clearPendingDeepLink, hasPendingDeepLink, hasPendingReferral } from '../utils/deepLink';
 import { routeNotification } from '../utils/notificationRoute';
@@ -74,6 +79,21 @@ const RedeemScreen = lazyScreen(() => import('../screens/RedeemScreen'), (m) => 
 const RedeemHistoryScreen = lazyScreen(() => import('../screens/RedeemHistoryScreen'), (m) => m.RedeemHistoryScreen);
 const DonationScreen = lazyScreen(() => import('../screens/DonationScreen'), (m) => m.DonationScreen);
 const TransferScreen = lazyScreen(() => import('../screens/TransferScreen'), (m) => m.TransferScreen);
+// EventHub screens that need a login (each shows its own "Log in" state when logged out).
+const ParticipateScreen = lazyScreen(() => import('../screens/events/ParticipateScreen'), (m) => m.ParticipateScreen);
+const MyEventsScreen = lazyScreen(() => import('../screens/events/MyEventsScreen'), (m) => m.MyEventsScreen);
+const AdminEventsScreen = lazyScreen(() => import('../screens/events/AdminEventsScreen'), (m) => m.AdminEventsScreen);
+
+// EventHub URLs, the same whether or not the visitor is logged in.
+const EVENTHUB_LINKS = {
+  Events: 'events',
+  EventDetail: 'events/:slug',
+  EventParticipate: 'events/:slug/participate',
+  EventLeaderboard: 'events/:slug/leaderboard',
+  MyEvents: 'my-events',
+  AdminEvents: 'admin/events',
+  CertificateVerify: 'verify/:certId',
+};
 
 export function RootNavigator() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
@@ -176,6 +196,7 @@ export function RootNavigator() {
             Feedback: 'feedback',
             Unsubscribe: 'unsubscribe',
             EmailPreferences: 'preferences',
+            ...EVENTHUB_LINKS,
             NotFound: '*',
           }
         : {
@@ -183,6 +204,7 @@ export function RootNavigator() {
             Blog: 'blog', BlogPost: 'blog/:slug',
             // Public, token-based mailer destinations — openable while logged out.
             Feedback: 'feedback', Unsubscribe: 'unsubscribe', EmailPreferences: 'preferences',
+            ...EVENTHUB_LINKS,
             NotFound: '*',
           },
     },
@@ -246,6 +268,13 @@ export function RootNavigator() {
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
         <Stack.Screen name="Unsubscribe" component={UnsubscribeScreen} />
         <Stack.Screen name="EmailPreferences" component={EmailPreferencesScreen} />
+        <Stack.Screen name="Events" component={EventsScreen} />
+        <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+        <Stack.Screen name="EventParticipate" component={ParticipateScreen} />
+        <Stack.Screen name="EventLeaderboard" component={EventLeaderboardScreen} />
+        <Stack.Screen name="MyEvents" component={MyEventsScreen} />
+        <Stack.Screen name="AdminEvents" component={AdminEventsScreen} />
+        <Stack.Screen name="CertificateVerify" component={CertificateVerifyScreen} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
     </NavigationContainer>

@@ -77,16 +77,36 @@ export function hasPendingReferral(): boolean {
 
 export function clearPendingDeepLink(): void {
   pendingUrl = null;
+  pendingNav = null;
 }
 
 export function hasPendingDeepLink(): boolean {
-  return !!pendingUrl;
+  return !!pendingUrl || !!pendingNav;
+}
+
+// A screen that asks the user to log in (e.g. EventHub's "Log in to register")
+// remembers exactly where to come back to, including route params.
+let pendingNav: { name: string; params?: Record<string, any> } | null = null;
+
+export function rememberReturnTo(name: string, params?: Record<string, any>): void {
+  pendingNav = { name, params };
 }
 
 // After a successful login, send the user to the remembered deep link (once).
 // Returns true if it navigated. Route name comes from the path; query params
 // (e.g. ?bookingId=) become navigation params.
 export function consumePendingDeepLink(navigation: any): boolean {
+  if (pendingNav && navigation) {
+    const target = pendingNav;
+    pendingNav = null;
+    pendingUrl = null;
+    try {
+      navigation.navigate(target.name, target.params);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
   if (!pendingUrl || !navigation) return false;
   const url = pendingUrl;
   pendingUrl = null;
