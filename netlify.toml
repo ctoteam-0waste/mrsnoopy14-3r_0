@@ -42,6 +42,20 @@
 # Legacy URLs from an earlier version of the site — still hold external backlinks and
 # Search Console referrals, so redirect them to their current equivalents instead of
 # silently serving the homepage shell (which the old catch-all below did).
+# Personal and team-only EventHub pages stay out of search results.
+[[headers]]
+  for = "/admin/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+[[headers]]
+  for = "/my-events"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+[[headers]]
+  for = "/verify/*"
+  [headers.values]
+    X-Robots-Tag = "noindex"
+
 [[redirects]]
   from = "/privacy-policy/*"
   to = "/legal/privacy/"
@@ -155,6 +169,27 @@
   status = 200
 [[redirects]]
   from = "/festival/*"
+  to = "/index.html"
+  status = 200
+# EventHub (see eventhub-sheets/README.md). Keep in step with EVENTHUB_LINKS in RootNavigator.tsx.
+[[redirects]]
+  from = "/events"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/events/*"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/my-events"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/admin/events"
+  to = "/index.html"
+  status = 200
+[[redirects]]
+  from = "/verify/*"
   to = "/index.html"
   status = 200
 

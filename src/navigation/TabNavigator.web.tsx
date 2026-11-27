@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { View, Text, StyleSheet, TouchableOpacity, Pressable, useWindowDimensions, Image } from 'react-native';
-import { Home, PackageCheck, Wallet, ShoppingBag, Bell, User } from 'lucide-react-native';
+import { Home, PackageCheck, Wallet, ShoppingBag, CalendarDays, Bell, User } from 'lucide-react-native';
 import { useNotifications } from '../context/NotificationContext';
 import { NotificationPanel } from '../components/shared/NotificationPanel';
 import { Avatar } from '../components/shared/Avatar';
@@ -40,12 +40,18 @@ const HOVER_TRANSITION = {
   transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
 } as any;
 
-const NAV_ITEMS = [
+// `root` items open a screen outside the tab navigator (EventHub's /events), so they
+// are never the active tab and must navigate through the root stack.
+const NAV_ITEMS: { name: string; label: string; Icon: any; root?: boolean }[] = [
   { name: 'Dashboard', label: 'Home', Icon: Home },
   { name: 'Orders', label: 'Orders', Icon: PackageCheck },
   { name: 'Wallet', label: 'Wallet', Icon: Wallet },
   { name: 'Store', label: 'Store', Icon: ShoppingBag },
+  { name: 'Events', label: 'Events', Icon: CalendarDays, root: true },
 ];
+
+const openItem = (item: { name: string; root?: boolean }, navigation: any) =>
+  item.root ? navigationRef.current?.navigate(item.name as never) : navigation.navigate(item.name);
 
 function TopNavbar({ state, navigation }: any) {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -71,10 +77,10 @@ function TopNavbar({ state, navigation }: any) {
       <>
         <View style={s.bottomBar}>
           {NAV_ITEMS.map((item, index) => {
-            const active = state.index === index;
+            const active = !item.root && state.index === index;
             const { Icon } = item;
             return (
-              <TouchableOpacity key={item.name} style={s.bottomTab} onPress={() => navigation.navigate(item.name)} activeOpacity={0.7}>
+              <TouchableOpacity key={item.name} style={s.bottomTab} onPress={() => openItem(item, navigation)} activeOpacity={0.7}>
                 <Icon size={22} color={active ? '#4ade80' : 'rgba(255,255,255,0.4)'} strokeWidth={active ? 2.5 : 1.8} />
                 <Text style={[s.bottomTabText, active && s.bottomTabTextActive]}>{item.label}</Text>
               </TouchableOpacity>
@@ -117,10 +123,10 @@ function TopNavbar({ state, navigation }: any) {
 
         <View style={s.navTabs}>
           {NAV_ITEMS.map((item, index) => {
-            const active = state.index === index;
+            const active = !item.root && state.index === index;
             const { Icon } = item;
             return (
-              <Pressable key={item.name} style={s.navTab} onPress={() => navigation.navigate(item.name)}>
+              <Pressable key={item.name} style={s.navTab} onPress={() => openItem(item, navigation)}>
                 {({ hovered }: any) => {
                   const lit = hovered && !active;
                   return (

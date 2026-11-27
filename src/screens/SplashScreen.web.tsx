@@ -292,6 +292,9 @@ export function SplashScreen({ navigation, route }: any) {
               <TouchableOpacity onPress={() => scrollToSection('learning')}>
                 <Text style={s.navTabText}>Learn</Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('Events')}>
+                <Text style={s.navTabText}>Events</Text>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => navigation.navigate('News')}>
                 <Text style={s.navTabText}>News</Text>
               </TouchableOpacity>
