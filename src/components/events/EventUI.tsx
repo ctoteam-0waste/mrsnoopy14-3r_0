@@ -352,10 +352,20 @@ export function Contours({ color = '#ffffff', opacity = 0.12, width = 600, heigh
 /** Event banner: the uploaded image, or category art (gradient, contours, icon). Never a stock photo. */
 export function Banner({ uri, height, title, category, radius = 0, iconTop }: { uri?: string; height: number; title: string; category?: string; radius?: number; iconTop?: boolean }) {
   const t = categoryTheme(category);
+  const [boxW, setBoxW] = useState(0);
   if (uri) {
+    // Covers are 16:9 with their subject on the right. When the box is narrower than
+    // 16:9 (phones), keep the right-hand side in view instead of cropping the middle.
+    const coverW = height * (16 / 9);
+    const narrow = boxW > 0 && boxW < coverW;
     return (
-      <View style={{ height, borderRadius: radius, overflow: 'hidden', backgroundColor: t.from }}>
-        <Image source={{ uri }} style={{ width: '100%', height }} resizeMode="cover" accessibilityLabel={title} />
+      <View onLayout={(e) => setBoxW(e.nativeEvent.layout.width)} style={{ height, borderRadius: radius, overflow: 'hidden', backgroundColor: t.from }}>
+        <Image
+          source={{ uri }}
+          style={narrow ? { position: 'absolute', top: 0, right: 0, width: coverW, height } : { width: '100%', height }}
+          resizeMode="cover"
+          accessibilityLabel={title}
+        />
         <LinearGradient colors={['transparent', 'rgba(2,20,10,0.45)']} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: height * 0.5 }} />
       </View>
     );

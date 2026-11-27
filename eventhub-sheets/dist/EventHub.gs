@@ -3693,7 +3693,7 @@ function seedGreenImpactChallenge_() {
     'Published': false,
     'Featured': true,
     'Short description': 'Seven days, seven simple green actions. Complete a task each day, earn points and get a digital certificate.',
-    'Banner URL': '',
+    'Banner URL': siteUrl_() + '/event-banners/green-impact-challenge.jpg', // served by the website (public/event-banners/)
     'Overview': 'The 7-Day Green Impact Challenge is a free week-long challenge for college students across India. Each day brings one practical sustainability task, from taking a green pledge to recycling and sharing your impact story. Submit proof on KarmaVerse, get it reviewed, earn points and climb the leaderboard.',
     'Objectives': ['Build everyday habits that cut waste', 'Learn to segregate, reuse and recycle correctly', 'Spread awareness on campus and online', 'Recognise students who take real action'].join('\n'),
     'Eligibility': ['Students currently enrolled in a college or university in India', 'A KarmaVerse account (free)', 'One registration per person'].join('\n'),

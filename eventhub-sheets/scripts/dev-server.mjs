@@ -41,6 +41,7 @@ ev('Certificates enabled', true);
 // 7 Days of Karma keeps its real seeded dates (starts 28 Nov) and is the featured launch event.
 const ev7 = (f, v) => s.setCell('Events', (r) => r['Event ID'] === 'E-7DOK2026A', f, v);
 ev('Featured', false);
+ev('Banner URL', 'http://localhost:8081/event-banners/green-impact-challenge.jpg');
 ev7('Banner URL', 'http://localhost:8081/event-banners/7-days-of-karma.jpg'); // the site serves public/ locally too
 ev7('Published', true);
 s.appendRaw('Admins', { Email: 'demo@example.test', Role: 'owner', Active: true });
